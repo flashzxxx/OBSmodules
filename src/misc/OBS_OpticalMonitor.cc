@@ -44,7 +44,7 @@ void OBS_OpticalMonitor::handleMessage(cMessage *msg){
       //check if kind=1 (Burst beginning)
       if(b->getKind() == 1){
          //register it!
-    	 fprintf(data_f,"1 %s %d %d %lld\n",simTime().str().c_str(),b->getBurstifierId(),b->getNumSeq(),b->getByteLength());
+    	 fprintf(data_f,"1 %s %d %d %ld\n",simTime().str().c_str(),b->getBurstifierId(),b->getNumSeq(),b->getByteLength());
       }
    }else if(dynamic_cast< OBS_BurstControlPacket *> (msg) != NULL){
       OBS_BurstControlPacket *c = check_and_cast < OBS_BurstControlPacket *> (msg);

@@ -23,6 +23,7 @@
 //#include <IPControlInfo.h>
 #include "IPv4Datagram.h"
 #include <IPv4ControlInfo.h>
+#include "IPProtocolId_m.h"
 
 using namespace std;
 
@@ -42,6 +43,13 @@ Define_Module(PacketConverter);
 PacketConverter::~PacketConverter(){}
 
 void PacketConverter::handleMessage(cMessage *msg){
+   // Check if this is a protocol registration command from IPvXTrafGen
+   if (dynamic_cast<IPRegisterProtocolCommand *>(msg->getControlInfo()) != NULL) {
+       // This is a protocol registration command, just delete it and return
+       delete msg;
+       return;
+   }
+   
    //IPTrafGen generates a cMessage packet which contains a IPControlInfo object encapsulated
 //   IPControlInfo *IPCtl = check_and_cast < IPControlInfo *> (msg->getControlInfo());
    IPv4ControlInfo *IPCtl = check_and_cast < IPv4ControlInfo *> (msg->getControlInfo());

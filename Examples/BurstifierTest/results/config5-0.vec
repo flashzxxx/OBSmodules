@@ -1,0 +1,27 @@
+version 2
+run config5-0-20251017-15:59:30-11941
+attr configname config5
+attr datetime 20251017-15:59:30
+attr experiment config5
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network BurstifierTest
+attr processid 11941
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 1  BurstifierTest.generator  sentPk:vector(packetBytes)  ETV
+attr interpolationmode  none
+attr source  sentPk
+attr title  "packets sent, vector(packetBytes)"
+vector 4  BurstifierTest.burstifier  burstifierInPacketSize  ETV
+vector 5  BurstifierTest.burstifier  avgPacketTime  ETV
+vector 3  BurstifierTest.sink  rcvdPk:vector(packetBytes)  ETV
+attr interpolationmode  none
+attr source  rcvdPk
+attr title  "packets received, vector(packetBytes)"

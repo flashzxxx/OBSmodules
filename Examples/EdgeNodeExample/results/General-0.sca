@@ -1,0 +1,17 @@
+version 2
+run General-0-20251015-14:53:04-51281
+attr configname General
+attr datetime 20251015-14:53:04
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network EdgeNodeExample
+attr processid 51281
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+

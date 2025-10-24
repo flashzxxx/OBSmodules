@@ -1,0 +1,19 @@
+version 2
+run General-0-20251015-14:52:26-51269
+attr configname General
+attr datetime 20251015-14:52:26
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network EdgeNodeTest
+attr processid 51269
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar EdgeNodeTest.edge1.obs.assembler.fileBurstifier[0] 	"my ID" 	39
+scalar EdgeNodeTest.edge2.obs.assembler.fileBurstifier[0] 	"my ID" 	58

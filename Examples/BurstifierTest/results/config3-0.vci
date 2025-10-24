@@ -1,0 +1,32 @@
+file 3422 1760516499                                            
+version 2
+run config3-0-20251015-16:19:59-56903
+attr configname config3
+attr datetime 20251015-16:19:59
+attr experiment config3
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network BurstifierTest
+attr processid 56903
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 1  BurstifierTest.generator  sentPk:vector(packetBytes)  ETV
+attr interpolationmode  none
+attr source  sentPk
+attr title  "packets sent, vector(packetBytes)"
+vector 4  BurstifierTest.burstifier  burstifierInPacketSize  ETV
+vector 5  BurstifierTest.burstifier  avgPacketTime  ETV
+vector 3  BurstifierTest.sink  rcvdPk:vector(packetBytes)  ETV
+attr interpolationmode  none
+attr source  rcvdPk
+attr title  "packets received, vector(packetBytes)"
+1	822 982 2 211 0 0.63 64 1000 1000 64000 64000000
+3	1804 309 14 204 0.03 0.6 20 3011 3011 60220 181322420
+4	2113 984 4 213 0 0.63 64 1000 1000 64000 64000000
+5	3097 325 13 213 0.03 0.63 21 0.02 0.02 0.42 0.0084

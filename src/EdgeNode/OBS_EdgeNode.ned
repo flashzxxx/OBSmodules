@@ -34,6 +34,7 @@ import inet.base.NotificationBoard;
 module OBS_EdgeNode
 {
     parameters:
+        @node();
         int numInLambdas; // Number of input data channels for the OBS interface.
         int numOutLambdas; // Number of output data channels for the OBS interface.
         //string inColours; // Colour array for input data channels.

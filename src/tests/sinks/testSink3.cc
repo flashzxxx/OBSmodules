@@ -23,7 +23,7 @@ Define_Module(testSink3);
 
 void testSink3::initialize(){
 	//Open the output file in write mode
-	outputFile.open(par("outputFile"));
+	outputFile.open(par("outputFile").stringValue());
 	if (!outputFile.is_open())
 		opp_error("Cannot create the output file for the test");
 }
@@ -131,7 +131,7 @@ void testSink3::finish(){
 				modulo = in->getPathStartGate()->getOwnerModule();
 			}
 			if(modulo->hasPar("reportFile")){
-				currentReport.open(modulo->par("reportFile"));
+				currentReport.open(modulo->par("reportFile").stringValue());
 			}
 			else{
 				opp_error("The tested module has not a parameter named 'reportFile'");
@@ -139,7 +139,7 @@ void testSink3::finish(){
 
 			if (!currentReport.is_open())
 				opp_error("Cannot open the report");
-			patternReport.open(par("reportPattern"));
+			patternReport.open(par("reportPattern").stringValue());
 			if (!patternReport.is_open())
 				opp_error("Cannot open the pattern of the report");
 
@@ -204,10 +204,10 @@ void testSink3::openFiles(){
 
 	if (compType == 1 || compType == 2){
 		//Open both files in read mode
-		currentFile.open(par("outputFile"));
+		currentFile.open(par("outputFile").stringValue());
 		if (!currentFile.is_open())
 			opp_error("Cannot open the output file for the test");
-		patternFile.open(par("patternFile"));
+		patternFile.open(par("patternFile").stringValue());
 		if (!patternFile.is_open())
 			opp_error("Cannot open the pattern file for the test");
 	}

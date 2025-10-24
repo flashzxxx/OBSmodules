@@ -1,0 +1,17 @@
+version 2
+run config2-0-20251015-11:40:17-50267
+attr configname config2
+attr datetime 20251015-11:40:17
+attr experiment config2
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network TreeTopologyOBS
+attr processid 50267
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+

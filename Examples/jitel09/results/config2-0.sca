@@ -1,0 +1,17 @@
+version 2
+run config2-0-20251015-14:44:32-51214
+attr configname config2
+attr datetime 20251015-14:44:32
+attr experiment config2
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network jitel09Simulation
+attr processid 51214
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+

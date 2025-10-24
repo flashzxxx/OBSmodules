@@ -1,0 +1,18 @@
+version 2
+run config0-0-20251011-17:57:29-19009
+attr configname config0
+attr datetime 20251011-17:57:29
+attr experiment config0
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network BurstifierTest
+attr processid 19009
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar BurstifierTest.burstifier 	"my ID" 	4

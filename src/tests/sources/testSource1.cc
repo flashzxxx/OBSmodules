@@ -24,7 +24,7 @@ Define_Module(testSource1);
 void testSource1::initialize(){
 
 	//Open the input file in read mode
-	inputFile.open(par("inputFile"));
+	inputFile.open(par("inputFile").stringValue());
 	if (!inputFile.is_open())
 		opp_error("Cannot open the input file for the test");
 
