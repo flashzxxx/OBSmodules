@@ -83,6 +83,9 @@ void OBS_PacketDispatcher::handleMessage(cMessage *msg){
    int i;
    
    cPacket *pkt = check_and_cast<cPacket *> (msg);
+
+   EV << "PacketDispatcher received packet: " << pkt->getName()
+      << " (" << pkt->getByteLength() << " bytes)" << endl;
    //register incoming packet
    recvPackSizeVec.record(pkt->getByteLength());
    recvPackSize.collect(pkt->getByteLength());
@@ -90,11 +93,15 @@ void OBS_PacketDispatcher::handleMessage(cMessage *msg){
  
    //Check if the packet matches any rule. It will be sent to the first gate where the rule matches.
    for(i=0;i < numQueues;i++){
+      EV << "  Checking rule[" << i << "]..." << endl;
       if(rules[i].match(msg)){
+         EV << "  Matched! Sending to out[" << i << "]" << endl;
          send(msg,"out",i);
          return;
       }
    }
+
+   EV_WARN << "  No matching rule! Dropping packet " << pkt->getName() << endl;
    //If packet doesn't match any rule, discard it.
    delete msg;
    //count discarded packet

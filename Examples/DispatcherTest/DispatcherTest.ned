@@ -46,7 +46,7 @@ network DispatcherTest
                 numPackets = 100;
                 protocol = 6;
                 packetLength = 1000 B;
-                destAddresses = "127.0.0.1 127.0.0.2 127.0.0.3";
+                destAddresses = "10.0.0.1 127.0.0.2 127.0.0.3";
                 @display("i=block/source");
         }
         converter: PacketConverter {

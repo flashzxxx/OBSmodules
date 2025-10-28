@@ -65,9 +65,15 @@ void PacketConverter::handleMessage(cMessage *msg){
 //   IPSal->setDestAddress(destCtlAddr);
    IPSal->setSrcAddress(IPCtl->getSrcAddr());
    IPSal->setDestAddress(IPCtl->getDestAddr());
+   IPSal->setTransportProtocol(IPCtl->getProtocol());
    // Also, add datagram length
    cPacket *pkt = check_and_cast<cPacket *> (msg);
    IPSal->setBitLength(pkt->getBitLength());
+   
+   EV << "PacketConverter: converted " << msg->getName() 
+      << " - dest=" << IPSal->getDestAddress() 
+      << " protocol=" << (int)IPSal->getTransportProtocol() << endl;
+   
    //It'd be cool to insert TCP/UDP packets...
    //Send the IPDatagram object
    send(IPSal,"out");

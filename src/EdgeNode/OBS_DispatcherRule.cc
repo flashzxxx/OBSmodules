@@ -107,15 +107,34 @@ bool OBS_DispatcherRule::match(cMessage *msg){
    IPv4Datagram *recvIP = check_and_cast< IPv4Datagram* > (msg);
    // Later we'll extract TCP/UDP header if necessary
 
+   EV_DEBUG << "    Matching packet: src=" << recvIP->getSrcAddress()
+                << " dest=" << recvIP->getDestAddress()
+                << " protocol=" << recvIP->getTransportProtocol() << endl;
+
    // Check which fields are set in this rule
    if(isSet[0]){
-      if(!(recvIP->getSrcAddress() == srcAddr)) return false;
+      EV_DEBUG << "      Checking srcAddr: " << srcAddr << endl;
+      if(!(recvIP->getSrcAddress() == srcAddr)) {
+          EV_DEBUG << "      srcAddr mismatch!" << endl;
+          return false;
+      }
+      EV_DEBUG << "      srcAddr matched!" << endl;
    }
    if(isSet[1]){
-      if(!(recvIP->getDestAddress() == destAddr)) return false;
+      EV_DEBUG << "      Checking destAddr: " << destAddr << endl;
+      if(!(recvIP->getDestAddress() == destAddr)) {
+          EV_DEBUG << "      destAddr mismatch!" << endl;
+          return false;
+      }
+      EV_DEBUG << "      destAddr matched!" << endl;
    }
    if(isSet[2]){
-      if(!(recvIP->getTransportProtocol() == protocol)) return false;
+      EV_DEBUG << "      Checking protocol: " << protocol << endl;
+      if(!(recvIP->getTransportProtocol() == protocol)) {
+          EV_DEBUG << "      protocol mismatch!" << endl;
+          return false;
+      }
+      EV_DEBUG << "      protocol matched!" << endl;
    }
    if(isSet[3]){
       // Lookup IP header in order to identify TCP/UDP header and then extract it.

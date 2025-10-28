@@ -1,14 +1,14 @@
 version 2
-run General-0-20251024-17:52:23-46488
+run General-0-20251028-17:31:42-21319
 attr configname General
-attr datetime 20251024-17:52:23
+attr datetime 20251028-17:31:42
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvars2 $repetition=0
 attr measurement ""
 attr network DispatcherTest
-attr processid 46488
+attr processid 21319
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -20,24 +20,11 @@ attr interpolationmode  none
 attr source  sentPk
 attr title  "packets sent, vector(packetBytes)"
 vector 6  DispatcherTest.dispatcher  recvPacketSize  ETV
-vector 3  DispatcherTest.sink[0]  rcvdPk:vector(packetBytes)  ETV
-attr interpolationmode  none
-attr source  rcvdPk
-attr title  "packets received, vector(packetBytes)"
 vector 4  DispatcherTest.sink[1]  rcvdPk:vector(packetBytes)  ETV
 attr interpolationmode  none
 attr source  rcvdPk
 attr title  "packets received, vector(packetBytes)"
-1	2	0	1000
-1	6	0.898560388483	1000
-1	10	2.758164600557	1000
-1	14	3.73517102695	1000
-1	18	4.220299190671	1000
-3	5	0	1000
-4	9	0.898560388483	1000
-4	13	2.758164600557	1000
-4	17	3.73517102695	1000
-6	4	0	1000
-6	8	0.898560388483	1000
-6	12	2.758164600557	1000
-6	16	3.73517102695	1000
+vector 5  DispatcherTest.sink[2]  rcvdPk:vector(packetBytes)  ETV
+attr interpolationmode  none
+attr source  rcvdPk
+attr title  "packets received, vector(packetBytes)"
