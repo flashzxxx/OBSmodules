@@ -27,8 +27,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=100,200");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islOut[10];
         }
         
         sat2: OBS_SatelliteNode {
@@ -38,8 +38,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=400,200");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islOut[15];
         }
         
         sat3: OBS_SatelliteNode {
@@ -49,8 +49,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=700,200");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islOut[10];
         }
         
         // 第二行
@@ -61,8 +61,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=100,450");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islOut[15];
         }
         
         sat5: OBS_SatelliteNode {
@@ -72,8 +72,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=400,450");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[20];  // 中心卫星: 4个邻居 × 5通道
+                islOut[20];
         }
         
         sat6: OBS_SatelliteNode {
@@ -83,8 +83,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=700,450");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islOut[15];
         }
         
         // 第三行
@@ -95,8 +95,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=100,700");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islOut[10];
         }
         
         sat8: OBS_SatelliteNode {
@@ -106,8 +106,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=400,700");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islOut[15];
         }
         
         sat9: OBS_SatelliteNode {
@@ -117,8 +117,8 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=700,700");
             gates:
-                islIn[4*lambdasPerISL+4];
-                islOut[4*lambdasPerISL+4];
+                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islOut[10];
         }
         
     connections:
