@@ -1,11 +1,11 @@
-# Core9 路由表（3x3网格右下角）
-# 端口：Port0:Edge9, Port1:Core6(上), Port2:Core8(左)
+# Core9 Routing Table (3x3 Grid Bottom-Right)
+# Ports: Port0:Edge9, Port1:Core6(Up), Port2:Core8(Left)
 
-# ===== 本地 (Label=9) =====
+# ===== Local (Label=9) =====
 1 * 9 0 * 9
 2 * 9 0 * 9
 
-# ===== 其他 =====
+# ===== Others =====
 0 * 1 2 * 1
 
 0 * 2 1 * 2

@@ -17,9 +17,9 @@ network RingFdlOBS
         @display("bgb=900,800");
         
     submodules:
-        // ===== 9个卫星节点=====
+        // ===== 9 Satellite Nodes =====
         
-        // 第一行
+        // Row 1
         sat1: OBS_SatelliteNode {
             parameters:
                 satId = 1;
@@ -27,7 +27,7 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=100,200");
             gates:
-                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islIn[10];  // Corner satellite: 2 neighbors × 5 channels
                 islOut[10];
         }
         
@@ -38,7 +38,7 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=400,200");
             gates:
-                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islIn[15];  // Edge satellite: 3 neighbors × 5 channels
                 islOut[15];
         }
         
@@ -49,11 +49,11 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=700,200");
             gates:
-                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islIn[10];  // Corner satellite: 2 neighbors × 5 channels
                 islOut[10];
         }
         
-        // 第二行
+        // Row 2
         sat4: OBS_SatelliteNode {
             parameters:
                 satId = 4;
@@ -61,7 +61,7 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=100,450");
             gates:
-                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islIn[15];  // Edge satellite: 3 neighbors × 5 channels
                 islOut[15];
         }
         
@@ -72,7 +72,7 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=400,450");
             gates:
-                islIn[20];  // 中心卫星: 4个邻居 × 5通道
+                islIn[20];  // Center satellite: 4 neighbors × 5 channels
                 islOut[20];
         }
         
@@ -83,11 +83,11 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=700,450");
             gates:
-                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islIn[15];  // Edge satellite: 3 neighbors × 5 channels
                 islOut[15];
         }
         
-        // 第三行
+        // Row 3
         sat7: OBS_SatelliteNode {
             parameters:
                 satId = 7;
@@ -95,7 +95,7 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=100,700");
             gates:
-                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islIn[10];  // Corner satellite: 2 neighbors × 5 channels
                 islOut[10];
         }
         
@@ -106,7 +106,7 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=400,700");
             gates:
-                islIn[15];  // 边卫星: 3个邻居 × 5通道
+                islIn[15];  // Edge satellite: 3 neighbors × 5 channels
                 islOut[15];
         }
         
@@ -117,14 +117,14 @@ network RingFdlOBS
                 lambdasPerISL = lambdasPerISL;
                 @display("p=700,700");
             gates:
-                islIn[10];  // 角卫星: 2个邻居 × 5通道
+                islIn[10];  // Corner satellite: 2 neighbors × 5 channels
                 islOut[10];
         }
         
     connections:
-        // ===== 星间链路（ISL, 5ms delay）=====
+        // ===== Inter-Satellite Links (ISL, 5ms delay) =====
         
-        // 第一行水平ISL
+        // Row 1 Horizontal ISL
         for i=0..lambdasPerISL {
             sat1.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat2.islIn++;
             sat2.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat1.islIn++;
@@ -134,7 +134,7 @@ network RingFdlOBS
             sat3.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat2.islIn++;
         }
         
-        // 第二行水平ISL
+        // Row 2 Horizontal ISL
         for i=0..lambdasPerISL {
             sat4.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat5.islIn++;
             sat5.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat4.islIn++;
@@ -144,7 +144,7 @@ network RingFdlOBS
             sat6.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat5.islIn++;
         }
         
-        // 第三行水平ISL
+        // Row 3 Horizontal ISL
         for i=0..lambdasPerISL {
             sat7.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat8.islIn++;
             sat8.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat7.islIn++;
@@ -154,7 +154,7 @@ network RingFdlOBS
             sat9.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat8.islIn++;
         }
         
-        // 第一列垂直ISL
+        // Column 1 Vertical ISL
         for i=0..lambdasPerISL {
             sat1.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat4.islIn++;
             sat4.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat1.islIn++;
@@ -164,7 +164,7 @@ network RingFdlOBS
             sat7.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat4.islIn++;
         }
         
-        // 第二列垂直ISL
+        // Column 2 Vertical ISL
         for i=0..lambdasPerISL {
             sat2.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat5.islIn++;
             sat5.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat2.islIn++;
@@ -174,7 +174,7 @@ network RingFdlOBS
             sat8.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat5.islIn++;
         }
         
-        // 第三列垂直ISL
+        // Column 3 Vertical ISL
         for i=0..lambdasPerISL {
             sat3.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat6.islIn++;
             sat6.islOut++ --> {datarate=400Gbps; delay=5ms;} --> sat3.islIn++;

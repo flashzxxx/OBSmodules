@@ -1,11 +1,11 @@
-# Core3 路由表（3x3网格右上角）
-# 端口：Port0:Edge3, Port1:Core2(左), Port2:Core6(下)
+# Core3 Routing Table (3x3 Grid Top-Right)
+# Ports: Port0:Edge3, Port1:Core2(Left), Port2:Core6(Down)
 
-# ===== 本地 (Label=3) =====
+# ===== Local (Label=3) =====
 1 * 3 0 * 3
 2 * 3 0 * 3
 
-# ===== 去往其他Core =====
+# ===== To Other Cores =====
 0 * 1 1 * 1
 2 * 1 1 * 1
 

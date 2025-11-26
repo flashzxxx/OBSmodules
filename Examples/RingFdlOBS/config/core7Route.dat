@@ -1,11 +1,11 @@
-# Core7 路由表（3x3网格左下角）
-# 端口：Port0:Edge7, Port1:Core4(上), Port2:Core8(右)
+# Core7 Routing Table (3x3 Grid Bottom-Left)
+# Ports: Port0:Edge7, Port1:Core4(Up), Port2:Core8(Right)
 
-# ===== 本地 (Label=7) =====
+# ===== Local (Label=7) =====
 1 * 7 0 * 7
 2 * 7 0 * 7
 
-# ===== 其他 =====
+# ===== Others =====
 0 * 1 1 * 1
 2 * 1 1 * 1
 

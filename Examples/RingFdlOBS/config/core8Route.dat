@@ -1,12 +1,12 @@
-# Core8 路由表（3x3网格底部中间）
-# 端口：Port0:Edge8, Port1:Core5(上), Port2:Core7(左), Port3:Core9(右)
+# Core8 Routing Table (3x3 Grid Bottom-Middle)
+# Ports: Port0:Edge8, Port1:Core5(Up), Port2:Core7(Left), Port3:Core9(Right)
 
-# ===== 本地 (Label=8) =====
+# ===== Local (Label=8) =====
 1 * 8 0 * 8
 2 * 8 0 * 8
 3 * 8 0 * 8
 
-# ===== 其他 =====
+# ===== Others =====
 0 * 1 1 * 1
 3 * 1 1 * 1
 

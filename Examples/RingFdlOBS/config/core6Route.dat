@@ -1,12 +1,12 @@
-# Core6 路由表（3x3网格右侧中间）
-# 端口：Port0:Edge6, Port1:Core3(上), Port2:Core5(左), Port3:Core9(下)
+# Core6 Routing Table (3x3 Grid Right-Middle)
+# Ports: Port0:Edge6, Port1:Core3(Up), Port2:Core5(Left), Port3:Core9(Down)
 
-# ===== 本地 (Label=6) =====
+# ===== Local (Label=6) =====
 1 * 6 0 * 6
 2 * 6 0 * 6
 3 * 6 0 * 6
 
-# ===== 其他 =====
+# ===== Others =====
 0 * 1 2 * 1
 3 * 1 2 * 1
 
