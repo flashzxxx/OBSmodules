@@ -52,8 +52,8 @@ module OBS_SatelliteNode
         }
         
     connections:
-        // 用户终端 <-> 边缘路由器
-        host.ethg++ <--> {datarate=200Gbps; delay=0.1ms;} <--> edgeRouter.ethIO++;
+        // 用户终端 <-> 边缘路由器 (100GbE - Standard Maximum Ethernet Speed)
+        host.ethg++ <--> {datarate=100Gbps; delay=0.1ms;} <--> edgeRouter.ethIO++;
         
         // 边缘路由器 <-> 核心交换机（本地连接）
         for i=0..lambdasPerISL {
