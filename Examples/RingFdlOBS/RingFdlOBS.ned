@@ -152,76 +152,78 @@ network RingFdlOBS
 
     connections:
         // ===== Inter-Satellite Links (ISL, 5ms delay) =====
+        // Note: No datarate set - OBS model requires zero transmission delay
+        // to preserve timing between iniBurst and endBurst
 
         // Row 1 Horizontal ISL
         // Sat1 <-> Sat2
         for i=0..lambdasCore1to2 {
-            sat1.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat2.islIn++;
-            sat2.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat1.islIn++;
+            sat1.islOut++ --> {  delay = 5ms; } --> sat2.islIn++;
+            sat2.islOut++ --> {  delay = 5ms; } --> sat1.islIn++;
         }
         // Sat2 <-> Sat3
         for i=0..lambdasCore2to3 {
-            sat2.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat3.islIn++;
-            sat3.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat2.islIn++;
+            sat2.islOut++ --> {  delay = 5ms; } --> sat3.islIn++;
+            sat3.islOut++ --> {  delay = 5ms; } --> sat2.islIn++;
         }
 
         // Row 2 Horizontal ISL
         // Sat4 <-> Sat5
         for i=0..lambdasCore4to5 {
-            sat4.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat5.islIn++;
-            sat5.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat4.islIn++;
+            sat4.islOut++ --> {  delay = 5ms; } --> sat5.islIn++;
+            sat5.islOut++ --> {  delay = 5ms; } --> sat4.islIn++;
         }
         // Sat5 <-> Sat6
         for i=0..lambdasCore5to6 {
-            sat5.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat6.islIn++;
-            sat6.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat5.islIn++;
+            sat5.islOut++ --> {  delay = 5ms; } --> sat6.islIn++;
+            sat6.islOut++ --> {  delay = 5ms; } --> sat5.islIn++;
         }
 
         // Row 3 Horizontal ISL
         // Sat7 <-> Sat8
         for i=0..lambdasCore7to8 {
-            sat7.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat8.islIn++;
-            sat8.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat7.islIn++;
+            sat7.islOut++ --> {  delay = 5ms; } --> sat8.islIn++;
+            sat8.islOut++ --> {  delay = 5ms; } --> sat7.islIn++;
         }
         // Sat8 <-> Sat9
         for i=0..lambdasCore8to9 {
-            sat8.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat9.islIn++;
-            sat9.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat8.islIn++;
+            sat8.islOut++ --> {  delay = 5ms; } --> sat9.islIn++;
+            sat9.islOut++ --> {  delay = 5ms; } --> sat8.islIn++;
         }
 
         // Column 1 Vertical ISL
         // Sat1 <-> Sat4
         for i=0..lambdasCore1to4 {
-            sat1.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat4.islIn++;
-            sat4.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat1.islIn++;
+            sat1.islOut++ --> {  delay = 5ms; } --> sat4.islIn++;
+            sat4.islOut++ --> {  delay = 5ms; } --> sat1.islIn++;
         }
         // Sat4 <-> Sat7
         for i=0..lambdasCore4to7 {
-            sat4.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat7.islIn++;
-            sat7.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat4.islIn++;
+            sat4.islOut++ --> {  delay = 5ms; } --> sat7.islIn++;
+            sat7.islOut++ --> {  delay = 5ms; } --> sat4.islIn++;
         }
 
         // Column 2 Vertical ISL
         // Sat2 <-> Sat5
         for i=0..lambdasCore2to5 {
-            sat2.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat5.islIn++;
-            sat5.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat2.islIn++;
+            sat2.islOut++ --> {  delay = 5ms; } --> sat5.islIn++;
+            sat5.islOut++ --> {  delay = 5ms; } --> sat2.islIn++;
         }
         // Sat5 <-> Sat8
         for i=0..lambdasCore5to8 {
-            sat5.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat8.islIn++;
-            sat8.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat5.islIn++;
+            sat5.islOut++ --> {  delay = 5ms; } --> sat8.islIn++;
+            sat8.islOut++ --> {  delay = 5ms; } --> sat5.islIn++;
         }
 
         // Column 3 Vertical ISL
         // Sat3 <-> Sat6
         for i=0..lambdasCore3to6 {
-            sat3.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat6.islIn++;
-            sat6.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat3.islIn++;
+            sat3.islOut++ --> {  delay = 5ms; } --> sat6.islIn++;
+            sat6.islOut++ --> {  delay = 5ms; } --> sat3.islIn++;
         }
         // Sat6 <-> Sat9
         for i=0..lambdasCore6to9 {
-            sat6.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat9.islIn++;
-            sat9.islOut++ --> {  datarate = 400Gbps; delay = 5ms; } --> sat6.islIn++;
+            sat6.islOut++ --> {  delay = 5ms; } --> sat9.islIn++;
+            sat9.islOut++ --> {  delay = 5ms; } --> sat6.islIn++;
         }
 }

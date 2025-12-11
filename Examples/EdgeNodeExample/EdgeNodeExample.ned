@@ -28,6 +28,7 @@ network EdgeNodeExample
 {
     parameters:
         int lambdasEdge; //Number of data channels in the fiber connecting edges
+        @display("bgb=379,407");
     submodules:
         host1: StandardHost {
             parameters:
@@ -45,7 +46,7 @@ network EdgeNodeExample
                 numOutLambdas = lambdasEdge;
                 obs.assembler.dispatcher.dispatcherRules = "DispatcherRules.dat";
                 routingTable.routingFile = "Edge1.irt";
-                @display("p=159,112");
+                @display("p=267,112");
             gates:
                 obsIn[lambdasEdge+1];
                 obsOut[lambdasEdge+1];
@@ -56,15 +57,15 @@ network EdgeNodeExample
                 numOutLambdas = lambdasEdge;
                 obs.assembler.dispatcher.dispatcherRules = "DispatcherRules.dat";
                 routingTable.routingFile = "Edge2.irt";
-                @display("p=158,272");
+                @display("p=267,272");
             gates:
                 obsIn[lambdasEdge+1];
                 obsOut[lambdasEdge+1];
         }
     connections:
         //Connections between hosts and Edge Nodes
-        host1.ethg++ <--> { datarate=1Gbps; } <--> edge1.ethIO++;
-        host2.ethg++ <--> { datarate=1Gbps; } <--> edge2.ethIO++;
+        host1.ethg++ <--> {  datarate = 1Gbps; } <--> edge1.ethIO++;
+        host2.ethg++ <--> {  datarate = 1Gbps; } <--> edge2.ethIO++;
 
         //Core 1 connections
         for i=0..lambdasEdge {

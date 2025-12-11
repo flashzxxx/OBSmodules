@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for obsmodules
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out -I../inet/src/transport/tcp_common -I../inet/src/base -I../inet/src/util -I../inet/src/linklayer/ieee80211/mac -I../inet/src/transport/udp -I../inet/src/linklayer/ieee80211/radio/errormodel -I../inet/src/util/headerserializers -I../inet/src/linklayer/ieee80211/radio -I../inet/src/status -I../inet/src/transport/sctp -I../inet/src/networklayer/icmpv6 -I../inet/src/linklayer/radio/propagation -I../inet/src/transport/contract -I../inet/src/networklayer/ipv6tunneling -I../inet/src/world/radio -I../inet/src/linklayer/contract -I../inet/src/util/headerserializers/udp -I../inet/src/util/headerserializers/tcp -I../inet/src/linklayer/radio -I../inet/src/world/obstacles -I../inet/src/networklayer/common -I../inet/src/networklayer/ipv6 -I../inet/src/networklayer/arp -I../inet/src/networklayer/routing/aodv -I../inet/src/networklayer/contract -I../inet/src -I../inet/src/networklayer/xmipv6 -I../inet/src/util/headerserializers/sctp -I../inet/src/util/headerserializers/ipv6 -I../inet/src/battery/models -I../inet/src/networklayer/autorouting/ipv4 -I../inet/src/networklayer/ipv4 -I../inet/src/mobility/contract -I../inet/src/applications/pingapp -I../inet/src/linklayer/common -I../inet/src/util/headerserializers/ipv4 -L../inet/out/$$\(CONFIGNAME\)/src -linet -DINET_IMPORT -KINET_PROJ=../inet
+#  opp_makemake -f --deep -O out -ID:/inet/src/linklayer/ieee80211/radio -ID:/inet/src/networklayer/routing/aodv -ID:/inet/src/networklayer/common -ID:/inet/src/networklayer/icmpv6 -ID:/inet/src -ID:/inet/src/world/obstacles -ID:/inet/src/networklayer/xmipv6 -ID:/inet/src/networklayer/contract -ID:/inet/src/networklayer/autorouting/ipv4 -ID:/inet/src/util -ID:/inet/src/transport/contract -ID:/inet/src/linklayer/common -ID:/inet/src/status -ID:/inet/src/linklayer/radio/propagation -ID:/inet/src/linklayer/ieee80211/radio/errormodel -ID:/inet/src/linklayer/radio -ID:/inet/src/util/headerserializers/tcp -ID:/inet/src/networklayer/ipv4 -ID:/inet/src/mobility/contract -ID:/inet/src/util/headerserializers/ipv4 -ID:/inet/src/base -ID:/inet/src/util/headerserializers -ID:/inet/src/world/radio -ID:/inet/src/linklayer/ieee80211/mac -ID:/inet/src/networklayer/ipv6 -ID:/inet/src/transport/sctp -ID:/inet/src/util/headerserializers/udp -ID:/inet/src/networklayer/ipv6tunneling -ID:/inet/src/applications/pingapp -ID:/inet/src/battery/models -ID:/inet/src/util/headerserializers/ipv6 -ID:/inet/src/util/headerserializers/sctp -ID:/inet/src/linklayer/contract -ID:/inet/src/networklayer/arp -ID:/inet/src/transport/tcp_common -ID:/inet/src/transport/udp -LD:/inet/out/$$\(CONFIGNAME\)/src -linet -DINET_IMPORT -KINET_PROJ=D:/inet
 #
 
 # Name of target to be created (-o option)
@@ -15,42 +15,42 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 
 # C++ include paths (with -I)
 INCLUDE_PATH = \
-    -I../inet/src/transport/tcp_common \
-    -I../inet/src/base \
-    -I../inet/src/util \
-    -I../inet/src/linklayer/ieee80211/mac \
-    -I../inet/src/transport/udp \
-    -I../inet/src/linklayer/ieee80211/radio/errormodel \
-    -I../inet/src/util/headerserializers \
-    -I../inet/src/linklayer/ieee80211/radio \
-    -I../inet/src/status \
-    -I../inet/src/transport/sctp \
-    -I../inet/src/networklayer/icmpv6 \
-    -I../inet/src/linklayer/radio/propagation \
-    -I../inet/src/transport/contract \
-    -I../inet/src/networklayer/ipv6tunneling \
-    -I../inet/src/world/radio \
-    -I../inet/src/linklayer/contract \
-    -I../inet/src/util/headerserializers/udp \
-    -I../inet/src/util/headerserializers/tcp \
-    -I../inet/src/linklayer/radio \
-    -I../inet/src/world/obstacles \
-    -I../inet/src/networklayer/common \
-    -I../inet/src/networklayer/ipv6 \
-    -I../inet/src/networklayer/arp \
-    -I../inet/src/networklayer/routing/aodv \
-    -I../inet/src/networklayer/contract \
-    -I../inet/src \
-    -I../inet/src/networklayer/xmipv6 \
-    -I../inet/src/util/headerserializers/sctp \
-    -I../inet/src/util/headerserializers/ipv6 \
-    -I../inet/src/battery/models \
-    -I../inet/src/networklayer/autorouting/ipv4 \
-    -I../inet/src/networklayer/ipv4 \
-    -I../inet/src/mobility/contract \
-    -I../inet/src/applications/pingapp \
-    -I../inet/src/linklayer/common \
-    -I../inet/src/util/headerserializers/ipv4 \
+    -I$(INET_PROJ)/src/linklayer/ieee80211/radio \
+    -I$(INET_PROJ)/src/networklayer/routing/aodv \
+    -I$(INET_PROJ)/src/networklayer/common \
+    -I$(INET_PROJ)/src/networklayer/icmpv6 \
+    -I$(INET_PROJ)/src \
+    -I$(INET_PROJ)/src/world/obstacles \
+    -I$(INET_PROJ)/src/networklayer/xmipv6 \
+    -I$(INET_PROJ)/src/networklayer/contract \
+    -I$(INET_PROJ)/src/networklayer/autorouting/ipv4 \
+    -I$(INET_PROJ)/src/util \
+    -I$(INET_PROJ)/src/transport/contract \
+    -I$(INET_PROJ)/src/linklayer/common \
+    -I$(INET_PROJ)/src/status \
+    -I$(INET_PROJ)/src/linklayer/radio/propagation \
+    -I$(INET_PROJ)/src/linklayer/ieee80211/radio/errormodel \
+    -I$(INET_PROJ)/src/linklayer/radio \
+    -I$(INET_PROJ)/src/util/headerserializers/tcp \
+    -I$(INET_PROJ)/src/networklayer/ipv4 \
+    -I$(INET_PROJ)/src/mobility/contract \
+    -I$(INET_PROJ)/src/util/headerserializers/ipv4 \
+    -I$(INET_PROJ)/src/base \
+    -I$(INET_PROJ)/src/util/headerserializers \
+    -I$(INET_PROJ)/src/world/radio \
+    -I$(INET_PROJ)/src/linklayer/ieee80211/mac \
+    -I$(INET_PROJ)/src/networklayer/ipv6 \
+    -I$(INET_PROJ)/src/transport/sctp \
+    -I$(INET_PROJ)/src/util/headerserializers/udp \
+    -I$(INET_PROJ)/src/networklayer/ipv6tunneling \
+    -I$(INET_PROJ)/src/applications/pingapp \
+    -I$(INET_PROJ)/src/battery/models \
+    -I$(INET_PROJ)/src/util/headerserializers/ipv6 \
+    -I$(INET_PROJ)/src/util/headerserializers/sctp \
+    -I$(INET_PROJ)/src/linklayer/contract \
+    -I$(INET_PROJ)/src/networklayer/arp \
+    -I$(INET_PROJ)/src/transport/tcp_common \
+    -I$(INET_PROJ)/src/transport/udp \
     -I. \
     -IExamples \
     -IExamples/BurstifierTest \
@@ -61,6 +61,9 @@ INCLUDE_PATH = \
     -IExamples/EdgeNodeExample/results \
     -IExamples/EdgeNodeTest \
     -IExamples/EdgeNodeTest/results \
+    -IExamples/RingFdlOBS \
+    -IExamples/RingFdlOBS/config \
+    -IExamples/RingFdlOBS/results \
     -IExamples/TreeTopologyOBS \
     -IExamples/TreeTopologyOBS/results \
     -IExamples/jitel09 \
@@ -71,6 +74,7 @@ INCLUDE_PATH = \
     -Isrc \
     -Isrc/CoreNode \
     -Isrc/EdgeNode \
+    -Isrc/SatelliteNode \
     -Isrc/messages \
     -Isrc/misc \
     -Isrc/tests \
@@ -95,8 +99,8 @@ INCLUDE_PATH = \
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = -L../inet/out/$(CONFIGNAME)/src  -linet
-LIBS += -Wl,-rpath,`abspath ../inet/out/$(CONFIGNAME)/src`
+LIBS = -L$(INET_PROJ)/out/$(CONFIGNAME)/src  -linet
+LIBS += -Wl,-rpath,`abspath $(INET_PROJ)/out/$(CONFIGNAME)/src`
 
 # Output directory
 PROJECT_OUTPUT_DIR = out
@@ -105,59 +109,59 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/src/CoreNode/OBS_OpticalCrossConnect.o \
-    $O/src/CoreNode/OBS_OEConverter.o \
-    $O/src/CoreNode/OBS_EOConverter.o \
-    $O/src/CoreNode/OBS_CoreRoutingTable.o \
-    $O/src/CoreNode/OBS_CoreOutputHorizon.o \
     $O/src/CoreNode/OBS_CoreControlLogic.o \
     $O/src/CoreNode/OBS_CoreInput.o \
     $O/src/CoreNode/OBS_CoreOutput.o \
-    $O/src/EdgeNode/OBS_BurstDisassembler.o \
+    $O/src/CoreNode/OBS_CoreOutputHorizon.o \
+    $O/src/CoreNode/OBS_CoreRoutingTable.o \
+    $O/src/CoreNode/OBS_EOConverter.o \
+    $O/src/CoreNode/OBS_OEConverter.o \
+    $O/src/CoreNode/OBS_OpticalCrossConnect.o \
     $O/src/EdgeNode/BurstList.o \
-    $O/src/EdgeNode/OBS_PacketDispatcher.o \
+    $O/src/EdgeNode/OBS_BurstDisassembler.o \
     $O/src/EdgeNode/OBS_BurstSender.o \
+    $O/src/EdgeNode/OBS_DispatcherRule.o \
     $O/src/EdgeNode/OBS_FileBurstifier.o \
     $O/src/EdgeNode/OBS_PacketBurstifier.o \
-    $O/src/EdgeNode/OBS_DispatcherRule.o \
+    $O/src/EdgeNode/OBS_PacketDispatcher.o \
     $O/src/messages/OBS_Burst.o \
-    $O/src/misc/OBS_OpticalMonitor.o \
     $O/src/misc/OBS_DropBurst.o \
+    $O/src/misc/OBS_OpticalMonitor.o \
     $O/src/tests/PacketConverter.o \
-    $O/src/tests/sinks/testSink5.o \
     $O/src/tests/sinks/testSink1.o \
-    $O/src/tests/sinks/testSink3.o \
     $O/src/tests/sinks/testSink2.o \
+    $O/src/tests/sinks/testSink3.o \
     $O/src/tests/sinks/testSink4.o \
-    $O/src/tests/sources/testSource5.o \
+    $O/src/tests/sinks/testSink5.o \
     $O/src/tests/sources/testSource1.o \
+    $O/src/tests/sources/testSource2.o \
     $O/src/tests/sources/testSource3.o \
     $O/src/tests/sources/testSource4.o \
-    $O/src/tests/sources/testSource2.o \
-    $O/src/CoreNode/OBS_ControlUnitInfo_m.o \
+    $O/src/tests/sources/testSource5.o \
     $O/src/CoreNode/OBS_BCPControlInfo_m.o \
+    $O/src/CoreNode/OBS_ControlUnitInfo_m.o \
     $O/src/CoreNode/OBS_CoreRoutingTableEntry_m.o \
     $O/src/EdgeNode/OBS_BurstifierInfo_m.o \
     $O/src/EdgeNode/OBS_BurstSenderInfo_m.o \
     $O/src/EdgeNode/OBS_ScheduledBurstItem_m.o \
-    $O/src/messages/OBS_BurstControlPacket_m.o \
     $O/src/messages/OBS_Burst_m.o \
+    $O/src/messages/OBS_BurstControlPacket_m.o \
     $O/src/tests/sources/SourceControlInfo_m.o
 
 # Message files
 MSGFILES = \
-    src/CoreNode/OBS_ControlUnitInfo.msg \
     src/CoreNode/OBS_BCPControlInfo.msg \
+    src/CoreNode/OBS_ControlUnitInfo.msg \
     src/CoreNode/OBS_CoreRoutingTableEntry.msg \
     src/EdgeNode/OBS_BurstifierInfo.msg \
     src/EdgeNode/OBS_BurstSenderInfo.msg \
     src/EdgeNode/OBS_ScheduledBurstItem.msg \
-    src/messages/OBS_BurstControlPacket.msg \
     src/messages/OBS_Burst.msg \
+    src/messages/OBS_BurstControlPacket.msg \
     src/tests/sources/SourceControlInfo.msg
 
 # Other makefile variables (-K)
-INET_PROJ=../inet
+INET_PROJ=D:/inet
 
 #------------------------------------------------------------------------------
 
@@ -240,6 +244,9 @@ clean:
 	$(Q)-rm -f Examples/EdgeNodeExample/results/*_m.cc Examples/EdgeNodeExample/results/*_m.h
 	$(Q)-rm -f Examples/EdgeNodeTest/*_m.cc Examples/EdgeNodeTest/*_m.h
 	$(Q)-rm -f Examples/EdgeNodeTest/results/*_m.cc Examples/EdgeNodeTest/results/*_m.h
+	$(Q)-rm -f Examples/RingFdlOBS/*_m.cc Examples/RingFdlOBS/*_m.h
+	$(Q)-rm -f Examples/RingFdlOBS/config/*_m.cc Examples/RingFdlOBS/config/*_m.h
+	$(Q)-rm -f Examples/RingFdlOBS/results/*_m.cc Examples/RingFdlOBS/results/*_m.h
 	$(Q)-rm -f Examples/TreeTopologyOBS/*_m.cc Examples/TreeTopologyOBS/*_m.h
 	$(Q)-rm -f Examples/TreeTopologyOBS/results/*_m.cc Examples/TreeTopologyOBS/results/*_m.h
 	$(Q)-rm -f Examples/jitel09/*_m.cc Examples/jitel09/*_m.h
@@ -250,6 +257,7 @@ clean:
 	$(Q)-rm -f src/*_m.cc src/*_m.h
 	$(Q)-rm -f src/CoreNode/*_m.cc src/CoreNode/*_m.h
 	$(Q)-rm -f src/EdgeNode/*_m.cc src/EdgeNode/*_m.h
+	$(Q)-rm -f src/SatelliteNode/*_m.cc src/SatelliteNode/*_m.h
 	$(Q)-rm -f src/messages/*_m.cc src/messages/*_m.h
 	$(Q)-rm -f src/misc/*_m.cc src/misc/*_m.h
 	$(Q)-rm -f src/tests/*_m.cc src/tests/*_m.h
@@ -275,7 +283,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc doc/*.cc doc/img/*.cc download-ripgrep0ikR1b/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/messages/*.cc src/misc/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/RingFdlOBS/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc doc/*.cc doc/img/*.cc download-ripgrep0ikR1b/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/src/CoreNode/OBS_BCPControlInfo_m.o: src/CoreNode/OBS_BCPControlInfo_m.cc \
