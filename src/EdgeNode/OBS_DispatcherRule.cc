@@ -21,14 +21,21 @@
 #include "OBS_DispatcherRule.h"
 
 OBS_DispatcherRule::OBS_DispatcherRule(string rule){
-   OBS_DispatcherRule(rule.c_str());
+   parse(rule.c_str());
 }
 
 OBS_DispatcherRule::OBS_DispatcherRule(char* rule){
+   parse(rule);
+}
+
+void OBS_DispatcherRule::parse(const char* ruleStr){
+   char* rule = strdup(ruleStr);
    char *token;
    //Initialize all values to false
    int i;
    for(i=0;i<5;i++) isSet[i] = false;
+   destLabel = -1;
+   hasDestMask = false;
 
    token = strtok(rule," \n");
    while(token != NULL){
@@ -54,6 +61,16 @@ OBS_DispatcherRule::OBS_DispatcherRule(char* rule){
          }
          else{
         	 opp_error("Cannot parse the value of the destination IP address in the rule");
+         }
+      }
+      else if(strcmp(token,"mask") == 0){ //Rule has a mask for the destination address
+         token = strtok(NULL," \n");
+         if(token != NULL){
+            destMask = IPv4Address(token);
+            hasDestMask = true;
+         }
+         else{
+        	 opp_error("Cannot parse the value of the destination mask in the rule");
          }
       }
       else if(strcmp(token,"protocol") == 0){ // Rule has a IP Protocol value
@@ -95,8 +112,18 @@ OBS_DispatcherRule::OBS_DispatcherRule(char* rule){
         	 opp_error("Cannot parse the value of the destination port in the rule");
          } //Any other char will return error.
       }
+      else if(strcmp(token,"destLabel") == 0){ // Rule has an OBS destination label value
+         token = strtok(NULL," \n");
+         if(token != NULL){
+               destLabel = atoi(token);
+         }
+         else{
+             opp_error("Cannot parse the value of the destLabel in the rule");
+         }
+      }
       token = strtok(NULL," ");
    }
+   free(rule);
 }
 
 OBS_DispatcherRule::~OBS_DispatcherRule(){}
@@ -107,34 +134,44 @@ bool OBS_DispatcherRule::match(cMessage *msg){
    IPv4Datagram *recvIP = check_and_cast< IPv4Datagram* > (msg);
    // Later we'll extract TCP/UDP header if necessary
 
-   EV_DEBUG << "    Matching packet: src=" << recvIP->getSrcAddress()
+   EV << "    Matching packet: src=" << recvIP->getSrcAddress()
                 << " dest=" << recvIP->getDestAddress()
                 << " protocol=" << recvIP->getTransportProtocol() << endl;
 
    // Check which fields are set in this rule
    if(isSet[0]){
-      EV_DEBUG << "      Checking srcAddr: " << srcAddr << endl;
+      EV << "      Checking srcAddr: " << srcAddr << endl;
       if(!(recvIP->getSrcAddress() == srcAddr)) {
-          EV_DEBUG << "      srcAddr mismatch!" << endl;
+          EV << "      srcAddr mismatch!" << endl;
           return false;
       }
-      EV_DEBUG << "      srcAddr matched!" << endl;
+      EV << "      srcAddr matched!" << endl;
    }
    if(isSet[1]){
-      EV_DEBUG << "      Checking destAddr: " << destAddr << endl;
-      if(!(recvIP->getDestAddress() == destAddr)) {
-          EV_DEBUG << "      destAddr mismatch!" << endl;
-          return false;
+      EV << "      Checking destAddr: " << destAddr << (hasDestMask ? " with mask " : "") << (hasDestMask ? destMask.str() : "") << endl;
+      if (hasDestMask) {
+          uint32 pktDestInt = recvIP->getDestAddress().getInt();
+          uint32 ruleAddrInt = destAddr.getInt();
+          uint32 maskInt = destMask.getInt();
+          if ((pktDestInt & maskInt) != (ruleAddrInt & maskInt)) {
+              EV << "      destAddr/mask mismatch!" << endl;
+              return false;
+          }
+      } else {
+          if(!(recvIP->getDestAddress() == destAddr)) {
+              EV << "      destAddr mismatch!" << endl;
+              return false;
+          }
       }
-      EV_DEBUG << "      destAddr matched!" << endl;
+      EV << "      destAddr matched!" << endl;
    }
    if(isSet[2]){
-      EV_DEBUG << "      Checking protocol: " << protocol << endl;
+      EV << "      Checking protocol: " << protocol << endl;
       if(!(recvIP->getTransportProtocol() == protocol)) {
-          EV_DEBUG << "      protocol mismatch!" << endl;
+          EV << "      protocol mismatch!" << endl;
           return false;
       }
-      EV_DEBUG << "      protocol matched!" << endl;
+      EV << "      protocol matched!" << endl;
    }
    if(isSet[3]){
       // Lookup IP header in order to identify TCP/UDP header and then extract it.

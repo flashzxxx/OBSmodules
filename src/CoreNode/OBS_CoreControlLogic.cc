@@ -107,6 +107,12 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
    //Count this message as a received burst
    recvBurstCounter[arrivalPort]++;
 
+   EV << "[CoreControl] Received BCP: inPort=" << arrivalPort 
+      << ", label=" << destLabel 
+      << ", burstColour=" << burstColour 
+      << ", burstSize=" << burstLength << "B"
+      << ", offset=" << arrivalDelta << endl;
+
    simtime_t burstArrival = simTime() + arrivalDelta;
 
    // Check if burst is scheduled to arrive in the future. If everything works OK burst should behave this way. But, it's possible that BCP and burst offset was very small and in some point of the path, burst enters the Core Node before it's BCP. In this case, discard this message (Burst was discarded already)
@@ -137,6 +143,12 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
    int outPort = result->getOutPort();
    int outColour = result->getOutColour();
    int outLabel = result->getOutLabel();
+
+   EV << "[CoreControl] Routing lookup: inPort=" << arrivalPort 
+            << ", label=" << destLabel 
+            << " -> outPort=" << outPort 
+            << ", outColour=" << outColour 
+            << ", outLabel=" << outLabel << endl;
 
    delete result; //Once the query data is stored, I must clean it.
 
@@ -197,6 +209,11 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
    controlInfo1->setSchedulingPriority(1);
 
    scheduleAt(OXCDisconnectTime,controlInfo1);
+
+   EV << "[CoreControl] OXC Reserved: inGate=" << inGate 
+      << " -> outPort=" << outPort << ", lambda=" << lambda
+      << ", connectTime=" << OXCConnectTime 
+      << ", disconnectTime=" << OXCDisconnectTime << endl;
 
    // Update BCP
    info->setPort(outPort);

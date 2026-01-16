@@ -81,9 +81,13 @@ void OBS_BurstDisassembler::handleMessage(cMessage *msg){
         	 fakeBursts.record(burstIni->getByteLength());
          }  
 
+         EV << "[Disassembler] Disassembling Burst: burstifierId=" << bId 
+            << ", numSeq=" << nSeq << endl;
+
          cMessage *tempPack;
          while(burstIni->hasMessages()){ //Release packets until burstIni queue is empty
             tempPack = burstIni->retrieveMessage();
+            EV << "[Disassembler] Releasing packet: " << tempPack->getName() << endl;
             //TODO: Send packets to an intermediate buffer so all packets won't be released to electrical network at the same time
             send(tempPack,"out");
          }

@@ -37,9 +37,12 @@ class OBS_DispatcherRule{
 //      IPAddress destAddr; //!< Destination address (isSet[1]).
       IPv4Address srcAddr; //!< Source address (isSet[0]).
       IPv4Address destAddr; //!< Destination address (isSet[1]).
+      IPv4Address destMask; //!< Destination mask.
+      bool hasDestMask; //!< Whether or not the destination address has a mask.
       int protocol;//!< IP protocol (isSet[2]).
       short srcPort; //!< Source port (isSet[3]).
       short destPort; //!< Destination port (isSet[4]).
+      int destLabel; //!< OBS destination label for this rule.
 
    public:
       //! @param rule A string which follows Dispatcher file format (see documentation).
@@ -49,4 +52,8 @@ class OBS_DispatcherRule{
 
       //! Matching method: tells whether or not msg matches the object's rule.
       bool match(cMessage *msg);
+      int getDestLabel() const { return destLabel; }
+   private:
+      //! Common initialization logic for all constructors.
+      void parse(const char* ruleStr);
 };

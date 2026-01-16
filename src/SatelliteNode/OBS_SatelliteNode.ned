@@ -55,10 +55,10 @@ module OBS_SatelliteNode
         // User terminal <-> Edge router (100GbE - Standard Maximum Ethernet Speed)
         host.ethg++ <--> {datarate=100Gbps;} <--> edgeRouter.ethIO++;
         
-        // Edge router <-> Core switch (local connection)
+        // Edge router <-> Core switch (local connection, zero-delay like EdgeNodeExample)
         for i=0..lambdasEdge {
-            edgeRouter.obsOut[i] --> {datarate=400Gbps;} --> coreSwitch.in++;
-            coreSwitch.out++ --> {datarate=400Gbps;} --> edgeRouter.obsIn[i];
+            edgeRouter.obsOut[i] --> coreSwitch.in++;
+            coreSwitch.out++ --> edgeRouter.obsIn[i];
         }
         
         // Core switch <-> Inter-Satellite Links (external interfaces)

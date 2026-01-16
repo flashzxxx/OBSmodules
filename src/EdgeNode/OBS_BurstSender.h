@@ -34,7 +34,7 @@ class InterfaceEntry;
 class NotificationBoard;
 
 //! Responsible of burst sending through the OBS Network.
-class INET_API OBS_BurstSender : public cSimpleModule{
+class OBS_BurstSender : public cSimpleModule{
    protected:
         //! @enum This enum contains all available values for msg's kind field into handleMessage().
         enum{

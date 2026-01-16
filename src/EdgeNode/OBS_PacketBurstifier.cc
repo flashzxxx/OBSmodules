@@ -73,12 +73,34 @@ void OBS_PacketBurstifier::handleMessage(cMessage *msg){
       assembleBurst();
    }
    else{ //Else.... is it a IP Datagram?
-//      IPDatagram *arrivedMsg = check_and_cast < IPDatagram *> (msg);
       IPv4Datagram *arrivedMsg = check_and_cast < IPv4Datagram *> (msg);
+      
+      // [PREEMPTIVE LOGIC] Check for Label Conflict
+      // Since destLabel might be influenced by Dispatcher, we check if this packet fits.
+      // If Dispatcher sends a packet that doesn't match current destLabel, it means a Flush is requested.
+      if (!isIdle() && destLabel != -1) {
+          // Note: In our system, the Dispatcher sets the label before sending if idle.
+          // If NOT idle, the Packet itself carries the target label (conceptually).
+          // For simplicity, we detect if this packet is meant for our current destLabel.
+          // We can't easily get the target label from the raw IPv4 packet here without re-matching,
+          // so we rely on the Dispatcher to have validated this.
+          // HOWEVER, the most robust way is to let the Dispatcher set a 'forceFlush' flag or 
+          // simply check if a special signal is sent.
+          
+          // Let's refine: If the Dispatcher sends to a Busy queue, it's a preemptive strike.
+          // The Dispatcher will update destLabel JUST BEFORE calling send().
+          // If we are here and not idle, but the logic downstream expects a single label per burst,
+          // we must flush first.
+      }
 
       //record incoming packet
       recvPackSizeVec.record(arrivedMsg->getByteLength());
       recvPackSize.collect(arrivedMsg->getByteLength());
+
+      EV << "[Burstifier] Received packet: " << arrivedMsg->getName() 
+               << ", size=" << arrivedMsg->getByteLength() << "B"
+               << ", currentQueueSize=" << burstContent.getLength() 
+               << ", destLabel=" << destLabel << endl;
 
       bool overflowHappened = false;
       int maxSizeInBits = maxSize*8;
@@ -93,17 +115,15 @@ void OBS_PacketBurstifier::handleMessage(cMessage *msg){
          firstPacket_t = simTime();            
       }
       else if (overflowHappened && !overflowLastPacket){ // Enter if burst assembly is needed before the packet is inserted into the queue
-      //If queue is empty at this moment, display an error message because something weird happened :S
          if(burstContent.empty()) opp_error("Attempted to assemble a burst using an empty queue");
-      //Assemble burst and restart counters
          assembleBurst();
          if(timeout_msg->isScheduled()) cancelEvent(timeout_msg); //Cancel current timeout and schedule a new one
          scheduleAt(simTime()+timeout,timeout_msg);
          firstPacket_t = simTime();
-         //Calculate if overflow happens with the first message
          overflowHappened = false;
          if(((burstBits + arrivedMsg->getBitLength() + varHeaderInBits) > maxSizeInBits)) overflowHappened = true;
       } 
+      
       //Anyway, insert the current message into the queue
       queuedTime.collect(simTime() - firstPacket_t);
 
@@ -111,9 +131,7 @@ void OBS_PacketBurstifier::handleMessage(cMessage *msg){
       burstBits += arrivedMsg->getBitLength() + varHeaderInBits;
       numBurstPackets++;
 
-      //If burst overflow is not allowed, but overflow happens when you insert the first message, show an error message
       if(overflowHappened && !overflowLastPacket) opp_error("Queue overflow happened inserting the first message and you don't allow Queue overflow (overflowLastPacket is false)");
-      //If either overflow happened or maximum size/packets reached appending this message, assemble it now!
 	  if((overflowHappened || numBurstPackets == numPackets) || burstBits == maxSizeInBits){
          assembleBurst();
          if(timeout_msg->isScheduled()) cancelEvent(timeout_msg);
@@ -144,6 +162,11 @@ void OBS_PacketBurstifier::assembleBurst(){
    info->setLabel(destLabel);
    assembledBurst->setControlInfo(info);
 
+   EV << "[Burstifier] Assembling Burst #" << burstCounter 
+      << ": numPackets=" << numBurstPackets 
+      << ", size=" << (burstBits/8) << "B"
+      << ", destLabel=" << destLabel << endl;
+
    //SenderID will be set once the burst arrives at the sender 
    burstCounter++;
    cMessage *tempMsg;
@@ -160,6 +183,28 @@ void OBS_PacketBurstifier::assembleBurst(){
    firstPacket_t = 0;
    //Burst finally assembled. Send to output gate
    send(assembledBurst,"out");
+}
+
+void OBS_PacketBurstifier::setDestLabel(int label){
+    Enter_Method_Silent();
+    this->destLabel = label;
+}
+
+int OBS_PacketBurstifier::getDestLabel() const {
+    return destLabel;
+}
+
+bool OBS_PacketBurstifier::isIdle() const {
+    return burstContent.isEmpty();
+}
+
+void OBS_PacketBurstifier::forceFlush(){
+    Enter_Method("forceFlush()");
+    if (!burstContent.isEmpty()) {
+        EV << "[Burstifier] FORCED FLUSH (Preemption triggered)" << endl;
+        if(timeout_msg->isScheduled()) cancelEvent(timeout_msg);
+        assembleBurst();
+    }
 }
 
 void OBS_PacketBurstifier::finish(){

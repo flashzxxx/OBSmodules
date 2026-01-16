@@ -1,9 +1,14 @@
-destAddr 10.0.1.10
-destAddr 10.0.2.10
-destAddr 10.0.3.10
-destAddr 10.0.4.10
-destAddr 10.0.5.10
-destAddr 10.0.6.10
-destAddr 10.0.7.10
-destAddr 10.0.8.10
-destAddr 10.0.9.10
+# Dispatcher Rules for 10-node Network (Dynamic Labeling)
+# Format: [destAddr IP mask MASK destLabel ID]
+# All nodes share the same rule logic: Map IP to Node ID (Label)
+
+destAddr 10.0.1.0 mask 255.255.255.0 destLabel 1
+destAddr 10.0.2.0 mask 255.255.255.0 destLabel 2
+destAddr 10.0.3.0 mask 255.255.255.0 destLabel 3
+destAddr 10.0.4.0 mask 255.255.255.0 destLabel 4
+destAddr 10.0.5.0 mask 255.255.255.0 destLabel 5
+destAddr 10.0.6.0 mask 255.255.255.0 destLabel 6
+destAddr 10.0.7.0 mask 255.255.255.0 destLabel 7
+destAddr 10.0.8.0 mask 255.255.255.0 destLabel 8
+destAddr 10.0.9.0 mask 255.255.255.0 destLabel 9
+destAddr 10.0.10.0 mask 255.255.255.0 destLabel 10

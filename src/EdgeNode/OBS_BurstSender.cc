@@ -305,6 +305,11 @@ void OBS_BurstSender::handleMessage(cMessage *msg){
 
 	    //Send BCP to control channel (the last one)
             send(bcp,"out",numLambdas);
+
+            EV << "[BurstSender] Sent iniBCP: label=" << info->getLabel()
+               << ", burstSize=" << scheduledBurst.retrieveBurstSize(info->getBurstId()) << "B"
+               << ", offset=" << (scheduledBurst.retrieveSendTime(info->getBurstId()) - simTime()) << endl;
+
             //Retransmit received message (ctlMsg = *msg here)
             msg->setKind(OBS_SCHEDULE_END_BCP);
             //Schedule endBCP sending

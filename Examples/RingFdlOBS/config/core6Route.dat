@@ -1,32 +1,68 @@
-# Core6 Routing Table (3x3 Grid Right-Middle)
-# Ports: Port0:Edge6, Port1:Core3(Up), Port2:Core5(Left), Port3:Core9(Down)
+# Core6 Routing Table (10-Node Topology: Center-Right)
+# Port Allocation (based on NED connection order):
+#   Port0 = Edge6
+#   Port1 = Sat5 (first ISL: sat5<->sat6, sat6 receives from sat5)
+#   Port2 = Sat7 (second ISL: sat6<->sat7)
+#   Port3 = Sat3 (third ISL: sat3<->sat6)
+#   Port4 = Sat9 (fourth ISL: sat6<->sat9)
+# Format: inPort inColour inLabel outPort outColour outLabel
 
 # ===== Local (Label=6) =====
 1 * 6 0 * 6
 2 * 6 0 * 6
 3 * 6 0 * 6
+4 * 6 0 * 6
 
-# ===== Others =====
-0 * 1 2 * 1
-3 * 1 2 * 1
+# ===== To Sat1 (Label=1) - Via Sat5 =====
+0 * 1 1 * 1
+2 * 1 1 * 1
+3 * 1 1 * 1
+4 * 1 1 * 1
 
-0 * 2 1 * 2
-3 * 2 1 * 2
+# ===== To Sat2 (Label=2) - Via Sat3 =====
+0 * 2 3 * 2
+1 * 2 3 * 2
+2 * 2 3 * 2
+4 * 2 3 * 2
 
-0 * 3 1 * 3
-2 * 3 1 * 3
-3 * 3 1 * 3
+# ===== To Sat3 (Label=3) - Direct via Port3 =====
+0 * 3 3 * 3
+1 * 3 3 * 3
+2 * 3 3 * 3
+4 * 3 3 * 3
 
-0 * 4 2 * 4
+# ===== To Sat4 (Label=4) - Via Sat5 =====
+0 * 4 1 * 4
+2 * 4 1 * 4
+3 * 4 1 * 4
+4 * 4 1 * 4
 
-0 * 5 2 * 5
-1 * 5 2 * 5
-3 * 5 2 * 5
+# ===== To Sat5 (Label=5) - Direct via Port1 =====
+0 * 5 1 * 5
+2 * 5 1 * 5
+3 * 5 1 * 5
+4 * 5 1 * 5
 
+# ===== To Sat7 (Label=7) - Direct via Port2 =====
 0 * 7 2 * 7
+1 * 7 2 * 7
+3 * 7 2 * 7
+4 * 7 2 * 7
 
-0 * 8 2 * 8
+# ===== To Sat8 (Label=8) - Via Sat5 =====
+0 * 8 1 * 8
+2 * 8 1 * 8
+3 * 8 1 * 8
+4 * 8 1 * 8
 
-0 * 9 3 * 9
-1 * 9 3 * 9
-2 * 9 3 * 9
+# ===== To Sat9 (Label=9) - Direct via Port4 =====
+0 * 9 4 * 9
+1 * 9 4 * 9
+2 * 9 4 * 9
+3 * 9 4 * 9
+
+# ===== To Sat10 (Label=10) - Via Sat7 =====
+0 * 10 2 * 10
+1 * 10 2 * 10
+3 * 10 2 * 10
+4 * 10 2 * 10

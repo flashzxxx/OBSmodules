@@ -21,15 +21,18 @@
 #include<omnetpp.h>
 #include<stdio.h>
 #include<string.h>
+#include <vector>
 #include "OBS_DispatcherRule.h"
 
-using namespace std;
+class OBS_PacketBurstifier;
 
 //! Uses a rule file to assign an output gate for each message received.
 class OBS_PacketDispatcher : public cSimpleModule{
    protected:
-      OBS_DispatcherRule *rules; //!< Dispatcher rules.
-      int numQueues; //!< Number of output gates (must be the same as the rules set on rules file).
+      std::vector<OBS_DispatcherRule> ruleList; //!< List of dispatcher rules.
+      OBS_PacketBurstifier **burstifiers; //!< Pointers to the burstifiers modules (queues).
+      int numQueues; //!< Number of output gates (physical queues).
+      simtime_t *lastAccessTimes; //!< Tracks the last time each queue was sent a packet (for LRU).
 
       //Statistics
       cStdDev recvPackSize; //!< Received packets' length statistics.

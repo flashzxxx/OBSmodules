@@ -1,0 +1,46 @@
+# Core10 Routing Table (10-Node Topology: Bottom-Right)
+# Port Allocation (based on NED connection order):
+#   Port0 = Edge10
+#   Port1 = Sat9 (first ISL: sat9<->sat10, sat10 receives from sat9)
+#   Port2 = Sat7 (second ISL: sat7<->sat10)
+# Format: inPort inColour inLabel outPort outColour outLabel
+
+# ===== Local (Label=10) =====
+1 * 10 0 * 10
+2 * 10 0 * 10
+
+# ===== To Sat1 (Label=1) - Via Sat7 =====
+0 * 1 2 * 1
+1 * 1 2 * 1
+
+# ===== To Sat2 (Label=2) - Via Sat7 =====
+0 * 2 2 * 2
+1 * 2 2 * 2
+
+# ===== To Sat3 (Label=3) - Via Sat7 =====
+0 * 3 2 * 3
+1 * 3 2 * 3
+
+# ===== To Sat4 (Label=4) - Via Sat7 =====
+0 * 4 2 * 4
+1 * 4 2 * 4
+
+# ===== To Sat5 (Label=5) - Via Sat7 =====
+0 * 5 2 * 5
+1 * 5 2 * 5
+
+# ===== To Sat6 (Label=6) - Via Sat7 =====
+0 * 6 2 * 6
+1 * 6 2 * 6
+
+# ===== To Sat7 (Label=7) - Direct via Port2 =====
+0 * 7 2 * 7
+1 * 7 2 * 7
+
+# ===== To Sat8 (Label=8) - Via Sat9 =====
+0 * 8 1 * 8
+2 * 8 1 * 8
+
+# ===== To Sat9 (Label=9) - Direct via Port1 =====
+0 * 9 1 * 9
+2 * 9 1 * 9

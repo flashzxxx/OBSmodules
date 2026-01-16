@@ -1,52 +1,67 @@
-# Core5 Routing Table (3x3 Grid Center)
-# Port Allocation: Port0:Edge5, Port1:Core2(Up), Port2:Core4(Left), Port3:Core6(Right), Port4:Core8(Down)
+# Core5 Routing Table (10-Node Topology: Center)
+# Port Allocation (based on NED connection order):
+#   Port0 = Edge5
+#   Port1 = Sat4 (first ISL: sat4<->sat5, sat5 receives from sat4)
+#   Port2 = Sat6 (second ISL: sat5<->sat6)
+#   Port3 = Sat2 (third ISL: sat2<->sat5)
+#   Port4 = Sat8 (fourth ISL: sat5<->sat8)
+# Format: inPort inColour inLabel outPort outColour outLabel
 
 # ===== Local (Label=5) =====
-1 * 5 0 * 5
-2 * 5 0 * 5
-3 * 5 0 * 5
-4 * 5 0 * 5
+1 * 5 0 * 5    # From Sat4
+2 * 5 0 * 5    # From Sat6
+3 * 5 0 * 5    # From Sat2
+4 * 5 0 * 5    # From Sat8
 
-# ===== To Core1 (Label=1) =====
-0 * 1 2 * 1    # Via Core4
-3 * 1 2 * 1
-4 * 1 2 * 1
+# ===== To Sat1 (Label=1) - Via Sat2 (Port3) =====
+0 * 1 3 * 1
+1 * 1 3 * 1
+2 * 1 3 * 1
+4 * 1 3 * 1
 
-# ===== To Core2 (Label=2) =====
-0 * 2 1 * 2    # Direct Up
-2 * 2 1 * 2
-3 * 2 1 * 2
-4 * 2 1 * 2
+# ===== To Sat2 (Label=2) - Direct via Port3 =====
+0 * 2 3 * 2
+1 * 2 3 * 2
+2 * 2 3 * 2
+4 * 2 3 * 2
 
-# ===== To Core3 (Label=3) =====
-0 * 3 1 * 3    # Via Core2
-2 * 3 1 * 3
-4 * 3 1 * 3
+# ===== To Sat3 (Label=3) - Via Sat2 =====
+0 * 3 3 * 3
+1 * 3 3 * 3
+4 * 3 3 * 3
 
-# ===== To Core4 (Label=4) =====
-0 * 4 2 * 4    # Direct Left
-1 * 4 2 * 4
-3 * 4 2 * 4
-4 * 4 2 * 4
+# ===== To Sat4 (Label=4) - Direct via Port1 =====
+0 * 4 1 * 4
+2 * 4 1 * 4
+3 * 4 1 * 4
+4 * 4 1 * 4
 
-# ===== To Core6 (Label=6) =====
-0 * 6 3 * 6    # Direct Right
-1 * 6 3 * 6
-2 * 6 3 * 6
-4 * 6 3 * 6
+# ===== To Sat6 (Label=6) - Direct via Port2 =====
+0 * 6 2 * 6
+1 * 6 2 * 6
+3 * 6 2 * 6
+4 * 6 2 * 6
 
-# ===== To Core7 (Label=7) =====
-0 * 7 2 * 7    # Via Core4
+# ===== To Sat7 (Label=7) - Via Sat6 =====
+0 * 7 2 * 7
 1 * 7 2 * 7
 3 * 7 2 * 7
+4 * 7 2 * 7
 
-# ===== To Core8 (Label=8) =====
-0 * 8 4 * 8    # Direct Down
+# ===== To Sat8 (Label=8) - Direct via Port4 =====
+0 * 8 4 * 8
 1 * 8 4 * 8
 2 * 8 4 * 8
 3 * 8 4 * 8
 
-# ===== To Core9 (Label=9) =====
-0 * 9 3 * 9    # Via Core6
-1 * 9 3 * 9
-2 * 9 3 * 9
+# ===== To Sat9 (Label=9) - Via Sat6 =====
+0 * 9 2 * 9
+1 * 9 2 * 9
+3 * 9 2 * 9
+4 * 9 2 * 9
+
+# ===== To Sat10 (Label=10) - Via Sat6 =====
+0 * 10 2 * 10
+1 * 10 2 * 10
+3 * 10 2 * 10
+4 * 10 2 * 10

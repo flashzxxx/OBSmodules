@@ -63,6 +63,14 @@ class OBS_PacketBurstifier : public cSimpleModule{
       virtual void handleMessage(cMessage *msg);
    public:
       virtual ~OBS_PacketBurstifier();
+      //! Sets the destination label for the next burst.
+      void setDestLabel(int label);
+      //! Returns the destination label currently assigned to this queue.
+      int getDestLabel() const;
+      //! Returns true if the burstifier is not currently assembling a burst (queue is empty).
+      bool isIdle() const;
+      //! Forces the assembly and transmission of the current burst if the queue is not empty.
+      void forceFlush();
    private:
       //! Builds an OBS_Burst object with all elements inside burstContent.
       void assembleBurst();
