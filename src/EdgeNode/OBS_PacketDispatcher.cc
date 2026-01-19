@@ -108,47 +108,52 @@ void OBS_PacketDispatcher::handleMessage(cMessage *msg){
    }
 
    // 2. Find a queue for this label using priority-based selection
+   // 2. Find a queue for this label using priority-based selection (Optimized: Single-Pass)
    int selectedQueue = -1;
+   int idleMatchQueue = -1;
+   int firstEmptyQueue = -1;
    
-   EV << "[Dispatcher] Looking for queue for Label " << targetLabel << ":" << endl;
+   EV << "[Dispatcher] Looking for queue for Label " << targetLabel << " (Single-Pass):" << endl;
    
-   // Log all queue states
    for(i=0; i < numQueues; i++){
-       EV << "  Queue[" << i << "]: idle=" << (burstifiers[i]->isIdle() ? "yes" : "no")
-          << ", destLabel=" << burstifiers[i]->getDestLabel() << endl;
-   }
-   
-   // Priority 1: Find a BUSY queue already assigned to this label
-   for(i=0; i < numQueues; i++){
-       if(!burstifiers[i]->isIdle() && burstifiers[i]->getDestLabel() == targetLabel){
-           selectedQueue = i;
-           EV << "  -> [Priority1] Found BUSY queue with matching Label: Queue[" << i << "]" << endl;
-           break;
-       }
+      bool isIdle = burstifiers[i]->isIdle();
+      int currentLabel = burstifiers[i]->getDestLabel();
+
+      EV << "  Queue[" << i << "]: idle=" << (isIdle ? "yes" : "no")
+         << ", destLabel=" << currentLabel << endl;
+
+      // P1 Check: Find a BUSY queue already assigned to this label
+      if(!isIdle && currentLabel == targetLabel){
+         selectedQueue = i;
+         EV << "  -> Found [Priority1] Busy queue match at Queue[" << i << "]" << endl;
+         break; // Highest priority found, exit loop immediately
+      }
+
+      // P2 Check: Find an IDLE queue that was previously assigned to this label (reuse)
+      if(isIdle && idleMatchQueue == -1 && currentLabel == targetLabel){
+         idleMatchQueue = i;
+      }
+
+      // P3 Check: Find the first available IDLE queue (for new labels)
+      if(isIdle && firstEmptyQueue == -1){
+         firstEmptyQueue = i;
+      }
    }
 
-   // Priority 2: Find an IDLE queue that was previously assigned to this label (reuse)
+   // Decision stage: prioritize P2 (reuse) over P3 (fresh start)
    if(selectedQueue == -1){
-       for(i=0; i < numQueues; i++){
-           if(burstifiers[i]->isIdle() && burstifiers[i]->getDestLabel() == targetLabel){
-               selectedQueue = i;
-               EV << "  -> [Priority2] Reusing IDLE queue with matching Label: Queue[" << i << "]" << endl;
-               break;
-           }
-       }
+      if(idleMatchQueue != -1){
+         selectedQueue = idleMatchQueue;
+         EV << "  -> Selected [Priority2] Idle queue match (reuse) at Queue[" << selectedQueue << "]" << endl;
+      }
+      else if(firstEmptyQueue != -1){
+         selectedQueue = firstEmptyQueue;
+         burstifiers[selectedQueue]->setDestLabel(targetLabel);
+         EV << "  -> Selected [Priority3] Fresh Idle queue at Queue[" << selectedQueue << "]" << endl;
+      }
    }
+   
 
-   // Priority 3: Find any IDLE queue and assign the new label
-   if(selectedQueue == -1){
-       for(i=0; i < numQueues; i++){
-           if(burstifiers[i]->isIdle()){
-               selectedQueue = i;
-               burstifiers[i]->setDestLabel(targetLabel);
-               EV << "  -> [Priority3] Assigned Label " << targetLabel << " to new IDLE Queue[" << i << "]" << endl;
-               break;
-           }
-       }
-   }
 
    // Priority 4: LRU Preemption (With Force Flush)
    // If all queues are busy with OTHER labels, pick the one that was accessed longest ago.
