@@ -39,7 +39,7 @@ module OBS_EdgeNode
         int numOutLambdas; // Number of output data channels for the OBS interface.
         //string inColours; // Colour array for input data channels.
         string outColours; // Colour array for output data channels.
-        @display("i=block/classifier2;bgb=747,483");
+        @display("i=block/classifier2;bgb=406,411");
     gates:
         inout pppIO[];	// PPP port
         inout ethIO[];	// Ethernet port
@@ -48,7 +48,7 @@ module OBS_EdgeNode
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=60,60;i=block/control");
+                @display("p=75,60;i=block/control");
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -66,11 +66,11 @@ module OBS_EdgeNode
         }
         ppp[sizeof(pppIO)]: PPPInterface {
             parameters:
-                @display("p=170,308,row,110;q=l2queue;i=block/ifcard");
+                @display("p=75,308,row,110;q=l2queue;i=block/ifcard");
         }
         eth[sizeof(ethIO)]: EthernetInterface {
             parameters:
-                @display("p=403,285,row,110;q=l2queue;i=block/ifcard");
+                @display("p=192,308,row,110;q=l2queue;i=block/ifcard");
         }
         obs: OBS_EdgeInterface {
             parameters:
@@ -78,7 +78,7 @@ module OBS_EdgeNode
                 numOutLambdas = numOutLambdas;
                 //inColours = inColours; 
                 outColours = outColours;
-                @display("p=592,246;q=l2queue;i=block/ifcard");
+                @display("p=331,308;q=l2queue;i=block/ifcard");
         }
     connections allowunconnected:
         // connections to the outer world

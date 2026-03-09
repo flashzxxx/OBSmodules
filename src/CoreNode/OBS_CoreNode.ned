@@ -31,7 +31,7 @@ module OBS_CoreNode
         string lambdasPerOutPort; //Number of output data channels for each fiber 
         string inputColours; // Colour of each input data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
         string outputColours; // Colour of each output data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
-        @display("bgb=434,264;i=block/switch");
+        @display("bgb=434,264;i=abstract/opticalswitch");
     gates:
         input in[];
         output out[];

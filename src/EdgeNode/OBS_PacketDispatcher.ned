@@ -56,6 +56,7 @@ simple OBS_PacketDispatcher
     parameters:
         int numQueues; // Number of burstifier queues (should be the same as the dispatcher rules and the output gates).
         string dispatcherRules; // Plain text file with the rules (see description).
+        int dispatchMode = default(0); // 0=Dynamic(P1-P4), 1=NoPreemption(P1-P3+Drop), 2=RoundRobin, 3=Static(label%queues)
     gates:
         input in;
         output out[];

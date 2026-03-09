@@ -38,6 +38,13 @@ class OBS_PacketDispatcher : public cSimpleModule{
       cStdDev recvPackSize; //!< Received packets' length statistics.
       int droppedPacket; //!< Number of dropped packets.
       cOutVector recvPackSizeVec; //!< Length of the packets received (in bytes).
+      int p1Hits; //!< Priority 1 (busy match) hit count.
+      int p2Hits; //!< Priority 2 (idle reuse) hit count.
+      int p3Hits; //!< Priority 3 (fresh idle) hit count.
+      int p4Hits; //!< Priority 4 (LRU preemption) hit count.
+      int forceFlushCount; //!< Number of forced flush operations (queue label switch cost).
+      int dispatchMode; //!< 0=Dynamic, 1=NoPreemption, 2=RoundRobin, 3=Static
+      int rrCounter; //!< Round-robin counter for mode 2.
 
       virtual void initialize();
       virtual void finish();
