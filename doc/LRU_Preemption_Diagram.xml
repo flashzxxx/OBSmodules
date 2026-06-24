@@ -1,0 +1,150 @@
+<mxfile host="app.diagrams.net" modified="2026-01-19T08:56:00.000Z" agent="Mozilla/5.0" version="21.0.0" etag="LRU_Preemption_Diagram">
+  <diagram name="LRU抢占时序图" id="LRU_Preemption_Sequence">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- 标题 -->
+        <mxCell id="title" value="&lt;b&gt;OBS 边缘节点 LRU 抢占时序演变图&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- 时间轴标签 -->
+        <mxCell id="time_label" value="时间轴 →" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="60" y="70" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- 阶段1: 初始状态 -->
+        <mxCell id="phase1_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="220" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1_title" value="&lt;b&gt;T0: 初始状态&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="100" y="110" width="140" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- 队列状态 T0 -->
+        <mxCell id="q0_t0" value="Queue[0]&#xa;Label: 5&#xa;状态: 忙碌&#xa;访问时间: 0.100s" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="80" y="150" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q1_t0" value="Queue[1]&#xa;Label: 2&#xa;状态: 忙碌&#xa;访问时间: 0.101s" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="180" y="150" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q2_t0" value="Queue[2]&#xa;Label: 3&#xa;状态: 忙碌&#xa;访问时间: 0.102s" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="80" y="220" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q3_t0" value="...&#xa;(所有队列已满)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;align=center;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="180" y="220" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="new_pkt_t0" value="新数据包到达&#xa;目标 Label: 10" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="90" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="problem_t0" value="❌ 无可用队列！" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#CC0000;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="100" y="350" width="140" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- 箭头1 -->
+        <mxCell id="arrow1" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="290" y="240" as="sourcePoint" />
+            <mxPoint x="340" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 阶段2: LRU 选择 -->
+        <mxCell id="phase2_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="350" y="100" width="220" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2_title" value="&lt;b&gt;T1: LRU 选择&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="390" y="110" width="140" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- 队列状态 T1 -->
+        <mxCell id="q0_t1" value="Queue[0] ★&#xa;Label: 5&#xa;访问时间: 0.100s&#xa;【最久未访问】" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=center;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="150" width="90" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="q1_t1" value="Queue[1]&#xa;Label: 2&#xa;访问时间: 0.101s" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="470" y="150" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q2_t1" value="Queue[2]&#xa;Label: 3&#xa;访问时间: 0.102s" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="370" y="230" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="lru_decision" value="LRU 算法比较&#xa;min(0.100, 0.101, 0.102, ...)&#xa;= 0.100s (Queue[0])" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="370" y="310" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- 箭头2 -->
+        <mxCell id="arrow2" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="580" y="240" as="sourcePoint" />
+            <mxPoint x="630" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 阶段3: 强制冲刷 -->
+        <mxCell id="phase3_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="100" width="220" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3_title" value="&lt;b&gt;T2: 强制冲刷 &amp; 重分配&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="670" y="110" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- 队列状态 T2 -->
+        <mxCell id="q0_t2" value="Queue[0] ✓&#xa;Label: 10 (新)&#xa;访问时间: 0.109s&#xa;状态: 已更新" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=center;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="660" y="150" width="90" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="q1_t2" value="Queue[1]&#xa;Label: 2&#xa;(不变)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="760" y="150" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- 冲刷动作 -->
+        <mxCell id="flush_action" value="1. forceFlush()&#xa;   → 原 Label 5 数据立即组帧发送&#xa;2. setDestLabel(10)&#xa;   → 队列标签切换为 10&#xa;3. send(newPacket)&#xa;   → 新数据包入队" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="240" width="180" height="90" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="success_t2" value="✓ 抢占成功，零丢包" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#006600;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="680" y="340" width="160" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- 底部说明 -->
+        <mxCell id="legend_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="410" width="800" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_title" value="&lt;b&gt;图例说明：&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="420" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="80" y="450" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend1_text" value="忙碌队列" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="105" y="450" width="70" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="190" y="450" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend2_text" value="被置换目标" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="215" y="450" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="310" y="450" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend3_text" value="重分配完成" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="335" y="450" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend4" value="" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="430" y="450" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend4_text" value="新到达数据包" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="465" y="450" width="90" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="note" value="LRU 算法确保在资源竞争时，优先置换最久未被访问的队列，实现公平调度与零丢包。" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="570" y="450" width="280" height="30" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -70,6 +70,7 @@ INCLUDE_PATH = \
     -IExamples/jitel09/results \
     -Idoc \
     -Idoc/img \
+    -Idocs \
     -Idownload-ripgrep0ikR1b \
     -Isrc \
     -Isrc/CoreNode \
@@ -253,6 +254,7 @@ clean:
 	$(Q)-rm -f Examples/jitel09/results/*_m.cc Examples/jitel09/results/*_m.h
 	$(Q)-rm -f doc/*_m.cc doc/*_m.h
 	$(Q)-rm -f doc/img/*_m.cc doc/img/*_m.h
+	$(Q)-rm -f docs/*_m.cc docs/*_m.h
 	$(Q)-rm -f download-ripgrep0ikR1b/*_m.cc download-ripgrep0ikR1b/*_m.h
 	$(Q)-rm -f src/*_m.cc src/*_m.h
 	$(Q)-rm -f src/CoreNode/*_m.cc src/CoreNode/*_m.h
@@ -283,7 +285,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/RingFdlOBS/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc doc/*.cc doc/img/*.cc download-ripgrep0ikR1b/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/RingFdlOBS/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc doc/*.cc doc/img/*.cc docs/*.cc download-ripgrep0ikR1b/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/src/CoreNode/OBS_BCPControlInfo_m.o: src/CoreNode/OBS_BCPControlInfo_m.cc \
@@ -398,8 +400,12 @@ $O/src/EdgeNode/OBS_PacketDispatcher.o: src/EdgeNode/OBS_PacketDispatcher.cc \
 	$(INET_PROJ)/src/transport/tcp_common/TCPSegment_m.h \
 	$(INET_PROJ)/src/transport/udp/UDPPacket.h \
 	$(INET_PROJ)/src/transport/udp/UDPPacket_m.h \
+	src/EdgeNode/OBS_BurstifierInfo_m.h \
 	src/EdgeNode/OBS_DispatcherRule.h \
-	src/EdgeNode/OBS_PacketDispatcher.h
+	src/EdgeNode/OBS_PacketBurstifier.h \
+	src/EdgeNode/OBS_PacketDispatcher.h \
+	src/messages/OBS_Burst.h \
+	src/messages/OBS_Burst_m.h
 $O/src/EdgeNode/OBS_ScheduledBurstItem_m.o: src/EdgeNode/OBS_ScheduledBurstItem_m.cc \
 	src/EdgeNode/OBS_ScheduledBurstItem_m.h
 $O/src/messages/OBS_Burst.o: src/messages/OBS_Burst.cc \

@@ -1,0 +1,333 @@
+<mxfile host="app.diagrams.net" modified="2026-01-19T10:03:00.000Z" agent="Mozilla/5.0" version="21.0.0">
+  <diagram name="OBS Edge Node Architecture" id="OBS_Edge_Node_Simple">
+    <mxGraphModel dx="1100" dy="750" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- ========== Host IP Router / Control Plane ========== -->
+        <mxCell id="host_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2C3E50;strokeColor=#1A252F;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="90" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="host_text" value="Host IP Router&#xa;/&#xa;Control Plane" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="35" y="105" width="80" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- IP Packets 输入 -->
+        <mxCell id="ip_input" value="IP Packets&#xa;(Labels 1...10)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#5DADE2;strokeColor=#2874A6;fontSize=9;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="30" y="230" width="90" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- Host -> Parser 箭头 -->
+        <mxCell id="arrow_host_parser" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="145" as="sourcePoint" />
+            <mxPoint x="160" y="145" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow_ip_parser" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="252" as="sourcePoint" />
+            <mxPoint x="160" y="252" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ========== FPGA Prototype Board (OBS Edge Node) ========== -->
+        <mxCell id="fpga_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1B4F72;strokeColor=#0D3A5C;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="160" y="40" width="870" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="fpga_title" value="FPGA Prototype Board (OBS Edge Node)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="400" y="50" width="300" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- ========== OBS Transmission Mechanism (Tx Path) ========== -->
+        <mxCell id="tx_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2E86AB;strokeColor=#1A5276;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="175" y="85" width="840" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="tx_title" value="OBS Transmission Mechanism (Tx Path)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="430" y="90" width="280" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Packet Receiver & Parser (五元组匹配) -->
+        <mxCell id="parser" value="Packet&#xa;Receiver&#xa;&amp;&#xa;Parser&#xa;───────&#xa;5-Tuple&#xa;Matching" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#85C1E9;strokeColor=#2874A6;strokeWidth=1;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="120" width="70" height="130" as="geometry" />
+        </mxCell>
+        
+        <!-- 五元组说明标注 -->
+        <mxCell id="parser_note" value="srcIP, dstIP&#xa;protocol&#xa;srcPort, dstPort" style="text;html=1;strokeColor=#2874A6;fillColor=#EAF2F8;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=7;fontColor=#2874A6;" vertex="1" parent="1">
+          <mxGeometry x="185" y="255" width="80" height="35" as="geometry" />
+        </mxCell>
+        
+        <!-- Parser -> Dispatcher 箭头 -->
+        <mxCell id="arrow_parser_disp" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="185" as="sourcePoint" />
+            <mxPoint x="290" y="185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ========== Dynamic Queue Dispatcher (核心模块) ========== -->
+        <mxCell id="dispatcher_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5D8DC;strokeColor=#7F8C8D;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="290" y="120" width="200" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="dispatcher_title" value="Dynamic Queue Dispatcher&#xa;(Scheduling Logic)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="122" width="180" height="28" as="geometry" />
+        </mxCell>
+        
+        <!-- Lookup Table -->
+        <mxCell id="lookup" value="Rule Matching&#xa;(IP → Label)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#AED6F1;strokeColor=#2874A6;strokeWidth=1;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="155" width="170" height="35" as="geometry" />
+        </mxCell>
+        
+        <!-- P1-P4 Scheduling Logic -->
+        <mxCell id="p1p4" value="P1-P4 Priority Selection&#xa;(Label → Queue)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#AED6F1;strokeColor=#2874A6;strokeWidth=1;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="200" width="170" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- LRU Controller -->
+        <mxCell id="lru" value="LRU Controller" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5B7B1;strokeColor=#C0392B;strokeWidth=1;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="250" width="170" height="35" as="geometry" />
+        </mxCell>
+        
+        <!-- 内部连接箭头 -->
+        <mxCell id="arrow_lookup_p1p4" value="" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#7F8C8D;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="190" as="sourcePoint" />
+            <mxPoint x="390" y="200" as="targetPoint" />
+            
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow_p1p4_lru" value="" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#7F8C8D;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="240" as="sourcePoint" />
+            <mxPoint x="390" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ★★★ 简化：只有一条数据流箭头 ★★★ -->
+        <mxCell id="arrow_data_flow" value="" style="endArrow=block;html=1;strokeWidth=2.5;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="490" y="210" as="sourcePoint" />
+            <mxPoint x="520" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="data_flow_label" value="Packet" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="485" y="190" width="45" height="15" as="geometry" />
+        </mxCell>
+        
+        <!-- ★★★ LRU Force Flush 红色虚线（唯一的控制信号）★★★ -->
+        <mxCell id="arrow_flush1" value="" style="endArrow=none;html=1;strokeWidth=1.5;strokeColor=#C0392B;dashed=1;dashPattern=5 2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="475" y="267" as="sourcePoint" />
+            <mxPoint x="500" y="267" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow_flush2" value="" style="endArrow=none;html=1;strokeWidth=1.5;strokeColor=#C0392B;dashed=1;dashPattern=5 2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="267" as="sourcePoint" />
+            <mxPoint x="500" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow_flush3" value="" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#C0392B;dashed=1;dashPattern=5 2;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="295" as="sourcePoint" />
+            <mxPoint x="535" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flush_text" value="Force Flush" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontColor=#C0392B;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="495" y="297" width="60" height="15" as="geometry" />
+        </mxCell>
+        
+        <!-- ========== Physical Burstifiers (N=8) ========== -->
+        <mxCell id="queue_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5D8DC;strokeColor=#7F8C8D;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="520" y="120" width="130" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="queue_title" value="Physical Burstifiers&#xa;(N=8)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="122" width="110" height="28" as="geometry" />
+        </mxCell>
+        
+        <!-- Queue 1 -->
+        <mxCell id="q1" value="Q1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ABEBC6;strokeColor=#27AE60;fontSize=8;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="535" y="155" width="35" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="q1_label" value="(Active, L1)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#27AE60;" vertex="1" parent="1">
+          <mxGeometry x="572" y="155" width="55" height="22" as="geometry" />
+        </mxCell>
+        
+        <!-- Queue 2 -->
+        <mxCell id="q2" value="Q2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ABEBC6;strokeColor=#27AE60;fontSize=8;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="535" y="180" width="35" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="q2_label" value="(Active, L3)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#27AE60;" vertex="1" parent="1">
+          <mxGeometry x="572" y="180" width="55" height="22" as="geometry" />
+        </mxCell>
+        
+        <!-- Queue 3 (Idle) -->
+        <mxCell id="q3" value="Q3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5D8DC;strokeColor=#7F8C8D;fontSize=8;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="535" y="205" width="35" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="q3_label" value="(Idle)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#7F8C8D;" vertex="1" parent="1">
+          <mxGeometry x="572" y="205" width="55" height="22" as="geometry" />
+        </mxCell>
+        
+        <!-- 省略号 -->
+        <mxCell id="q_dots" value="⋮" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="545" y="225" width="20" height="15" as="geometry" />
+        </mxCell>
+        
+        <!-- FIFO x2 -->
+        <mxCell id="fifo1" value="FIFO" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5D8DC;strokeColor=#7F8C8D;fontSize=7;" vertex="1" parent="1">
+          <mxGeometry x="535" y="243" width="35" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="fifo2" value="FIFO" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5D8DC;strokeColor=#7F8C8D;fontSize=7;" vertex="1" parent="1">
+          <mxGeometry x="535" y="262" width="35" height="16" as="geometry" />
+        </mxCell>
+        
+        <!-- Queue 8 (LRU Target) -->
+        <mxCell id="q8" value="Q8" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5B7B1;strokeColor=#C0392B;fontSize=8;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="535" y="280" width="35" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="q8_label" value="(Active, L7,&#xa;LRU Target)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=6;fontColor=#C0392B;" vertex="1" parent="1">
+          <mxGeometry x="572" y="277" width="55" height="28" as="geometry" />
+        </mxCell>
+        
+        <!-- Queues -> Burst Assembly 箭头 -->
+        <mxCell id="arrow_q_burst" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="650" y="210" as="sourcePoint" />
+            <mxPoint x="680" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ========== Burst Assembly & Aggregation (封装过程) ========== -->
+        <mxCell id="burst_asm" value="Burst&#xa;Assembly&#xa;&amp;&#xa;Aggregation&#xa;───────&#xa;Timeout /&#xa;MaxSize /&#xa;MaxPkts" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#85C1E9;strokeColor=#2874A6;strokeWidth=1;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="120" width="70" height="130" as="geometry" />
+        </mxCell>
+        
+        <!-- 封装说明标注 -->
+        <mxCell id="burst_note" value="IP Pkts → OBS_Burst&#xa;+ Label + Offset" style="text;html=1;strokeColor=#2874A6;fillColor=#EAF2F8;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=7;fontColor=#2874A6;" vertex="1" parent="1">
+          <mxGeometry x="673" y="255" width="85" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Burst Assembly -> Optical 箭头 -->
+        <mxCell id="arrow_burst_opt" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="750" y="195" as="sourcePoint" />
+            <mxPoint x="785" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ========== Resource Allocation & Optical Tx Interface ========== -->
+        <mxCell id="optical_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5D8DC;strokeColor=#7F8C8D;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="785" y="120" width="100" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="optical_title" value="Resource&#xa;Allocation&#xa;&amp;&#xa;Optical Tx&#xa;Interface" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="795" y="125" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="eo" value="E/O" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ABEBC6;strokeColor=#27AE60;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="805" y="195" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="laser" value="Tunable&#xa;Laser&#xa;Source" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F9E79F;strokeColor=#D4AC0D;fontSize=8;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="805" y="235" width="60" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Optical -> Output 箭头 -->
+        <mxCell id="arrow_opt_out" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="885" y="210" as="sourcePoint" />
+            <mxPoint x="940" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Output Fiber Port -->
+        <mxCell id="fiber_symbol" value="◯" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=22;fontColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="935" y="195" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fiber_label" value="Output&#xa;Fiber&#xa;Port" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="190" width="50" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- ========== OBS Reception Mechanism (Rx Path) ========== -->
+        <mxCell id="rx_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2E86AB;strokeColor=#1A5276;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="175" y="330" width="840" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="rx_title" value="OBS Reception Mechanism (Rx Path)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="430" y="335" width="280" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Rx Path 模块 -->
+        <mxCell id="rx_optical" value="Optical Rx&#xa;Interface" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#85C1E9;strokeColor=#2874A6;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="365" width="70" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="rx_oe" value="O/E&#xa;Converter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ABEBC6;strokeColor=#27AE60;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="365" width="70" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="rx_disasm" value="Burst Disassembly" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#85C1E9;strokeColor=#2874A6;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="365" width="200" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="rx_fwd" value="Packet&#xa;Forwarding" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#85C1E9;strokeColor=#2874A6;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="365" width="70" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- Rx 连接箭头 -->
+        <mxCell id="rx_arrow1" value="" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#FFFFFF;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="387" as="sourcePoint" />
+            <mxPoint x="290" y="387" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rx_arrow2" value="" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#FFFFFF;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="360" y="387" as="sourcePoint" />
+            <mxPoint x="400" y="387" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rx_arrow3" value="" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#FFFFFF;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="600" y="387" as="sourcePoint" />
+            <mxPoint x="640" y="387" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- ========== 图注 ========== -->
+        <mxCell id="fig_caption" value="&lt;b&gt;Fig. A:&lt;/b&gt; FPGA-based OBS Edge Node Architecture with Dynamic Queue Scheduling" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="300" y="455" width="500" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- ========== 图例 ========== -->
+        <mxCell id="legend_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7F8C8D;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="330" width="110" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_title" value="Legend:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="905" y="332" width="50" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_data" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2C3E50;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="910" y="360" as="sourcePoint" />
+            <mxPoint x="940" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_data_text" value="Packet Flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;" vertex="1" parent="1">
+          <mxGeometry x="945" y="352" width="60" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_flush" value="" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#C0392B;dashed=1;dashPattern=5 2;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="910" y="380" as="sourcePoint" />
+            <mxPoint x="940" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_flush_text" value="Force Flush" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#C0392B;" vertex="1" parent="1">
+          <mxGeometry x="945" y="372" width="60" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_lru" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5B7B1;strokeColor=#C0392B;fontSize=7;" vertex="1" parent="1">
+          <mxGeometry x="910" y="395" width="30" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_lru_text" value="LRU Target" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#C0392B;" vertex="1" parent="1">
+          <mxGeometry x="945" y="392" width="60" height="15" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

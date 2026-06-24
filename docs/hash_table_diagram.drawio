@@ -1,0 +1,179 @@
+<mxfile host="app.diagrams.net" modified="2024-12-17T01:14:00.000Z" agent="Mozilla/5.0" version="21.0.0">
+  <diagram name="哈希表结构图" id="hash-table-diagram-v3">
+    <mxGraphModel dx="1100" dy="750" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="550" math="0" shadow="1">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- 背景外框 -->
+        <mxCell id="outer-frame" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D3748;strokeWidth=3;fillColor=#F7FAFC;shadow=1;arcSize=5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="580" height="480" as="geometry"/>
+        </mxCell>
+        
+        <!-- 标题区域背景 -->
+        <mxCell id="header-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#E2E8F0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="580" height="45" as="geometry"/>
+        </mxCell>
+        
+        <!-- 主标题 -->
+        <mxCell id="title-keys" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;b&gt;键 (Keys)&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#1A365D;" vertex="1" parent="1">
+          <mxGeometry x="100" y="28" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="title-hash" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;b&gt;哈希函数&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#1A365D;" vertex="1" parent="1">
+          <mxGeometry x="280" y="28" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="title-buckets" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;b&gt;存储桶 (Buckets)&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#1A365D;" vertex="1" parent="1">
+          <mxGeometry x="460" y="28" width="140" height="30" as="geometry"/>
+        </mxCell>
+        
+        <!-- 节点 node -->
+        <mxCell id="node" value="&lt;b&gt;节点&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=2;fillColor=#EDF2F7;fontSize=13;fontColor=#2D3748;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="265" width="65" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- Keys 虚线框 - 组合键整体 -->
+        <mxCell id="keys-box" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4299E1;strokeWidth=2;dashed=1;dashPattern=8 4;fillColor=#EBF8FF;opacity=50;" vertex="1" parent="1">
+          <mxGeometry x="140" y="80" width="110" height="400" as="geometry"/>
+        </mxCell>
+        
+        <!-- Key 字段 - 表示组合键的组成部分 -->
+        <mxCell id="key1" value="&lt;b&gt;源 IP&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=1.5;fillColor=#FFFFFF;fontSize=12;fontColor=#2D3748;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="152" y="100" width="85" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="key2" value="&lt;b&gt;目的 IP&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=1.5;fillColor=#FFFFFF;fontSize=12;fontColor=#2D3748;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="152" y="148" width="85" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="key3" value="&lt;b&gt;标识符&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=1.5;fillColor=#FFFFFF;fontSize=12;fontColor=#2D3748;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="152" y="196" width="85" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="key4" value="&lt;b&gt;协议&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=1.5;fillColor=#FFFFFF;fontSize=12;fontColor=#2D3748;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="152" y="244" width="85" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="key5" value="&lt;b&gt;源端口&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=1.5;fillColor=#FFFFFF;fontSize=12;fontColor=#2D3748;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="152" y="292" width="85" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="key6" value="&lt;b&gt;目的端口&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#4A5568;strokeWidth=1.5;fillColor=#FFFFFF;fontSize=12;fontColor=#2D3748;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="152" y="340" width="85" height="38" as="geometry"/>
+        </mxCell>
+        
+        <!-- 组合键整体标注 -->
+        <mxCell id="combo-key-label" value="&lt;i&gt;组合键&lt;br&gt;(六元组)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#4299E1;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="155" y="390" width="80" height="35" as="geometry"/>
+        </mxCell>
+        
+        <!-- 大括号（表示组合） -->
+        <mxCell id="brace-top" value="" style="curved=1;endArrow=none;html=1;strokeColor=#4299E1;strokeWidth=2;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="245" y="110" as="sourcePoint"/>
+            <mxPoint x="265" y="230" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="265" y="110"/>
+              <mxPoint x="275" y="170"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="brace-bottom" value="" style="curved=1;endArrow=none;html=1;strokeColor=#4299E1;strokeWidth=2;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="245" y="370" as="sourcePoint"/>
+            <mxPoint x="265" y="230" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="265" y="370"/>
+              <mxPoint x="275" y="300"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Hash Function 虚线框 -->
+        <mxCell id="hash-box" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#805AD5;strokeWidth=2;dashed=1;dashPattern=8 4;fillColor=#FAF5FF;opacity=50;" vertex="1" parent="1">
+          <mxGeometry x="290" y="80" width="120" height="400" as="geometry"/>
+        </mxCell>
+        
+        <!-- Hash Function 核心表示 -->
+        <mxCell id="hash-func-box" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#805AD5;strokeWidth=2;fillColor=#E9D8FD;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="160" width="90" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="hash-icon" value="⚙️" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=32;" vertex="1" parent="1">
+          <mxGeometry x="325" y="165" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="hash-text1" value="&lt;b&gt;计算哈希值&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=13;fontColor=#553C9A;" vertex="1" parent="1">
+          <mxGeometry x="305" y="215" width="90" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="hash-text2" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;取模 4&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#553C9A;" vertex="1" parent="1">
+          <mxGeometry x="305" y="240" width="90" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="hash-desc" value="&lt;i&gt;(余数为桶索引)&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontColor=#805AD5;" vertex="1" parent="1">
+          <mxGeometry x="305" y="265" width="90" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="hash-result" value="&lt;b&gt;输出: 0~3&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontColor=#553C9A;" vertex="1" parent="1">
+          <mxGeometry x="305" y="290" width="90" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- Buckets 区域 -->
+        <mxCell id="bucket0" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;00&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#9B2C2C;strokeWidth=2;fillColor=#C53030;fontSize=16;fontColor=#FFFFFF;shadow=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="460" y="95" width="90" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bucket1" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;01&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2B6CB0;strokeWidth=2;fillColor=#3182CE;fontSize=16;fontColor=#FFFFFF;shadow=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="460" y="180" width="90" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bucket2" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;02&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#C05621;strokeWidth=2;fillColor=#DD6B20;fontSize=16;fontColor=#FFFFFF;shadow=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="460" y="265" width="90" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bucket3" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;03&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#276749;strokeWidth=2;fillColor=#38A169;fontSize=16;fontColor=#FFFFFF;shadow=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="460" y="350" width="90" height="70" as="geometry"/>
+        </mxCell>
+        
+        <!-- Bucket 索引标注 -->
+        <mxCell id="idx0" value="索引 0" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#A0AEC0;" vertex="1" parent="1">
+          <mxGeometry x="555" y="120" width="50" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="idx1" value="索引 1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#A0AEC0;" vertex="1" parent="1">
+          <mxGeometry x="555" y="205" width="50" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="idx2" value="索引 2" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#A0AEC0;" vertex="1" parent="1">
+          <mxGeometry x="555" y="290" width="50" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="idx3" value="索引 3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#A0AEC0;" vertex="1" parent="1">
+          <mxGeometry x="555" y="375" width="50" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- node 到 keys-box 的箭头 -->
+        <mxCell id="arrow-node" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4A5568;strokeWidth=2;endArrow=blockThin;endFill=1;endSize=8;" edge="1" parent="1" source="node" target="keys-box">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- 组合键到哈希函数的箭头（单一输入） -->
+        <mxCell id="arrow-to-hash" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4299E1;strokeWidth=3;endArrow=blockThin;endFill=1;endSize=8;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="240" as="sourcePoint"/>
+            <mxPoint x="305" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 哈希函数到各Bucket的箭头（表示不同结果映射到不同桶） -->
+        <mxCell id="arrow-to-bucket0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C53030;strokeWidth=2.5;endArrow=blockThin;endFill=1;endSize=6;exitX=1;exitY=0.25;entryX=0;entryY=0.5;" edge="1" parent="1" source="hash-func-box" target="bucket0">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow-to-bucket1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3182CE;strokeWidth=2.5;endArrow=blockThin;endFill=1;endSize=6;exitX=1;exitY=0.4;entryX=0;entryY=0.5;" edge="1" parent="1" source="hash-func-box" target="bucket1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow-to-bucket2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#DD6B20;strokeWidth=2.5;endArrow=blockThin;endFill=1;endSize=6;exitX=1;exitY=0.6;entryX=0;entryY=0.5;" edge="1" parent="1" source="hash-func-box" target="bucket2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow-to-bucket3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#38A169;strokeWidth=2.5;endArrow=blockThin;endFill=1;endSize=6;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="hash-func-box" target="bucket3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- 流程说明 -->
+        <mxCell id="flow-desc" value="&lt;i&gt;不同的数据包根据&lt;br&gt;组合键计算结果&lt;br&gt;分配到对应的桶&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontColor=#718096;" vertex="1" parent="1">
+          <mxGeometry x="305" y="380" width="90" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- 底部说明 -->
+        <mxCell id="note" value="说明：节点的每个数据包使用六元组作为组合键，经过哈希计算和取模运算后，映射到对应的存储桶中" style="text;html=1;strokeColor=none;fillColor=#FEF3C7;align=center;verticalAlign=middle;fontSize=11;fontColor=#92400E;rounded=1;spacing=5;" vertex="1" parent="1">
+          <mxGeometry x="55" y="445" width="545" height="35" as="geometry"/>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
