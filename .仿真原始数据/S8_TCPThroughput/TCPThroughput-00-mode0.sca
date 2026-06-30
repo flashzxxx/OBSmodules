@@ -1,0 +1,40 @@
+version 2
+run TCPThroughput-0-20260309-141205-28451
+attr configname TCPThroughput
+attr datetime 20260309-141205
+attr experiment TCPThroughput
+attr inifile experiments.ini
+attr iterationvars "$mode=0"
+attr measurement "$mode=0"
+attr network RingFdlOBS
+attr processid 28451
+attr repetition 0
+attr replication "#0"
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+param **.dispatchMode 0
+param **.sat1.host.numTcpApps 12
+param **.sat1.host.tcpApp[*].typename "TCPBasicClientApp"
+param **.sat1.host.tcpApp[*].numRequestsPerSession 500
+param **.sat1.host.tcpApp[*].requestLength 5000B
+param **.sat1.host.tcpApp[*].replyLength 100B
+param **.sat1.host.tcpApp[*].thinkTime 0s
+param **.numQueues 8
+param sim-time-limit 15s
+
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Dispatch Mode" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Packets received" 7183
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Dropped Packets" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Total Dispatched" 7183
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P1 Hits (Busy Match)" 5259
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P2 Hits (Idle Reuse)" 1307
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P3 Hits (Fresh Idle)" 522
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P4 Hits (LRU Preemption)" 95
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Force Flush Count" 95
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Drop Rate (%)" 0.0000
+scalar RingFdlOBS.sat1.host "TCP Requests Sent" 6000
+scalar RingFdlOBS.sat1.host "TCP Requests Completed" 6000
+scalar RingFdlOBS.sat1.host "TCP Retransmissions" 12
+scalar RingFdlOBS.sat1.host "Avg Throughput (Kbps/flow)" 285.3000

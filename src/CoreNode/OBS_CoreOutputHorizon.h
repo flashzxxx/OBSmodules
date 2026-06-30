@@ -21,7 +21,7 @@
 #include<omnetpp.h>
 
 //! The horizon table store the time where each optical channel is available (this time is often called the horizon).
-//! This table is structured as an bidimensional array where the first component represents the port number and the second component is the data channel:
+//! This table is structured as an bidimensional array where the first component represents the port number (including FDL loopback port at index numPorts) and the second component is the data channel:
 //!
 //! horizon[fiber][channel]
 //!

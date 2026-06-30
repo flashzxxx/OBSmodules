@@ -1,0 +1,5 @@
+﻿Mode,ModeName,RequestsSent,Completed,Dropped,DropRate(%),TCPRetransmit,AvgThroughput(Kbps)
+0,Dynamic,6000,6000,0,0.0,12,285.3
+1,NoPreemption,6000,5412,347,5.78,234,241.7
+2,RoundRobin,6000,5718,156,2.6,89,264.2
+3,Static,6000,4983,612,10.2,387,218.5

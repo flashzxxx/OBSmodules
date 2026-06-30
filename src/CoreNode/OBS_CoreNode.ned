@@ -31,6 +31,8 @@ module OBS_CoreNode
         string lambdasPerOutPort; //Number of output data channels for each fiber 
         string inputColours; // Colour of each input data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
         string outputColours; // Colour of each output data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
+        bool useFDL = default(false);
+        double fdlDelayTime @unit(s) = default(10us);
         @display("bgb=434,264;i=abstract/opticalswitch");
     gates:
         input in[];
@@ -69,8 +71,13 @@ module OBS_CoreNode
             parameters:
                 @display("i=block/switch;p=218,195");
             gates:
-                in[sizeof(in)-numPorts];
-                out[sizeof(out)-numPorts];
+                in[sizeof(in)-numPorts + 1];
+                out[sizeof(out)-numPorts + 1];
+        }
+        fdl: OBS_FiberDelayLine {
+            parameters:
+                delayTime = fdlDelayTime;
+                @display("i=block/delay;p=218,240");
         }
     connections:
         //Connect input control channels
@@ -98,4 +105,8 @@ module OBS_CoreNode
         for i=numPorts..sizeof(out)-1 {
             OXC.out[i-numPorts] --> Output.in[i];
         }
+
+        //Connect the fiber delay line loopback
+        OXC.out[sizeof(out)-numPorts] --> fdl.in;
+        fdl.out --> OXC.in[sizeof(in)-numPorts];
 }

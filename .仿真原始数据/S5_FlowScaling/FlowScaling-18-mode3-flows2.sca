@@ -1,0 +1,51 @@
+version 2
+run FlowScaling-18-20251215-141859-28451
+attr configname FlowScaling
+attr datetime 20251215-141859
+attr experiment FlowScaling
+attr inifile experiments.ini
+attr iterationvars "$mode=3, $flows=2"
+attr measurement "$mode=3, $flows=2"
+attr network RingFdlOBS
+attr processid 28451
+attr repetition 0
+attr replication "#0"
+attr resultdir results
+attr runnumber 18
+attr seedset 18
+
+param **.dispatchMode 3
+param **.sat1.host.numUdpApps 2
+param **.sat1.host.udpApp[*].sendInterval 0.002s
+param **.sat1.host.udpApp[*].messageLength 500B
+param **.packetBurstifier[*].timeout 0.01s
+param **.packetBurstifier[*].numPackets 1000
+param **.numQueues 8
+param sim-time-limit 4s
+
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Dispatch Mode" 3
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Packets received" 1150
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Dropped Packets" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Total Dispatched" 1150
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P1 Hits (Busy Match)" 453
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P2 Hits (Idle Reuse)" 407
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P3 Hits (Fresh Idle)" 290
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P4 Hits (LRU Preemption)" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Force Flush Count" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Drop Rate (%)" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[0] "Bursts assembled" 28
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[0] "Packets burstified" 146
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[1] "Bursts assembled" 29
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[1] "Packets burstified" 144
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[2] "Bursts assembled" 29
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[2] "Packets burstified" 144
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[3] "Bursts assembled" 28
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[3] "Packets burstified" 139
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[4] "Bursts assembled" 29
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[4] "Packets burstified" 141
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[5] "Bursts assembled" 28
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[5] "Packets burstified" 145
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[6] "Bursts assembled" 29
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[6] "Packets burstified" 141
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[7] "Bursts assembled" 28
+scalar RingFdlOBS.sat1.edgeRouter.packetBurstifier[7] "Packets burstified" 142

@@ -1,0 +1,35 @@
+version 2
+run QueueSensitivity-12-20260116-103641-28451
+attr configname QueueSensitivity
+attr datetime 20260116-103641
+attr experiment QueueSensitivity
+attr inifile experiments.ini
+attr iterationvars "$mode=3, $queues=2"
+attr measurement "$mode=3, $queues=2"
+attr network RingFdlOBS
+attr processid 28451
+attr repetition 0
+attr replication "#0"
+attr resultdir results
+attr runnumber 12
+attr seedset 12
+
+param **.dispatchMode 3
+param **.numQueues 2
+param **.sat1.host.numUdpApps 10
+param **.sat1.host.udpApp[*].sendInterval 0.002s
+param **.packetBurstifier[*].timeout 0.01s
+param sim-time-limit 4s
+
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Dispatch Mode" 3
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Num Queues" 2
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Resource Overload Ratio" 5.0000
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Packets received" 5750
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Dropped Packets" 2777
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Total Dispatched" 2973
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P1 Hits (Busy Match)" 1161
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P2 Hits (Idle Reuse)" 1042
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P3 Hits (Fresh Idle)" 770
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "P4 Hits (LRU Preemption)" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Force Flush Count" 0
+scalar RingFdlOBS.sat1.edgeRouter.packetDispatcher "Drop Rate (%)" 48.3000

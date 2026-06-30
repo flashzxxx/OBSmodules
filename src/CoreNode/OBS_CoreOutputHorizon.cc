@@ -25,7 +25,7 @@ Define_Module(OBS_CoreOutputHorizon);
 OBS_CoreOutputHorizon::~OBS_CoreOutputHorizon(){
 	int i;
 	int numPorts = par("numPorts");
-	for(i=0;i<numPorts;i++)
+	for(i=0;i<=numPorts;i++)
 	   free(horizon[i]);
 	free(horizon);
 	free(portLambdas);
@@ -35,17 +35,18 @@ void OBS_CoreOutputHorizon::initialize(){
    int numPorts = par("numPorts");
    int i=0;
    int j = 0;
-   portLambdas= (int*)calloc(numPorts,sizeof(int));
+   portLambdas= (int*)calloc(numPorts + 1,sizeof(int));
    
    cStringTokenizer tokenizer(par("lambdasPerPort").stringValue());
    while(tokenizer.hasMoreTokens()){
       portLambdas[i] = atoi(tokenizer.nextToken());
       i++;
    }
+   portLambdas[numPorts] = 1; // FDL loopback port has 1 wavelength channel
 
-   horizon = (simtime_t**)calloc(numPorts,sizeof(simtime_t*));
+   horizon = (simtime_t**)calloc(numPorts + 1,sizeof(simtime_t*));
 
-   for(i=0;i<numPorts;i++){
+   for(i=0;i<=numPorts;i++){
       horizon[i] = (simtime_t*)calloc(portLambdas[i],sizeof(simtime_t)); 
       // Fill horizon matrix with zeros
       for(j=0;j<portLambdas[i];j++){
