@@ -112,7 +112,7 @@ void OBS_PacketDispatcher::handleMessage(cMessage *msg){
    }
 
    if(targetLabel == -1){
-       EV_WARN << "No matching rule for packet " << pkt->getName() << "! Dropping." << endl;
+       EV << "No matching rule for packet " << pkt->getName() << "! Dropping." << endl;
        delete msg;
        droppedPacket++;
        return;
@@ -249,7 +249,7 @@ void OBS_PacketDispatcher::handleMessage(cMessage *msg){
        send(msg, "out", selectedQueue);
    }
    else{
-       EV_WARN << "[Dispatcher] Mode=" << dispatchMode << " ALL DISPATCH FAILED for Label " << targetLabel << ". Dropping." << endl;
+       EV << "[Dispatcher] Mode=" << dispatchMode << " ALL DISPATCH FAILED for Label " << targetLabel << ". Dropping." << endl;
        delete msg;
        droppedPacket++;
    }
