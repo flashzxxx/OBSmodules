@@ -51,5 +51,6 @@ class OBS_PacketDispatcher : public cSimpleModule{
 
       virtual void handleMessage(cMessage *msg);
    public:
+      OBS_PacketDispatcher();
       virtual ~OBS_PacketDispatcher();
 };

@@ -22,6 +22,16 @@
 
 Define_Module(OBS_PacketBurstifier);
 
+OBS_PacketBurstifier::OBS_PacketBurstifier(){
+   // timeout_msg is created in initialize(). If initialize() never runs - for
+   // instance when another module aborts network initialization and this module
+   // is torn down uninitialized - the destructor would otherwise hand
+   // cancelAndDelete() an uninitialized pointer (0xbaadf00d under the debug
+   // heap) and abort with an access violation instead of a model error.
+   // OMNeT++ 4.6 cancelAndDelete() null-checks its argument.
+   timeout_msg = NULL;
+}
+
 OBS_PacketBurstifier::~OBS_PacketBurstifier(){
 	   burstContent.clear();
 	   cancelAndDelete(timeout_msg);

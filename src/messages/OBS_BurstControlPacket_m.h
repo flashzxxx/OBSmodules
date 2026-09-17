@@ -37,6 +37,7 @@
  *     int senderId = -1; //Burst sender identifier. Not used as a Id
  * 
  *     int burstSize = -1; // Associated burst size
+ *     int fdlLoopCount = 0; // Number of FDL loopbacks already taken by this burst along the path
  * }
  * </pre>
  */
@@ -50,6 +51,7 @@ class OBS_BurstControlPacket : public ::cPacket
     int numSeq_var;
     int senderId_var;
     int burstSize_var;
+    int fdlLoopCount_var;
 
   private:
     void copy(const OBS_BurstControlPacket& other);
@@ -82,6 +84,8 @@ class OBS_BurstControlPacket : public ::cPacket
     virtual void setSenderId(int senderId);
     virtual int getBurstSize() const;
     virtual void setBurstSize(int burstSize);
+    virtual int getFdlLoopCount() const;
+    virtual void setFdlLoopCount(int fdlLoopCount);
 };
 
 inline void doPacking(cCommBuffer *b, OBS_BurstControlPacket& obj) {obj.parsimPack(b);}

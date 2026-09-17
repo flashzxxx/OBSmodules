@@ -62,6 +62,7 @@ class OBS_PacketBurstifier : public cSimpleModule{
       virtual void finish();
       virtual void handleMessage(cMessage *msg);
    public:
+      OBS_PacketBurstifier();
       virtual ~OBS_PacketBurstifier();
       //! Sets the destination label for the next burst.
       void setDestLabel(int label);

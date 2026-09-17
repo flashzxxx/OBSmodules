@@ -33,6 +33,7 @@ class OBS_CoreInput : public cSimpleModule{
       int *outDataBegin; //!< This array stores the output gate index to which the beginning of the data channels of each optical fiber is connected. For example: If lambdasPerPort is "3 2 3", it will be "3 6 8".
       int *portLen; //!< Number of channels (data+control) for each optical fiber.
    public:
+      OBS_CoreInput();
       virtual ~OBS_CoreInput();
       //! Return the OXC gate where burst will pass through.
       int getOXCGate(int port, int lambda);

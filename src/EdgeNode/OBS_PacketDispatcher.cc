@@ -23,6 +23,16 @@
 
 Define_Module(OBS_PacketDispatcher);
 
+OBS_PacketDispatcher::OBS_PacketDispatcher(){
+   // Allocated in initialize(). numQueues doubles as the guard in the
+   // destructor, so leave it at 0: an uninitialized value would both defeat
+   // that guard and be used as an allocation bound. The four dispatch modes are
+   // untouched - this only affects the never-initialized teardown path.
+   burstifiers = NULL;
+   lastAccessTimes = NULL;
+   numQueues = 0;
+}
+
 OBS_PacketDispatcher::~OBS_PacketDispatcher(){
     if (numQueues != 0){
         delete[] burstifiers;

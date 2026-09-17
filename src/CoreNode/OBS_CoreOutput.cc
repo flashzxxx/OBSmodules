@@ -22,11 +22,28 @@
 
 Define_Module(OBS_CoreOutput);
 
+OBS_CoreOutput::OBS_CoreOutput(){
+   // initialize() can opp_error (empty lambdasPerPort) before allocating these.
+   // Null-init, and keep numPorts at 0 so the destructor's row loop stays empty
+   // instead of walking gate2Colour with an uninitialized bound.
+   gate2Colour = NULL;
+   portLen = NULL;
+   inDataBegin = NULL;
+   outPortBegin = NULL;
+   numPorts = 0;
+}
+
 OBS_CoreOutput::~OBS_CoreOutput(){
-   int i;
-   for(i=0;i<numPorts;i++)
-      free(gate2Colour[i]);
-   free(gate2Colour);
+   // Guard on the array itself, not on numPorts: initialize() sets numPorts
+   // before it allocates gate2Colour, so an opp_error in between leaves
+   // numPorts set while gate2Colour is still NULL and the row loop would
+   // dereference NULL.
+   if(gate2Colour != NULL){
+      int i;
+      for(i=0;i<numPorts;i++)
+         free(gate2Colour[i]);
+      free(gate2Colour);
+   }
    free(portLen);
    free(inDataBegin);
    free(outPortBegin);
@@ -45,8 +62,19 @@ void OBS_CoreOutput::initialize(){
    cStringTokenizer tokenizer(portLenStr);
    int i = 0;
    while(tokenizer.hasMoreTokens()){
+      // Bound the write. A lambdasPerOutPort string with more tokens than
+      // numPorts used to run past the end of portLen and corrupt the heap,
+      // which only surfaced later as an access violation inside free() during
+      // shutdown. Same guard as OBS_CoreOutputHorizon.
+      if(i >= numPorts){
+         opp_error("lambdasPerPort has more tokens than numPorts (%d)", numPorts);
+      }
       portLen[i] = atoi(tokenizer.nextToken()) + 1; // lambdasPerPort considers only data channels. In this array we include a control channel for each fiber.
       i++;
+   }
+
+   if(i != numPorts){
+      opp_error("lambdasPerPort has %d tokens, expected numPorts=%d", i, numPorts);
    }
 
    inDataBegin[0] = numPorts; // First fiber begins just after control channels

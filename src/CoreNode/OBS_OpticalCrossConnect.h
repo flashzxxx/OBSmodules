@@ -24,7 +24,10 @@
 class OBS_OpticalCrossConnect : public cSimpleModule{
    private:
       int* schedulingTable; //!< Array that represents the connections of the input gates.
+      int* outputOwner; //!< Reverse map: output gate -> occupying input gate, or -1.
+      int oxcDropCount; //!< Bursts dropped because the input gate was unprogrammed.
    public:
+      OBS_OpticalCrossConnect();
       virtual ~OBS_OpticalCrossConnect();
       //! Set a connection between the given input and output gate.
       //! @param inGate OXC's input gate.
@@ -36,4 +39,5 @@ class OBS_OpticalCrossConnect : public cSimpleModule{
    protected:
       virtual void initialize();
       virtual void handleMessage(cMessage *msg);
+      virtual void finish();
 };

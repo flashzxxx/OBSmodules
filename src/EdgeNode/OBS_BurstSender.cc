@@ -22,6 +22,18 @@
 
 Define_Module(OBS_BurstSender);
 
+OBS_BurstSender::OBS_BurstSender(){
+   // These are allocated in initialize(). If initialize() never runs - another
+   // module aborts network initialization and this one is torn down
+   // uninitialized - the destructor would otherwise free uninitialized pointers
+   // and walk horizonVec with an uninitialized bound, aborting with an access
+   // violation instead of reporting the model error. free(NULL) is a no-op and
+   // numLambdas = 0 keeps the horizonVec loop empty.
+   horizon = NULL;
+   colour = NULL;
+   numLambdas = 0;
+}
+
 OBS_BurstSender::~OBS_BurstSender(){
 	free(horizon);
 	free(colour);

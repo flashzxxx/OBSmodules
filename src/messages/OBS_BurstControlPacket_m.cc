@@ -64,6 +64,7 @@ OBS_BurstControlPacket::OBS_BurstControlPacket(const char *name, int kind) : ::c
     this->numSeq_var = -1;
     this->senderId_var = -1;
     this->burstSize_var = -1;
+    this->fdlLoopCount_var = 0;
 }
 
 OBS_BurstControlPacket::OBS_BurstControlPacket(const OBS_BurstControlPacket& other) : ::cPacket(other)
@@ -92,6 +93,7 @@ void OBS_BurstControlPacket::copy(const OBS_BurstControlPacket& other)
     this->numSeq_var = other.numSeq_var;
     this->senderId_var = other.senderId_var;
     this->burstSize_var = other.burstSize_var;
+    this->fdlLoopCount_var = other.fdlLoopCount_var;
 }
 
 void OBS_BurstControlPacket::parsimPack(cCommBuffer *b)
@@ -104,6 +106,7 @@ void OBS_BurstControlPacket::parsimPack(cCommBuffer *b)
     doPacking(b,this->numSeq_var);
     doPacking(b,this->senderId_var);
     doPacking(b,this->burstSize_var);
+    doPacking(b,this->fdlLoopCount_var);
 }
 
 void OBS_BurstControlPacket::parsimUnpack(cCommBuffer *b)
@@ -116,6 +119,7 @@ void OBS_BurstControlPacket::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->numSeq_var);
     doUnpacking(b,this->senderId_var);
     doUnpacking(b,this->burstSize_var);
+    doUnpacking(b,this->fdlLoopCount_var);
 }
 
 simtime_t OBS_BurstControlPacket::getBurstArrivalDelta() const
@@ -188,6 +192,16 @@ void OBS_BurstControlPacket::setBurstSize(int burstSize)
     this->burstSize_var = burstSize;
 }
 
+int OBS_BurstControlPacket::getFdlLoopCount() const
+{
+    return fdlLoopCount_var;
+}
+
+void OBS_BurstControlPacket::setFdlLoopCount(int fdlLoopCount)
+{
+    this->fdlLoopCount_var = fdlLoopCount;
+}
+
 class OBS_BurstControlPacketDescriptor : public cClassDescriptor
 {
   public:
@@ -235,7 +249,7 @@ const char *OBS_BurstControlPacketDescriptor::getProperty(const char *propertyna
 int OBS_BurstControlPacketDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 7+basedesc->getFieldCount(object) : 7;
+    return basedesc ? 8+basedesc->getFieldCount(object) : 8;
 }
 
 unsigned int OBS_BurstControlPacketDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -254,8 +268,9 @@ unsigned int OBS_BurstControlPacketDescriptor::getFieldTypeFlags(void *object, i
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<7) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<8) ? fieldTypeFlags[field] : 0;
 }
 
 const char *OBS_BurstControlPacketDescriptor::getFieldName(void *object, int field) const
@@ -274,8 +289,9 @@ const char *OBS_BurstControlPacketDescriptor::getFieldName(void *object, int fie
         "numSeq",
         "senderId",
         "burstSize",
+        "fdlLoopCount",
     };
-    return (field>=0 && field<7) ? fieldNames[field] : NULL;
+    return (field>=0 && field<8) ? fieldNames[field] : NULL;
 }
 
 int OBS_BurstControlPacketDescriptor::findField(void *object, const char *fieldName) const
@@ -289,6 +305,7 @@ int OBS_BurstControlPacketDescriptor::findField(void *object, const char *fieldN
     if (fieldName[0]=='n' && strcmp(fieldName, "numSeq")==0) return base+4;
     if (fieldName[0]=='s' && strcmp(fieldName, "senderId")==0) return base+5;
     if (fieldName[0]=='b' && strcmp(fieldName, "burstSize")==0) return base+6;
+    if (fieldName[0]=='f' && strcmp(fieldName, "fdlLoopCount")==0) return base+7;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -308,8 +325,9 @@ const char *OBS_BurstControlPacketDescriptor::getFieldTypeString(void *object, i
         "int",
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<7) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<8) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *OBS_BurstControlPacketDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -356,6 +374,7 @@ std::string OBS_BurstControlPacketDescriptor::getFieldAsString(void *object, int
         case 4: return long2string(pp->getNumSeq());
         case 5: return long2string(pp->getSenderId());
         case 6: return long2string(pp->getBurstSize());
+        case 7: return long2string(pp->getFdlLoopCount());
         default: return "";
     }
 }
@@ -377,6 +396,7 @@ bool OBS_BurstControlPacketDescriptor::setFieldAsString(void *object, int field,
         case 4: pp->setNumSeq(string2long(value)); return true;
         case 5: pp->setSenderId(string2long(value)); return true;
         case 6: pp->setBurstSize(string2long(value)); return true;
+        case 7: pp->setFdlLoopCount(string2long(value)); return true;
         default: return false;
     }
 }

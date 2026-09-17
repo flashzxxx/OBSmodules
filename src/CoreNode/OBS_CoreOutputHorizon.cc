@@ -22,13 +22,25 @@
 
 Define_Module(OBS_CoreOutputHorizon);
 
+OBS_CoreOutputHorizon::OBS_CoreOutputHorizon(){
+   // initialize() allocates these, but it can opp_error before it reaches the
+   // horizon allocation (a malformed lambdasPerPort string). Null-init them so
+   // the destructor does not walk uninitialized pointers on that path - that
+   // used to free garbage and abort with an access violation instead of
+   // reporting the model error.
+   horizon = NULL;
+   portLambdas = NULL;
+}
+
 OBS_CoreOutputHorizon::~OBS_CoreOutputHorizon(){
-	int i;
-	int numPorts = par("numPorts");
-	for(i=0;i<=numPorts;i++)
-	   free(horizon[i]);
-	free(horizon);
-	free(portLambdas);
+	if(horizon != NULL){
+		int i;
+		int numPorts = par("numPorts");
+		for(i=0;i<=numPorts;i++)
+		   free(horizon[i]);
+		free(horizon);
+	}
+	free(portLambdas); // free(NULL) is a no-op
 }
 
 void OBS_CoreOutputHorizon::initialize(){
@@ -39,8 +51,14 @@ void OBS_CoreOutputHorizon::initialize(){
    
    cStringTokenizer tokenizer(par("lambdasPerPort").stringValue());
    while(tokenizer.hasMoreTokens()){
+      if(i >= numPorts){
+         opp_error("lambdasPerPort has more tokens than numPorts (%d)", numPorts);
+      }
       portLambdas[i] = atoi(tokenizer.nextToken());
       i++;
+   }
+   if(i != numPorts){
+      opp_error("lambdasPerPort has %d tokens, expected numPorts=%d", i, numPorts);
    }
    portLambdas[numPorts] = 1; // FDL loopback port has 1 wavelength channel
 
@@ -59,7 +77,7 @@ void OBS_CoreOutputHorizon::initialize(){
 
 //Find a lambda which horizon value is nearest (or even equal) to given arrival time. 
 int OBS_CoreOutputHorizon::findNearestLambda(int port,simtime_t arrivalTime){
-   Enter_Method("find me the nearest lambda for port %d and time %s",port,arrivalTime.str().c_str());
+   Enter_Method_Silent();
 
    int i;
    int min = 0;
@@ -84,13 +102,22 @@ int OBS_CoreOutputHorizon::findNearestLambda(int port,simtime_t arrivalTime){
    return min;
 }
 
+// Enter_Method_Silent rather than Enter_Method: this is a plain getter with no side effects, and it is
+// also called from finish(), where triggering the method-call animation of Enter_Method is not wanted.
+int OBS_CoreOutputHorizon::getPortLambdas(int port){
+   Enter_Method_Silent();
+   int numPorts = par("numPorts");
+   if(portLambdas == NULL || port < 0 || port > numPorts) return 0;
+   return portLambdas[port];
+}
+
 void OBS_CoreOutputHorizon::updateHorizon(int port, int lambda, simtime_t newTime){
-   Enter_Method("update %d,%d horizon",port,lambda);
+   Enter_Method_Silent();
    horizon[port][lambda] = newTime;
 }
 
 simtime_t OBS_CoreOutputHorizon::getHorizon(int port,int lambda){
-   Enter_Method("request %d,%d horizon",port,lambda);
+   Enter_Method_Silent();
    if(lambda == -1) return -1; //Just in case lambda = -1
    return horizon[port][lambda];
 }

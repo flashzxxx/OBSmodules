@@ -33,6 +33,7 @@ class OBS_CoreOutputHorizon : public cSimpleModule{
 
       virtual void initialize();
    public:
+      OBS_CoreOutputHorizon();
       virtual ~OBS_CoreOutputHorizon();
       //! Find the lambda which horizon (time when the channel is free) is lesser than and closer to the arrivalTime value given.
       //! @param port Optical fiber to look for.
@@ -48,4 +49,8 @@ class OBS_CoreOutputHorizon : public cSimpleModule{
       //! @param port Optical fiber.
       //! @param lambda Optical channel.
       simtime_t getHorizon(int port,int lambda);
+
+      //! Return the number of data channels configured on a port. Port numPorts is the FDL loopback port.
+      //! @param port Optical fiber.
+      int getPortLambdas(int port);
 };

@@ -81,6 +81,7 @@ class OBS_BurstSender : public cSimpleModule{
         //! @param *msg Message received by the getModule(either messages from the outer-world or an auto-message).
 	    virtual void handleMessage(cMessage *msg);
    public:
+	OBS_BurstSender();
 	virtual ~OBS_BurstSender();
    private:
 	  //! Find the minimum value on the data channel's horizon table.

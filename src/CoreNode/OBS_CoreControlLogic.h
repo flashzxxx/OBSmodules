@@ -48,6 +48,38 @@ class OBS_CoreControlLogic : public cSimpleModule{
      int *recvBurstCounter; //!< Received burst counter.
      int *schedBurstCounter; //!< Scheduled burst counter.
 
+     int numInPorts; //!< Number of input fibers.
+     int numOutPorts; //!< Number of output fibers.
+     //! Accumulated occupancy of each output fiber, i.e. the sum of the burst durations reserved on it.
+     //! Divided by (simulated time x data channels of the port) it yields the measured channel load, which
+     //! is the quantity the offered-load calibration of experiments A/B/C is verified against.
+     simtime_t *portBusyTime;
+     double *portCarriedBytes; //!< Payload bytes reserved on each output fiber. double avoids overflow on long runs.
+
+     bool useFDL; //!< Whether to use FDL loopback.
+     simtime_t tau; //!< FDL delay time.
+     int numPorts; //!< Number of ports.
+     simtime_t switchReconfigTime; //!< Physical lower bound on tau when FDL is on.
+     bool fdlOffsetIsSO; //!< Stay-Offset: hold the BCP by tau so downstream offset matches cut-through.
+     int maxFdlLoopsPerBurst; //!< -1 unlimited; >=0 is the maximum fdlLoopCount allowed before refusing another loop.
+     simtime_t warmupPeriod; //!< Copied from simulation.getWarmupPeriod(). Statistics use burstArrival.
+
+     int fdlUsageCountCounter; //!< Usage counter for FDL.
+     simtime_t busyTime; //!< Accumulated FDL entry occupancy (burstDuration).
+     simtime_t busyTimeInFlight; //!< Accumulated FDL in-fibre occupancy (burstDuration+tau).
+     int burstLossContentionCounter; //!< Counter for contention drops.
+     int burstsLoopedOnceCounter; //!< Loopbacks that raised fdlLoopCount to 1.
+     int burstsLoopedMultipleCounter; //!< Loopbacks that raised fdlLoopCount above 1.
+     double outgoingOffsetSum; //!< Sum of forwarded BCP offsets, for the mean scalar.
+     long outgoingOffsetSamples;
+     simtime_t outgoingOffsetMin;
+
+     simsignal_t fdlUsageCountSignal; //!< OMNeT++ signal for FDL usage count.
+     simsignal_t fdlUtilizationSignal; //!< OMNeT++ signal for FDL utilization.
+     simsignal_t burstLossContentionSignal; //!< OMNeT++ signal for contention drops.
+     simsignal_t burstLossTotalSignal; //!< OMNeT++ signal for total drops.
+     simsignal_t burstNodeDelaySignal; //!< Extra delay introduced at this node (0 or tau).
+
    protected:
 
      FILE *data_f; //!< Output file descriptor.
@@ -56,5 +88,6 @@ class OBS_CoreControlLogic : public cSimpleModule{
      virtual void finish();
      virtual void handleMessage(cMessage *msg);
    public:
+     OBS_CoreControlLogic();
      virtual ~OBS_CoreControlLogic();
 };

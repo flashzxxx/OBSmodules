@@ -33,7 +33,10 @@ module OBS_CoreNode
         string outputColours; // Colour of each output data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
         bool useFDL = default(false);
         double fdlDelayTime @unit(s) = default(10us);
-        @display("bgb=434,264;i=abstract/opticalswitch");
+        double switchReconfigTime @unit(s) = default(0s); // Lower bound for tau when useFDL=true. 0 disables the check.
+        string fdlOffsetMode = default("DO"); // "DO": BCP offset += tau. "SO": hold BCP by tau so downstream offset matches cut-through.
+        int maxFdlLoopsPerBurst = default(-1); // -1 unlimited; 1 refuses a second loopback on the same BCP.
+        @display("bgb=550,371;i=abstract/opticalswitch");
     gates:
         input in[];
         output out[];
@@ -53,7 +56,7 @@ module OBS_CoreNode
                 numPorts = numPorts;
                 colours = outputColours;
                 lambdasPerPort = lambdasPerOutPort;
-                @display("i=block/departure;p=351,123");
+                @display("i=block/departure;p=392,134");
             gates:
                 in[sizeof(out)];
                 out[sizeof(out)];
@@ -77,7 +80,7 @@ module OBS_CoreNode
         fdl: OBS_FiberDelayLine {
             parameters:
                 delayTime = fdlDelayTime;
-                @display("i=block/delay;p=218,240");
+                @display("i=block/delay;p=218,285");
         }
     connections:
         //Connect input control channels

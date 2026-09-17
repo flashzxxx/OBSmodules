@@ -22,6 +22,14 @@
 
 Define_Module(OBS_CoreInput);
 
+OBS_CoreInput::OBS_CoreInput(){
+   // initialize() can opp_error (empty lambdasPerPort) before allocating these.
+   // Null-init so the destructor cannot free uninitialized pointers.
+   portLen = NULL;
+   inPortBegin = NULL;
+   outDataBegin = NULL;
+}
+
 OBS_CoreInput::~OBS_CoreInput(){
    free(portLen);
    free(inPortBegin);
@@ -44,10 +52,21 @@ void OBS_CoreInput::initialize(){
    int i = 0;
 
    while(tokenizer.hasMoreTokens()){
+      // Bound the write. A lambdasPerInPort string with more tokens than
+      // numPorts used to run past the end of portLen and corrupt the heap,
+      // which only surfaced later as an access violation inside free() during
+      // shutdown. Same guard as OBS_CoreOutputHorizon.
+      if(i >= numPorts){
+         opp_error("lambdasPerPort has more tokens than numPorts (%d)", numPorts);
+      }
       portLen[i] = atoi(tokenizer.nextToken()) + 1; // lambdasPerPort considers only data channels. In this array we include a control channel for each fiber.
       i++; 
    }
    
+   if(i != numPorts){
+      opp_error("lambdasPerPort has %d tokens, expected numPorts=%d", i, numPorts);
+   }
+
    inPortBegin[0] = 0;
    for(i=1;i<numPorts;i++)
       // i-th fiber begins just after (i-1)-th last channel. 

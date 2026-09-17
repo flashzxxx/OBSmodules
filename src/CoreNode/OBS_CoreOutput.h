@@ -40,6 +40,7 @@ class OBS_CoreOutput : public cSimpleModule{
       int getOutPort(int gateIndex);
       int getOutLambda(int gateIndex);
    public:
+      OBS_CoreOutput();
       virtual ~OBS_CoreOutput();
       //! Convert port and lambda to OXC output gate.
       int getOXCGate(int port,int lambda);

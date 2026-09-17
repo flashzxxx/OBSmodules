@@ -37,4 +37,5 @@ packet OBS_BurstControlPacket
     int senderId = -1; //Burst sender identifier. Not used as a Id
 
     int burstSize = -1; // Associated burst size
+    int fdlLoopCount = 0; // Number of FDL loopbacks already taken by this burst along the path
 }

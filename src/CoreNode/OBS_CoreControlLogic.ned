@@ -58,6 +58,18 @@ simple OBS_CoreControlLogic
         double BCPProcessingDelay @unit(s); //Processing time of BCP
         double dataRate @unit(bps); //Data rate of optical channel. Used to calculate OXC's connection unset time.
         string reportFile; // Name of the file to save information about the bursts that cross the core node. "" not to save anything.
+
+        @signal[fdlUsageCount](type="long");
+
+        @signal[fdlUtilization](type="double");
+
+        @signal[burstLossContention](type="long");
+
+        @signal[burstLossTotal](type="long");
+
+        @signal[burstNodeDelay](type="double");
+        @statistic[burstNodeDelay](title="Extra delay introduced at this core node (0 cut-through, tau loopback)"; source="burstNodeDelay"; record=mean,max,count);
+
     gates:
         input in;
         output out;

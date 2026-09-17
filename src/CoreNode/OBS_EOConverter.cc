@@ -37,6 +37,13 @@ class OBS_EOConverter : public cSimpleModule
       virtual void initialize();
       virtual void handleMessage(cMessage *msg);
    public:
+      //! Null-initialise the per-fiber tables. initialize() allocates them, but
+      //! it does not run at all when another module aborts network
+      //! initialization; the destructor would then walk uninitialized pointers
+      //! (numPorts as the loop bound) and abort with an access violation instead
+      //! of reporting the model error. Whether it faulted depended on heap
+      //! contents, so this used to crash only intermittently.
+      OBS_EOConverter() : BCPqueues(NULL), numPorts(0), control_is_busy(NULL) {}
       virtual ~OBS_EOConverter();
 };
 
