@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "BCP/Burst 发送 · OBS_BurstSender 4 状态机",
+    "output": "seq-2-burstsender.html",
+    "quality_profile": "showcase",
+    "viewBox": [960, 780],
+    "column_fit": "spread",
+    "views": [
+      { "id": "scheduling", "label": "调度入队", "focus": ["burstifier", "sender", "sched", "ctrl"], "note": "findNearestHorizon 选波长，存入 scheduledBurst，安排 BCP 发送时刻。" },
+      { "id": "bcp-send", "label": "BCP 先发", "focus": ["sender", "ctrl", "core"], "note": "iniBCP(kind=1) 携带 burstArrivalDelta，经控制波长先发往核心节点。" },
+      { "id": "burst-send", "label": "Burst 延迟发", "focus": ["sender", "data", "core"], "note": "等待 offset 后发 iniBurst(kind=1)，全光数据波长到达核心节点。" }
+    ]
+  },
+  "participants": [
+    { "id": "burstifier", "type": "backend", "label": "组帧器", "sublabel": "OBS_PacketBurstifier" },
+    { "id": "sender", "type": "backend", "label": "突发发送器", "sublabel": "OBS_BurstSender" },
+    { "id": "sched", "type": "database", "label": "调度队列", "sublabel": "scheduledBurst + horizon" },
+    { "id": "ctrl", "type": "messagebus", "label": "控制波长", "sublabel": "out[numLambdas] 控制信道" },
+    { "id": "data", "type": "cloud", "label": "数据波长", "sublabel": "out[lambda] 光数据信道" },
+    { "id": "core", "type": "external", "label": "核心节点", "sublabel": "OBS_CoreNode" }
+  ],
+  "segments": [
+    { "from": 150, "to": 250, "label": "调度入队" },
+    { "from": 268, "to": 430, "label": "BCP 先发 (状态 1→2)" },
+    { "from": 448, "to": 660, "label": "Burst 延迟发 (状态 3→4)" }
+  ],
+  "messages": [
+    { "id": "m1", "from": "burstifier", "to": "sender", "y": 170, "label": "OBS_Burst (组装完成)", "variant": "default" },
+    { "id": "m2", "from": "sender", "to": "sched", "y": 210, "label": "findNearestHorizon → 选 wl", "variant": "dashed", "note": "选 horizon 最小的波长" },
+    { "id": "m3", "from": "sender", "to": "sched", "y": 240, "label": "insertBurst + 更新 horizon[wl]", "variant": "default", "note": "horizon += burstLength/dataRate + guardTime" },
+    { "id": "m4", "from": "sender", "to": "sched", "y": 290, "label": "scheduleAt(sendTime - maxOffset) 状态①", "variant": "dashed", "note": "安排 BCP 发送时刻" },
+    { "id": "m5", "from": "sender", "to": "ctrl", "y": 340, "label": "send iniBCP (kind=1)", "variant": "emphasis", "note": "BCPSize 字节，携带 burstArrivalDelta/label/size" },
+    { "id": "m6", "from": "ctrl", "to": "core", "y": 380, "label": "iniBCP → 核心节点 O/E", "variant": "emphasis", "note": "BCP 提前到达，核心节点开始调度" },
+    { "id": "m7", "from": "sender", "to": "sched", "y": 420, "label": "状态② OBS_SCHEDULE_END_BCP", "variant": "dashed", "note": "BCPSize*8/dataRate 后触发" },
+    { "id": "m8", "from": "sender", "to": "ctrl", "y": 460, "label": "send endBCP (kind=2)", "variant": "default" },
+    { "id": "m9", "from": "sender", "to": "sched", "y": 510, "label": "状态③ OBS_SCHEDULE_BURST", "variant": "dashed", "note": "等待 offset 后到达 sendTime" },
+    { "id": "m10", "from": "sender", "to": "data", "y": 560, "label": "send iniBurst (kind=1)", "variant": "emphasis", "note": "全光 burst 在数据波长发送" },
+    { "id": "m11", "from": "data", "to": "core", "y": 600, "label": "Data Burst 全光到达", "variant": "emphasis", "note": "核心节点 OXC 已按 BCP 预约配置好光路" },
+    { "id": "m12", "from": "sender", "to": "sched", "y": 640, "label": "状态④ OBS_SCHEDULE_END_BURST", "variant": "dashed", "note": "burstBits/dataRate 后触发" },
+    { "id": "m13", "from": "sender", "to": "data", "y": 680, "label": "send endBurst (kind=2)", "variant": "default" }
+  ],
+  "activations": [
+    { "participant": "sender", "from": 164, "to": 686, "type": "backend" },
+    { "participant": "sched", "from": 204, "to": 256, "type": "database" },
+    { "participant": "ctrl", "from": 334, "to": 466, "type": "messagebus" },
+    { "participant": "data", "from": 554, "to": 686, "type": "cloud" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "4 状态机时序", "items": ["① SCHEDULE_BCP: 发 iniBCP(kind=1)", "② SCHEDULE_END_BCP: 发 endBCP(kind=2)", "③ SCHEDULE_BURST: 发 iniBurst(kind=1)", "④ SCHEDULE_END_BURST: 发 endBurst(kind=2) + 清理"] },
+    { "dot": "amber", "title": "offset 机制", "items": ["BCP 在 sendTime - maxOffset 时刻发送", "Burst 在 sendTime 时刻发送", "二者间隔 = offset = burstArrivalDelta", "核心节点利用 offset 完成 OEO 调度 + OXC 预约"] },
+    { "dot": "violet", "title": "BCP 携带字段", "items": ["burstArrivalDelta: BCP 与 Burst 到达时间差", "label: 目的标签 (路由依据)", "burstSize: Burst 长度 (预约时长)", "burstColour/lambda: 波长", "burstifierId + numSeq: 唯一标识"] }
+  ]
+}

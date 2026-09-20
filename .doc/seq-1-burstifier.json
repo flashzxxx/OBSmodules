@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "组帧流程 · OBS_PacketBurstifier 内部机制",
+    "output": "seq-1-burstifier.html",
+    "quality_profile": "showcase",
+    "viewBox": [960, 740],
+    "column_fit": "spread",
+    "views": [
+      { "id": "normal-assembly", "label": "正常组装", "focus": ["host", "dispatcher", "burstifier", "queue", "sender"], "note": "按超时/大小/数量触发 assembleBurst，padding 补齐后送 BurstSender。" },
+      { "id": "preemption", "label": "LRU 抢占", "focus": ["dispatcher", "burstifier", "queue"], "note": "Dynamic 模式下所有队列忙时，Dispatcher 调 forceFlush 强制 flush。" }
+    ]
+  },
+  "participants": [
+    { "id": "host", "type": "external", "label": "源主机 Host", "sublabel": "IP 流量源" },
+    { "id": "dispatcher", "type": "backend", "label": "调度器", "sublabel": "OBS_PacketDispatcher" },
+    { "id": "burstifier", "type": "backend", "label": "组帧器", "sublabel": "OBS_PacketBurstifier" },
+    { "id": "queue", "type": "database", "label": "组装队列", "sublabel": "burstContent 缓存" },
+    { "id": "sender", "type": "backend", "label": "突发发送器", "sublabel": "OBS_BurstSender" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "入队与触发" },
+    { "from": 318, "to": 440, "label": "LRU 抢占" },
+    { "from": 458, "to": 660, "label": "组装与输出" }
+  ],
+  "messages": [
+    { "id": "m1", "from": "host", "to": "dispatcher", "y": 170, "label": "IP 数据包", "variant": "default" },
+    { "id": "m2", "from": "dispatcher", "to": "burstifier", "y": 210, "label": "setDestLabel + send(packet)", "variant": "default", "note": "P1-P4 四级优先级选队列；idle 时分配 label" },
+    { "id": "m3", "from": "burstifier", "to": "queue", "y": 250, "label": "首包 → 启动 timeout 定时器", "variant": "dashed", "note": "scheduleAt(simTime()+timeout)" },
+    { "id": "m4", "from": "burstifier", "to": "queue", "y": 290, "label": "insert(packet) · 累积 burstBits", "variant": "default" },
+    { "id": "m5", "from": "dispatcher", "to": "burstifier", "y": 340, "label": "forceFlush()（LRU 抢占）", "variant": "emphasis", "note": "Dynamic P4：所有队列忙时驱逐 LRU 队列" },
+    { "id": "m6", "from": "burstifier", "to": "queue", "y": 380, "label": "cancelEvent(timeout) → 取出全部", "variant": "dashed", "note": "强制 flush，立即释放队列" },
+    { "id": "m7", "from": "queue", "to": "burstifier", "y": 430, "label": "pop 所有 packet", "variant": "return" },
+    { "id": "m8", "from": "burstifier", "to": "queue", "y": 470, "label": "触发判断：①超时 ②overflow ③numPackets满", "variant": "dashed", "note": "满足任一条件即调 assembleBurst()" },
+    { "id": "m9", "from": "burstifier", "to": "queue", "y": 510, "label": "padding 补齐至 minSizeWithPadding", "variant": "dashed" },
+    { "id": "m10", "from": "queue", "to": "burstifier", "y": 550, "label": "封装 OBS_Burst", "variant": "return", "note": "label/burstifierId/numSeq/offset/burstBits" },
+    { "id": "m11", "from": "burstifier", "to": "sender", "y": 600, "label": "send(assembledBurst, out)", "variant": "emphasis" },
+    { "id": "m12", "from": "burstifier", "to": "queue", "y": 640, "label": "clear() · 重置计数器", "variant": "dashed" }
+  ],
+  "activations": [
+    { "participant": "dispatcher", "from": 164, "to": 346, "type": "backend" },
+    { "participant": "burstifier", "from": 204, "to": 646, "type": "backend" },
+    { "participant": "queue", "from": 244, "to": 646, "type": "database" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "三种组装触发条件", "items": ["① timeout 超时定时器到期", "② burstBits + 新包 > maxSize 溢出", "③ numPackets 达上限 或 burstBits == maxSize"] },
+    { "dot": "amber", "title": "LRU 抢占 (Dynamic 模式)", "items": ["所有队列忙时 Dispatcher 选最久未用队列", "调 forceFlush() 强制组装当前内容", "释放队列供新 label 使用"] },
+    { "dot": "violet", "title": "Burst 字段", "items": ["destLabel: 目的标签", "burstifierId + numSeq: 全局唯一标识", "minOffset/maxOffset: BCP 提前量", "burstBits: 含 padding 的总长度"] }
+  ]
+}

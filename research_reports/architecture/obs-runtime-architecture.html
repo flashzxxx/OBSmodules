@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="archify 2.10.0">
+  <title>OBS Satellite Runtime Architecture</title>
+  <script>
+    (function () {
+      try {
+        var theme = null;
+        try {
+          var param = new URLSearchParams(window.location.search).get('theme');
+          if (param === 'light' || param === 'dark') theme = param;
+        } catch (_) {}
+        if (!theme) {
+          try { theme = localStorage.getItem('archify-theme'); } catch (_) {}
+        }
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (_) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </noscript>
+  <style>
+    :root,
+    [data-theme="dark"] {
+      --bg: #020617;
+      --grid: #1e293b;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --text-faint: #7d8da1;
+      --panel: rgba(15, 23, 42, 0.5);
+      --panel-border: #1e293b;
+      --lane-fill: rgba(15, 23, 42, 0.22);
+      --lane-stroke: #334155;
+      --arrow: #64748b;
+      --arrow-emphasis: #34d399;
+      --mask: #0f172a;
+      --frontend-fill:    rgba(8, 51, 68, 0.4);
+      --frontend-stroke:  #22d3ee;
+      --backend-fill:     rgba(6, 78, 59, 0.4);
+      --backend-stroke:   #34d399;
+      --database-fill:    rgba(76, 29, 149, 0.4);
+      --database-stroke:  #a78bfa;
+      --cloud-fill:       rgba(120, 53, 15, 0.3);
+      --cloud-stroke:     #fbbf24;
+      --security-fill:    rgba(136, 19, 55, 0.4);
+      --security-stroke:  #fb7185;
+      --messagebus-fill:  rgba(251, 146, 60, 0.3);
+      --messagebus-stroke:#fb923c;
+      --external-fill:    rgba(30, 41, 59, 0.5);
+      --external-stroke:  #94a3b8;
+      --toolbar-bg:       rgba(15, 23, 42, 0.8);
+      --toolbar-border:   #334155;
+      --toolbar-text:     #e2e8f0;
+      --toolbar-hover:    rgba(15, 23, 42, 0.95);
+      --toolbar-menu-bg:  #0f172a;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --grid: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+      --panel: #ffffff;
+      --panel-border: #e2e8f0;
+      --lane-fill: rgba(248, 250, 252, 0.65);
+      --lane-stroke: #cbd5e1;
+      --arrow: #94a3b8;
+      --arrow-emphasis: #059669;
+      --mask: #ffffff;
+      --frontend-fill:    rgba(34, 211, 238, 0.15);
+      --frontend-stroke:  #0891b2;
+      --backend-fill:     rgba(52, 211, 153, 0.18);
+      --backend-stroke:   #059669;
+      --database-fill:    rgba(167, 139, 250, 0.2);
+      --database-stroke:  #7c3aed;
+      --cloud-fill:       rgba(251, 191, 36, 0.18);
+      --cloud-stroke:     #d97706;
+      --security-fill:    rgba(251, 113, 133, 0.15);
+      --security-stroke:  #e11d48;
+      --messagebus-fill:  rgba(251, 146, 60, 0.15);
+      --messagebus-stroke:#ea580c;
+      --external-fill:    rgba(148, 163, 184, 0.18);
+      --external-stroke:  #64748b;
+      --toolbar-bg:       rgba(255, 255, 255, 0.92);
+      --toolbar-border:   #cbd5e1;
+      --toolbar-text:     #334155;
+      --toolbar-hover:    #ffffff;
+      --toolbar-menu-bg:  #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 2rem;
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: var(--frontend-stroke); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: var(--text-muted); font-size: 0.875rem; margin-left: 1.75rem; }
+    .diagram-container { background: var(--panel); border-radius: 1rem; border: 1px solid var(--panel-border); padding: 1.5rem; overflow-x: auto; }
+    svg { width: 100%; min-width: min(1100px, 100%); display: block; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .card { background: var(--panel); border-radius: 0.75rem; border: 1px solid var(--panel-border); padding: 1.25rem; }
+    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-dot.cyan     { background: var(--frontend-stroke); }
+    .card-dot.emerald  { background: var(--backend-stroke); }
+    .card-dot.violet   { background: var(--database-stroke); }
+    .card-dot.amber    { background: var(--cloud-stroke); }
+    .card-dot.rose     { background: var(--security-stroke); }
+    .card-dot.orange   { background: var(--messagebus-stroke); }
+    .card-dot.slate    { background: var(--external-stroke); }
+    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .card ul { list-style: none; color: var(--text-muted); font-size: 0.75rem; }
+    .card li { margin-bottom: 0.375rem; }
+    .footer { text-align: center; margin-top: 1.5rem; color: var(--text-faint); font-size: 0.75rem; }
+
+    @page { size: landscape; margin: 1.5cm; }
+    @media print {
+      :root, [data-theme="dark"], [data-theme="light"] {
+        --bg: #ffffff; --grid: transparent; --panel: #ffffff; --panel-border: #e2e8f0;
+        --text: #0f172a; --text-muted: #475569; --text-dim: #94a3b8; --text-faint: #64748b;
+        --mask: #ffffff; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1;
+        --arrow: #94a3b8; --arrow-emphasis: #059669;
+        --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2;
+        --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669;
+        --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed;
+        --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706;
+        --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48;
+        --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c;
+        --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b;
+      }
+      body { background: #ffffff !important; padding: 0; }
+      .container { max-width: none; }
+      .toolbar, .archify-toast, .no-print { display: none !important; }
+      .diagram-container, .card { box-shadow: none; border-color: #e2e8f0; }
+      .cards { grid-template-columns: 1fr 1fr; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .diagram-container { break-inside: avoid; page-break-inside: avoid; }
+      h1, .subtitle { color: #0f172a; }
+    }
+
+    .toolbar { position: fixed; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; z-index: 100; }
+    .toolbar button { background: var(--toolbar-bg); color: var(--toolbar-text); border: 1px solid var(--toolbar-border); padding: 0.5rem 0.875rem; border-radius: 0.5rem; font-family: inherit; font-size: 0.75rem; font-weight: 500; cursor: pointer; backdrop-filter: blur(8px); transition: background 0.15s, border-color 0.15s; display: inline-flex; align-items: center; gap: 0.375rem; }
+    .toolbar button:hover { background: var(--toolbar-hover); border-color: var(--arrow); }
+    .toolbar button:focus-visible { outline: 2px solid var(--frontend-stroke); outline-offset: 2px; }
+    .toolbar .export-wrap { position: relative; }
+    .toolbar .export-menu { position: absolute; top: calc(100% + 0.375rem); right: 0; background: var(--toolbar-menu-bg); border: 1px solid var(--toolbar-border); border-radius: 0.5rem; padding: 0.375rem; min-width: 160px; display: none; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+    .toolbar .export-menu.open { display: flex; }
+    .toolbar .export-menu button { background: transparent; border: 0; justify-content: space-between; width: 100%; text-align: left; padding: 0.5rem 0.75rem; }
+    .toolbar .export-menu button:hover { background: var(--toolbar-hover); }
+    .toolbar .export-menu .hint { color: var(--text-faint); font-size: 0.625rem; }
+    .toolbar .export-menu hr { border: 0; border-top: 1px solid var(--toolbar-border); margin: 0.25rem 0.375rem; opacity: 0.5; }
+    .archify-toast { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%) translateY(-8px); background: var(--toolbar-menu-bg); color: var(--text); border: 1px solid var(--toolbar-border); padding: 0.5rem 1rem; border-radius: 0.5rem; font-family: inherit; font-size: 0.75rem; opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 200; pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+    .archify-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 720px) {
+      body { padding: 1rem; }
+      .toolbar { position: static; justify-content: flex-end; margin-bottom: 1rem; }
+      .header { margin-bottom: 1.25rem; }
+      .header-row { gap: 0.75rem; align-items: flex-start; }
+      h1 { font-size: 1.25rem; line-height: 1.25; }
+      .subtitle { margin-left: 0; font-size: 0.8125rem; line-height: 1.55; }
+      .diagram-container { padding: 0.75rem; border-radius: 0.75rem; }
+      .cards { grid-template-columns: 1fr; margin-top: 1rem; }
+    }
+
+    .c-grid       { stroke: var(--grid); fill: none; }
+    .c-mask       { fill: var(--mask); stroke: none; }
+    .c-frontend   { fill: var(--frontend-fill);   stroke: var(--frontend-stroke); }
+    .c-backend    { fill: var(--backend-fill);    stroke: var(--backend-stroke); }
+    .c-database   { fill: var(--database-fill);   stroke: var(--database-stroke); }
+    .c-cloud      { fill: var(--cloud-fill);      stroke: var(--cloud-stroke); }
+    .c-security   { fill: var(--security-fill);   stroke: var(--security-stroke); }
+    .c-messagebus { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
+    .c-external   { fill: var(--external-fill);   stroke: var(--external-stroke); }
+    .t-primary { fill: var(--text); }
+    .t-muted   { fill: var(--text-muted); }
+    .t-dim     { fill: var(--text-dim); }
+    .t-frontend   { fill: var(--frontend-stroke); }
+    .t-backend    { fill: var(--backend-stroke); }
+    .t-database   { fill: var(--database-stroke); }
+    .t-cloud      { fill: var(--cloud-stroke); }
+    .t-security   { fill: var(--security-stroke); }
+    .t-messagebus { fill: var(--messagebus-stroke); }
+    .t-external   { fill: var(--external-stroke); }
+    .a-default   { stroke: var(--arrow); fill: none; }
+    .a-emphasis  { stroke: var(--arrow-emphasis); fill: none; }
+    .a-security  { stroke: var(--security-stroke); fill: none; stroke-dasharray: 5,5; }
+    .a-dashed    { stroke: var(--database-stroke); fill: none; stroke-dasharray: 4,4; }
+    .m-default   { fill: var(--arrow); }
+    .m-emphasis  { fill: var(--arrow-emphasis); }
+    .m-security  { fill: var(--security-stroke); }
+    .m-dashed    { fill: var(--database-stroke); }
+    .c-security-group { fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4,4; }
+    .c-region         { fill: rgba(251, 191, 36, 0.05); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
+    .c-lane           { fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6,6; }
+  </style>
+</head>
+<body>
+  <div class="toolbar" role="toolbar" aria-label="Diagram actions">
+    <button id="btn-theme" type="button" title="Toggle theme (T)" aria-label="Toggle color theme" aria-pressed="false">
+      <span id="theme-icon" aria-hidden="true">&#9790;</span>
+      <span id="theme-label">Dark</span>
+    </button>
+    <div class="export-wrap">
+      <button id="btn-export" type="button" title="Export diagram (E)" aria-label="Export diagram" aria-haspopup="menu" aria-expanded="false" aria-controls="export-menu">
+        Export <span aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="export-menu" id="export-menu" role="menu" aria-label="Export">
+        <button data-action="copy"  type="button" role="menuitem" tabindex="-1">Copy to clipboard <span class="hint">PNG</span></button>
+        <hr role="separator">
+        <button data-format="png"   type="button" role="menuitem" tabindex="-1">Download PNG</button>
+        <button data-format="jpeg"  type="button" role="menuitem" tabindex="-1">Download JPEG</button>
+        <button data-format="webp"  type="button" role="menuitem" tabindex="-1">Download WebP</button>
+        <hr role="separator">
+        <button data-format="svg"   type="button" role="menuitem" tabindex="-1">Download SVG <span class="hint">vector</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>OBS 卫星全光交换 — 运行时架构</h1>
+      </div>
+      <p class="subtitle">SatelliteNode 内部模块层次 · 控制平面与数据平面分离 · FDL 回环机制</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1140 820" role="img" aria-label="OBS 卫星全光交换运行时架构图">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <marker id="arrowhead-bi" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto-start-reverse">
+            <polygon points="10 0, 0 3.5, 10 7" class="m-default" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- 背景网格 -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- ================================================================
+             箭头（文档顺序：先画箭头，后画组件）
+             ================================================================ -->
+
+        <!-- === 发送路径（电→光）=== -->
+        <!-- Host → EdgeNode (PPP) -->
+        <line x1="108" y1="348" x2="210" y2="348" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+        <text x="159" y="341" class="t-muted" font-size="7" text-anchor="middle">PPP</text>
+
+        <!-- NetworkLayer → Dispatcher -->
+        <line x1="278" y1="330" x2="278" y2="286" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+
+        <!-- Dispatcher → Burstifier -->
+        <line x1="328" y1="253" x2="363" y2="253" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+
+        <!-- Burstifier → BurstSender -->
+        <line x1="483" y1="253" x2="518" y2="253" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+
+        <!-- BurstSender → CoreInput（BCP路径：控制信道）-->
+        <path d="M 638 235 L 670 235 Q 685 235 685 220 L 685 180 Q 685 165 700 165 L 712 165" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <text x="706" y="195" class="t-security" font-size="7">BCP</text>
+
+        <!-- BurstSender → CoreInput（Burst路径：数据信道）-->
+        <path d="M 638 260 L 670 260 Q 685 260 685 280 L 685 395 Q 685 410 700 410 L 712 410" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+        <text x="676" y="330" class="t-backend" font-size="7" text-anchor="end">Burst</text>
+
+        <!-- === CoreNode 内部路径 === -->
+
+        <!-- CoreInput 控制通道 → OE Converter -->
+        <line x1="830" y1="165" x2="882" y2="165" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+
+        <!-- OE Converter → ControlLogic -->
+        <line x1="930" y1="185" x2="930" y2="232" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+
+        <!-- ControlLogic → RoutingTable (直接方法调用) -->
+        <line x1="880" y1="295" x2="843" y2="295" class="a-dashed" stroke-width="1" marker-end="url(#arrowhead-dashed)"/>
+        <text x="861" y="288" class="t-database" font-size="6" text-anchor="middle">lookup()</text>
+
+        <!-- ControlLogic → OutputHorizon (直接方法调用) -->
+        <line x1="880" y1="245" x2="843" y2="245" class="a-dashed" stroke-width="1" marker-end="url(#arrowhead-dashed)"/>
+        <text x="861" y="238" class="t-database" font-size="6" text-anchor="middle">query()</text>
+
+        <!-- ControlLogic → OXC (直接方法调用 — 配置交换路径) -->
+        <line x1="910" y1="305" x2="910" y2="372" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <text x="922" y="345" class="t-database" font-size="7">setGate()</text>
+
+        <!-- CoreInput 数据通道 → OXC -->
+        <line x1="830" y1="410" x2="860" y2="410" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+
+        <!-- OXC → CoreOutput 数据通道 -->
+        <line x1="960" y1="410" x2="990" y2="410" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+
+        <!-- OXC → FDL (回环输出) -->
+        <path d="M 870 440 L 870 455 Q 870 465 860 465 L 810 465 Q 800 465 800 475 L 800 502 Q 800 512 810 512 L 832 512" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <text x="815" y="485" class="t-security" font-size="7" text-anchor="start">冲突</text>
+
+        <!-- FDL → OXC (回环输入) -->
+        <path d="M 980 512 L 990 512 Q 1000 512 1000 502 L 1000 490 Q 1000 480 990 480 L 950 480 Q 940 480 940 470 L 940 448" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <text x="990" y="473" class="t-security" font-size="7" text-anchor="end">延迟τ</text>
+
+        <!-- ControlLogic → EOConverter -->
+        <line x1="980" y1="272" x2="1010" y2="272" class="a-default" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+        <!-- EOConverter → CoreOutput -->
+        <path d="M 1080 272 L 1095 272 Q 1105 272 1105 285 L 1105 360 Q 1105 370 1095 370 L 1045 370 L 1045 382" class="a-default" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+        <!-- CoreOutput → ISL 输出 -->
+        <line x1="1045" y1="430" x2="1045" y2="482" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+
+        <!-- === 接收路径 === -->
+        <!-- BurstDisassembler → NetworkLayer -->
+        <line x1="278" y1="440" x2="278" y2="398" class="a-default" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+        <!-- NetworkLayer → Host (反向) -->
+        <line x1="218" y1="372" x2="116" y2="372" class="a-default" stroke-width="1" marker-end="url(#arrowhead)"/>
+
+        <!-- ISL → CoreInput -->
+        <line x1="775" y1="95" x2="775" y2="122" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+        <text x="775" y="90" class="t-muted" font-size="8" text-anchor="middle">星间链路 (ISL)</text>
+
+        <!-- ================================================================
+             组件 — 由外到内，SatelliteNode → EdgeNode → CoreNode
+             ================================================================ -->
+
+        <!-- === SatelliteNode 边界 === -->
+        <rect x="20" y="60" width="1105" height="510" rx="12" class="c-region" stroke-width="1.5"/>
+        <text x="34" y="80" class="t-cloud" font-size="10" font-weight="600">SatelliteNode (OBS_SatelliteNode)</text>
+
+        <!-- === Host (StandardHost) === -->
+        <rect x="38" y="330" width="70" height="60" rx="6" class="c-mask"/>
+        <rect x="38" y="330" width="70" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+        <text x="73" y="355" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Host</text>
+        <text x="73" y="369" class="t-muted" font-size="7" text-anchor="middle">StandardHost</text>
+        <text x="73" y="381" class="t-external" font-size="6" text-anchor="middle">IP流量源/汇</text>
+
+        <!-- === EdgeNode 边界 === -->
+        <rect x="148" y="175" width="522" height="340" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="162" y="193" class="t-frontend" font-size="9" font-weight="600">EdgeNode (OBS_EdgeNode)</text>
+
+        <!-- NetworkLayer -->
+        <rect x="218" y="330" width="120" height="60" rx="6" class="c-mask"/>
+        <rect x="218" y="330" width="120" height="60" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="278" y="355" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">NetworkLayer</text>
+        <text x="278" y="369" class="t-muted" font-size="7" text-anchor="middle">IP路由层</text>
+        <text x="278" y="381" class="t-cloud" font-size="6" text-anchor="middle">RoutingTable</text>
+
+        <!-- === BurstAssembler 边界 === -->
+        <rect x="168" y="204" width="490" height="100" rx="8" class="c-security-group" stroke-width="1"/>
+        <text x="180" y="218" class="t-security" font-size="8">BurstAssembler (组帧器)</text>
+
+        <!-- Dispatcher -->
+        <rect x="228" y="228" width="100" height="50" rx="6" class="c-mask"/>
+        <rect x="228" y="228" width="100" height="50" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="278" y="248" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">Dispatcher</text>
+        <text x="278" y="262" class="t-muted" font-size="7" text-anchor="middle">包分发规则</text>
+
+        <!-- Burstifier -->
+        <rect x="363" y="228" width="120" height="50" rx="6" class="c-mask"/>
+        <rect x="363" y="228" width="120" height="50" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="423" y="245" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">Burstifier</text>
+        <text x="423" y="258" class="t-muted" font-size="7" text-anchor="middle">P1-P4优先级组帧</text>
+        <text x="423" y="270" class="t-backend" font-size="6" text-anchor="middle">LRU抢占</text>
+
+        <!-- BurstSender -->
+        <rect x="518" y="228" width="120" height="50" rx="6" class="c-mask"/>
+        <rect x="518" y="228" width="120" height="50" rx="6" class="c-frontend" stroke-width="1.5"/>
+        <text x="578" y="245" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">BurstSender</text>
+        <text x="578" y="258" class="t-muted" font-size="7" text-anchor="middle">BCP+Burst发送</text>
+        <text x="578" y="270" class="t-frontend" font-size="6" text-anchor="middle">offset时序控制</text>
+
+        <!-- BurstDisassembler -->
+        <rect x="218" y="440" width="120" height="50" rx="6" class="c-mask"/>
+        <rect x="218" y="440" width="120" height="50" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="278" y="460" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">Disassembler</text>
+        <text x="278" y="474" class="t-muted" font-size="7" text-anchor="middle">光突发拆帧</text>
+
+        <!-- === CoreNode 边界 === -->
+        <rect x="700" y="120" width="410" height="430" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="714" y="138" class="t-backend" font-size="9" font-weight="600">CoreNode (OBS_CoreNode) — 全光交换</text>
+
+        <!-- CoreInput -->
+        <rect x="720" y="145" width="110" height="40" rx="6" class="c-mask"/>
+        <rect x="720" y="145" width="110" height="40" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="775" y="163" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">CoreInput</text>
+        <text x="775" y="177" class="t-muted" font-size="7" text-anchor="middle">光信号分离</text>
+
+        <!-- CoreInput (数据通道部分) -->
+        <rect x="720" y="390" width="110" height="40" rx="6" class="c-mask"/>
+        <rect x="720" y="390" width="110" height="40" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="775" y="408" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">CoreInput</text>
+        <text x="775" y="422" class="t-cloud" font-size="7" text-anchor="middle">数据通道→OXC</text>
+
+        <!-- === ControlUnit 边界 === -->
+        <rect x="720" y="190" width="380" height="160" rx="8" class="c-security-group" stroke-width="1"/>
+        <text x="732" y="205" class="t-security" font-size="8">ControlUnit (控制单元 — 电域处理)</text>
+
+        <!-- OE Converter -->
+        <rect x="890" y="145" width="80" height="40" rx="6" class="c-mask"/>
+        <rect x="890" y="145" width="80" height="40" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="930" y="163" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">OE转换</text>
+        <text x="930" y="177" class="t-muted" font-size="7" text-anchor="middle">光→电</text>
+
+        <!-- RoutingTable -->
+        <rect x="730" y="280" width="110" height="50" rx="6" class="c-mask"/>
+        <rect x="730" y="280" width="110" height="50" rx="6" class="c-database" stroke-width="1.5"/>
+        <text x="785" y="300" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">路由表</text>
+        <text x="785" y="314" class="t-muted" font-size="7" text-anchor="middle">RoutingTable</text>
+        <text x="785" y="325" class="t-database" font-size="6" text-anchor="middle">端口+λ查找</text>
+
+        <!-- OutputHorizon -->
+        <rect x="730" y="220" width="110" height="40" rx="6" class="c-mask"/>
+        <rect x="730" y="220" width="110" height="40" rx="6" class="c-database" stroke-width="1.5"/>
+        <text x="785" y="238" class="t-primary" font-size="8" font-weight="600" text-anchor="middle">OutputHorizon</text>
+        <text x="785" y="252" class="t-muted" font-size="7" text-anchor="middle">信道预约表</text>
+
+        <!-- ControlLogic -->
+        <rect x="880" y="240" width="100" height="65" rx="6" class="c-mask"/>
+        <rect x="880" y="240" width="100" height="65" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="930" y="260" class="t-primary" font-size="10" font-weight="700" text-anchor="middle">Control</text>
+        <text x="930" y="274" class="t-primary" font-size="10" font-weight="700" text-anchor="middle">Logic</text>
+        <text x="930" y="294" class="t-backend" font-size="7" text-anchor="middle">核心调度决策</text>
+
+        <!-- EO Converter -->
+        <rect x="1010" y="250" width="70" height="44" rx="6" class="c-mask"/>
+        <rect x="1010" y="250" width="70" height="44" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="1045" y="269" class="t-primary" font-size="8" font-weight="600" text-anchor="middle">EO</text>
+        <text x="1045" y="283" class="t-muted" font-size="7" text-anchor="middle">电→光</text>
+
+        <!-- OXC -->
+        <rect x="860" y="380" width="100" height="60" rx="6" class="c-mask"/>
+        <rect x="860" y="380" width="100" height="60" rx="6" class="c-frontend" stroke-width="1.5"/>
+        <text x="910" y="403" class="t-primary" font-size="11" font-weight="700" text-anchor="middle">OXC</text>
+        <text x="910" y="419" class="t-muted" font-size="7" text-anchor="middle">光交叉连接</text>
+        <text x="910" y="433" class="t-frontend" font-size="6" text-anchor="middle">全光透明转发</text>
+
+        <!-- FDL -->
+        <rect x="840" y="490" width="140" height="44" rx="6" class="c-mask"/>
+        <rect x="840" y="490" width="140" height="44" rx="6" class="c-messagebus" stroke-width="1.5"/>
+        <text x="910" y="509" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">FDL</text>
+        <text x="910" y="523" class="t-muted" font-size="7" text-anchor="middle">光纤延迟线 delay=τ</text>
+
+        <!-- CoreOutput -->
+        <rect x="990" y="390" width="110" height="40" rx="6" class="c-mask"/>
+        <rect x="990" y="390" width="110" height="40" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="1045" y="408" class="t-primary" font-size="9" font-weight="600" text-anchor="middle">CoreOutput</text>
+        <text x="1045" y="422" class="t-muted" font-size="7" text-anchor="middle">光信号合并</text>
+
+        <!-- ISL 输出端口 -->
+        <rect x="1010" y="490" width="70" height="30" rx="6" class="c-mask"/>
+        <rect x="1010" y="490" width="70" height="30" rx="6" class="c-external" stroke-width="1.5"/>
+        <text x="1045" y="509" class="t-primary" font-size="8" font-weight="600" text-anchor="middle">ISL out</text>
+
+        <!-- ================================================================
+             图例
+             ================================================================ -->
+        <text x="38" y="620" class="t-primary" font-size="10" font-weight="600">图例</text>
+
+        <rect x="38" y="632" width="16" height="10" rx="2" class="c-external" stroke-width="1"/>
+        <text x="60" y="640" class="t-muted" font-size="8">外部节点 (Host/ISL)</text>
+
+        <rect x="38" y="648" width="16" height="10" rx="2" class="c-cloud" stroke-width="1"/>
+        <text x="60" y="656" class="t-muted" font-size="8">网络/基础设施层</text>
+
+        <rect x="38" y="664" width="16" height="10" rx="2" class="c-backend" stroke-width="1"/>
+        <text x="60" y="672" class="t-muted" font-size="8">处理逻辑模块</text>
+
+        <rect x="38" y="680" width="16" height="10" rx="2" class="c-frontend" stroke-width="1"/>
+        <text x="60" y="688" class="t-muted" font-size="8">光域交换 (OXC/Sender)</text>
+
+        <rect x="38" y="696" width="16" height="10" rx="2" class="c-database" stroke-width="1"/>
+        <text x="60" y="704" class="t-muted" font-size="8">状态表 (路由/Horizon)</text>
+
+        <rect x="38" y="712" width="16" height="10" rx="2" class="c-security" stroke-width="1"/>
+        <text x="60" y="720" class="t-muted" font-size="8">OE/EO 转换 (控制平面)</text>
+
+        <rect x="38" y="728" width="16" height="10" rx="2" class="c-messagebus" stroke-width="1"/>
+        <text x="60" y="736" class="t-muted" font-size="8">FDL 光纤延迟线</text>
+
+        <!-- 箭头图例 -->
+        <line x1="260" y1="637" x2="290" y2="637" class="a-emphasis" stroke-width="1.5" marker-end="url(#arrowhead-emphasis)"/>
+        <text x="296" y="640" class="t-muted" font-size="8">数据平面 (Burst光信号)</text>
+
+        <line x1="260" y1="657" x2="290" y2="657" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <text x="296" y="660" class="t-muted" font-size="8">控制平面 (BCP) / FDL回环</text>
+
+        <line x1="260" y1="677" x2="290" y2="677" class="a-dashed" stroke-width="1" marker-end="url(#arrowhead-dashed)"/>
+        <text x="296" y="680" class="t-muted" font-size="8">直接方法调用 (OMNeT++)</text>
+
+        <line x1="260" y1="697" x2="290" y2="697" class="a-default" stroke-width="1" marker-end="url(#arrowhead)"/>
+        <text x="296" y="700" class="t-muted" font-size="8">反向/辅助路径</text>
+
+        <!-- 边界图例 -->
+        <rect x="530" y="630" width="20" height="12" rx="3" class="c-region" stroke-width="1"/>
+        <text x="556" y="640" class="t-muted" font-size="8">SatelliteNode 边界</text>
+
+        <rect x="530" y="650" width="20" height="12" rx="3" class="c-lane" stroke-width="1"/>
+        <text x="556" y="660" class="t-muted" font-size="8">EdgeNode / CoreNode</text>
+
+        <rect x="530" y="670" width="20" height="12" rx="3" class="c-security-group" stroke-width="1"/>
+        <text x="556" y="680" class="t-muted" font-size="8">BurstAssembler / ControlUnit</text>
+
+        <!-- 标注：数据平面特征 -->
+        <text x="530" y="706" class="t-dim" font-size="7">W=1 单波长 · 最大1次FDL回环 · offset可趋近0</text>
+
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>数据平面 (全光)</h3>
+        </div>
+        <ul>
+          <li>&bull; Burst在CoreNode内全光透明转发，不做OEO转换</li>
+          <li>&bull; OXC根据ControlLogic的指令配置交换路径</li>
+          <li>&bull; W=1 单波长时域调度，每条ISL一个数据通道</li>
+          <li>&bull; FDL提供光域暂存，冲突时延迟τ后重试（最多1次）</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>控制平面 (电域)</h3>
+        </div>
+        <ul>
+          <li>&bull; BCP先于Burst发送（offset时间差）</li>
+          <li>&bull; CoreInput分离控制信道 → OEConverter转换为电信号</li>
+          <li>&bull; ControlLogic查询路由表+Horizon表做调度决策</li>
+          <li>&bull; 通过直接方法调用(sendDirect)配置OXC交换矩阵</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot cyan"></div>
+          <h3>边缘节点 (组帧)</h3>
+        </div>
+        <ul>
+          <li>&bull; Dispatcher按规则(IP/端口)分发包到不同Burstifier</li>
+          <li>&bull; Burstifier支持P1-P4优先级 + LRU抢占，4种调度模式</li>
+          <li>&bull; BurstSender管理发送队列，控制BCP/Burst时序</li>
+          <li>&bull; BurstDisassembler反向拆帧，提取封装的IP包</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot orange"></div>
+          <h3>FDL 回环机制</h3>
+        </div>
+        <ul>
+          <li>&bull; 场景A 直通：通道空闲，burst直接OXC转发</li>
+          <li>&bull; 场景B FDL：冲突 + waitTime≤τ + FDL空闲 → 回环延迟</li>
+          <li>&bull; 场景C 丢弃：以上均不满足，burst被丢弃</li>
+          <li>&bull; FDL连接OXC回环端口in[N]/out[N]，最大1次回环</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      OBS Satellite All-Optical Switching &bull; OMNeT++ Simulation Framework &bull; OBSmodules
+    </p>
+  </div>
+
+  <script>
+    var Archify = {};
+
+    Archify.theme = (function () {
+      var STORAGE_KEY = 'archify-theme';
+      var html = document.documentElement;
+      var btn = document.getElementById('btn-theme');
+      var icon = document.getElementById('theme-icon');
+      var label = document.getElementById('theme-label');
+
+      function readStored() {
+        try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; }
+      }
+      function writeStored(value) {
+        try { localStorage.setItem(STORAGE_KEY, value); } catch (_) {}
+      }
+      function urlOverride() {
+        try {
+          var param = new URLSearchParams(window.location.search).get('theme');
+          if (param === 'light' || param === 'dark') return param;
+        } catch (_) {}
+        return null;
+      }
+
+      function resolveInitial() {
+        var fromUrl = urlOverride();
+        if (fromUrl) return fromUrl;
+        var saved = readStored();
+        if (saved === 'light' || saved === 'dark') return saved;
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+
+      function apply(theme) {
+        html.setAttribute('data-theme', theme);
+        icon.textContent = theme === 'dark' ? '\u263E' : '\u263C';
+        label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+        btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+      }
+
+      function toggle() {
+        var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        apply(next);
+        writeStored(next);
+      }
+
+      apply(resolveInitial());
+      btn.addEventListener('click', toggle);
+
+      try {
+        var media = window.matchMedia('(prefers-color-scheme: light)');
+        var onChange = function (e) {
+          var saved = readStored();
+          if (urlOverride() || saved === 'light' || saved === 'dark') return;
+          apply(e.matches ? 'light' : 'dark');
+        };
+        if (media.addEventListener) media.addEventListener('change', onChange);
+        else if (media.addListener) media.addListener(onChange);
+      } catch (_) {}
+
+      return { toggle: toggle };
+    })();
+
+    (function () {
+      var RASTER_SCALE = 4;
+
+      function diagramFilename() {
+        var title = (document.title || 'diagram')
+          .replace(/\s+Architecture(\s+Diagram)?$/i, '')
+          .replace(/\s+Diagram$/i, '')
+          .trim();
+        return title.replace(/[^a-z0-9_\-]+/gi, '-')
+                    .toLowerCase()
+                    .replace(/^-+|-+$/g, '') || 'diagram';
+      }
+
+      function currentBg() {
+        return getComputedStyle(document.body).backgroundColor || '#ffffff';
+      }
+
+      function serializeSvg(scale, opts) {
+        scale = scale || 1;
+        opts = opts || {};
+        var autoTheme = opts.autoTheme === true;
+
+        var svg = document.querySelector('.diagram-container svg');
+        var clone = svg.cloneNode(true);
+
+        var vb = svg.viewBox.baseVal;
+        clone.setAttribute('width', vb.width * scale);
+        clone.setAttribute('height', vb.height * scale);
+        clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+        var hostStyle = (function () {
+          var out = [];
+          Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+            var rules;
+            try { rules = sheet.cssRules; } catch (_) { return; }
+            if (!rules) return;
+            Array.prototype.forEach.call(rules, function (rule) {
+              if (rule.type !== 1) return;
+              var sel = rule.selectorText || '';
+              if (/(^|,)\s*(svg|:root|\[data-theme|\.c-|\.t-|\.a-|\.m-)/.test(sel)) {
+                out.push(rule.cssText);
+              }
+            });
+          });
+          return out.join('\n');
+        })();
+
+        var varNames = (function () {
+          var seen = {};
+          var names = [];
+          (hostStyle.match(/--[a-zA-Z0-9-]+(?=\s*:)/g) || []).forEach(function (n) {
+            if (!seen[n]) { seen[n] = true; names.push(n); }
+          });
+          return names;
+        })();
+
+        function resolveVars(themeAttr) {
+          var probe = document.createElement('div');
+          probe.setAttribute('data-theme', themeAttr);
+          probe.style.cssText = 'position:absolute;width:0;height:0;visibility:hidden;';
+          document.body.appendChild(probe);
+          try {
+            var c = getComputedStyle(probe);
+            return varNames.map(function (n) {
+              return n + ': ' + c.getPropertyValue(n).trim() + ';';
+            }).join(' ');
+          } finally {
+            document.body.removeChild(probe);
+          }
+        }
+
+        var fontFallback = [400, 500, 600, 700].map(function (w) {
+          return "@font-face { font-family: 'JetBrains Mono'; font-weight: " + w +
+                 "; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }";
+        }).join('\n');
+
+        var style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        var bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bgRect.setAttribute('width', '100%');
+        bgRect.setAttribute('height', '100%');
+
+        if (autoTheme) {
+          var darkVars = resolveVars('dark');
+          var lightVars = resolveVars('light');
+
+          style.textContent =
+            fontFallback + "\n" +
+            "svg { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace; }\n" +
+            hostStyle + "\n" +
+            ":root, svg { " + darkVars + " }\n" +
+            "@media (prefers-color-scheme: light) { :root, svg { " + lightVars + " } }\n" +
+            "svg[data-theme=\"light\"] { " + lightVars + " }\n" +
+            "svg[data-theme=\"dark\"] { " + darkVars + " }\n" +
+            "rect.c-bg-rect { fill: var(--bg); }\n";
+
+          clone.removeAttribute('data-theme');
+          bgRect.setAttribute('class', 'c-bg-rect');
+        } else {
+          var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+          var themeHost = document.querySelector('[data-theme="' + theme + '"]') || document.documentElement;
+          var computed = getComputedStyle(themeHost);
+          var vars = varNames.map(function (n) {
+            return n + ': ' + computed.getPropertyValue(n).trim() + ';';
+          }).join(' ');
+
+          style.textContent =
+            fontFallback + "\n" +
+            "svg { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace; }\n" +
+            hostStyle + "\n" +
+            ":root, svg { " + vars + " }\n";
+
+          bgRect.setAttribute('fill', computed.getPropertyValue('--bg').trim() || '#ffffff');
+        }
+
+        clone.insertBefore(style, clone.firstChild);
+        clone.insertBefore(bgRect, style.nextSibling);
+
+        return {
+          svgString: new XMLSerializer().serializeToString(clone),
+          width: vb.width * scale,
+          height: vb.height * scale
+        };
+      }
+
+      function download(blob, filename) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      var MAX_CANVAS_PIXELS = 16 * 1024 * 1024;
+
+      function pickSafeScale(vbW, vbH) {
+        for (var s = RASTER_SCALE; s >= 1; s--) {
+          if (vbW * s * vbH * s <= MAX_CANVAS_PIXELS) return s;
+        }
+        return 1;
+      }
+
+      function rasterize(format) {
+        var svg = document.querySelector('.diagram-container svg');
+        var vb = svg.viewBox.baseVal;
+        var scale = pickSafeScale(vb.width, vb.height);
+        var data = serializeSvg(scale);
+        var svgBlob = new Blob([data.svgString], { type: 'image/svg+xml;charset=utf-8' });
+        var svgUrl = URL.createObjectURL(svgBlob);
+
+        return new Promise(function (resolve, reject) {
+          var img = new Image();
+          img.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = data.width;
+            canvas.height = data.height;
+            var ctx = canvas.getContext('2d');
+            if (format === 'jpeg') {
+              ctx.fillStyle = currentBg();
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(svgUrl);
+            var mime = format === 'jpeg' ? 'image/jpeg' :
+                       format === 'webp' ? 'image/webp' : 'image/png';
+            var quality = format === 'png' ? undefined : 0.95;
+            canvas.toBlob(function (blob) {
+              if (!blob) reject(new Error('toBlob returned null for ' + format));
+              else resolve(blob);
+            }, mime, quality);
+          };
+          img.onerror = function (e) {
+            URL.revokeObjectURL(svgUrl);
+            reject(e);
+          };
+          img.src = svgUrl;
+        });
+      }
+
+      var menu = document.getElementById('export-menu');
+      var btn = document.getElementById('btn-export');
+      var items = function () {
+        return Array.prototype.slice.call(menu.querySelectorAll('button[role="menuitem"]'));
+      };
+
+      function canCopyImage() {
+        return typeof ClipboardItem !== 'undefined' &&
+               navigator.clipboard &&
+               typeof navigator.clipboard.write === 'function';
+      }
+
+      function supports(format) {
+        if (format === 'svg' || format === 'png') return true;
+        var mime = format === 'jpeg' ? 'image/jpeg' : 'image/webp';
+        try {
+          var c = document.createElement('canvas');
+          c.width = c.height = 2;
+          return c.toDataURL(mime).indexOf('data:' + mime) === 0;
+        } catch (_) { return false; }
+      }
+
+      items().forEach(function (it) {
+        if (it.dataset.format && !supports(it.dataset.format)) {
+          it.disabled = true;
+          it.title = 'Not supported by this browser';
+          it.style.opacity = '0.5';
+        }
+        if (it.dataset.action === 'copy' && !canCopyImage()) {
+          it.disabled = true;
+          it.title = 'Clipboard image write not supported by this browser';
+          it.style.opacity = '0.5';
+        }
+      });
+
+      var toastEl = document.createElement('div');
+      toastEl.className = 'archify-toast';
+      toastEl.setAttribute('role', 'status');
+      document.body.appendChild(toastEl);
+      var toastTimer = null;
+
+      function toast(msg) {
+        toastEl.textContent = '';
+        requestAnimationFrame(function () {
+          toastEl.textContent = msg;
+          toastEl.classList.add('show');
+        });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 1500);
+      }
+
+      function open(focusLast) {
+        menu.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+        var available = items().filter(function (i) { return !i.disabled; });
+        var target = focusLast ? available[available.length - 1] : available[0];
+        if (target) target.focus();
+      }
+      function close(focusTrigger) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        if (focusTrigger) btn.focus();
+      }
+      function isOpen() { return menu.classList.contains('open'); }
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (isOpen()) close(false);
+        else open();
+      });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (!isOpen()) open(e.key === 'ArrowUp');
+        }
+      });
+      document.addEventListener('click', function (e) {
+        if (!menu.contains(e.target) && e.target !== btn) close(false);
+      });
+
+      menu.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { e.preventDefault(); close(true); return; }
+        if (e.key === 'Tab')    { close(false); return; }
+
+        var available = items().filter(function (i) { return !i.disabled; });
+        var current = available.indexOf(document.activeElement);
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            if (available.length) available[(current + 1 + available.length) % available.length].focus();
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            if (available.length) available[(current - 1 + available.length) % available.length].focus();
+            break;
+          case 'Home':
+            e.preventDefault();
+            if (available[0]) available[0].focus();
+            break;
+          case 'End':
+            e.preventDefault();
+            if (available.length) available[available.length - 1].focus();
+            break;
+        }
+      });
+
+      function runExport(format) {
+        var base = diagramFilename();
+        close(true);
+        return (format === 'svg'
+          ? Promise.resolve(serializeSvg(1, { autoTheme: true })).then(function (d) {
+              download(new Blob([d.svgString], { type: 'image/svg+xml;charset=utf-8' }), base + '.svg');
+            })
+          : rasterize(format).then(function (blob) {
+              download(blob, base + '.' + format);
+            })
+        ).catch(function (err) {
+          console.error(err);
+          alert('Export failed: ' + (err && err.message ? err.message : format));
+        });
+      }
+
+      function runCopy() {
+        close(true);
+        if (!canCopyImage()) {
+          alert('Clipboard image write not supported in this browser.');
+          return;
+        }
+        var blobPromise = rasterize('png');
+        var writePromise;
+        try {
+          writePromise = navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })]);
+        } catch (_) {
+          writePromise = blobPromise.then(function (blob) {
+            return navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          });
+        }
+        return writePromise.then(function () {
+          toast('Copied PNG to clipboard');
+        }).catch(function (err) {
+          console.error(err);
+          alert('Copy failed: ' + (err && err.message ? err.message : 'unknown'));
+        });
+      }
+
+      menu.addEventListener('click', function (e) {
+        var copyBtn = e.target.closest('button[data-action="copy"]');
+        if (copyBtn && !copyBtn.disabled) { runCopy(); return; }
+
+        var formatBtn = e.target.closest('button[data-format]');
+        if (formatBtn && !formatBtn.disabled) { runExport(formatBtn.dataset.format); }
+      });
+
+      Archify.exportMenu = { open: open, close: close, isOpen: isOpen, run: runExport };
+
+      try {
+        if (new URLSearchParams(window.location.search).get('openExport') === '1') {
+          var openWhenReady = function () {
+            requestAnimationFrame(function () { requestAnimationFrame(open); });
+          };
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(openWhenReady);
+          } else {
+            setTimeout(openWhenReady, 200);
+          }
+        }
+      } catch (_) {}
+    })();
+
+    document.addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        Archify.theme.toggle();
+      } else if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        if (!Archify.exportMenu.isOpen()) Archify.exportMenu.open();
+      }
+    });
+  </script>
+</body>
+</html>

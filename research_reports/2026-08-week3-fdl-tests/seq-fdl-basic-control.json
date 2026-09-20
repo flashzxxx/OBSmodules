@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Test-FDL-Basic · sat5 回环控制面时序",
+    "subtitle": "BCP 先到预约，两段 OXC 间隔 τ=20 µs，offset 加 τ 后转出",
+    "output": "seq-fdl-basic-control.html",
+    "quality_profile": "showcase",
+    "visual_preset": "signal-flow",
+    "viewBox": [1080, 820],
+    "views": [
+      {
+        "id": "bcp-ahead",
+        "label": "BCP 先到并判定",
+        "focus": ["sat5in", "logic", "horizon"],
+        "note": "决策发生在光到达前。sat1 已占 Port2，waitTime≈6.5 µs ≤ τ。"
+      },
+      {
+        "id": "book-oxc",
+        "label": "两段 OXC 预约",
+        "focus": ["logic", "oxc", "horizon"],
+        "note": "现在只下预约：t_b 入纤→FDL，t_b+20 µs 再 FDL→Port2。"
+      },
+      {
+        "id": "rewrite-offset",
+        "label": "offset 加 τ 转出",
+        "focus": ["logic", "port2"],
+        "note": "新 offset = Δ+τ−1 µs，让下游按延迟后的到达时刻继续预约。"
+      },
+      {
+        "id": "light-loop",
+        "label": "光按预约走 FDL",
+        "focus": ["sat5in", "oxc", "fdl", "port2"],
+        "note": "光突发到时第一段已接通；延迟 20 µs 后第二段接通出 Port2。"
+      }
+    ]
+  },
+  "participants": [
+    { "id": "sat5in", "type": "external", "label": "入纤 sat5", "sublabel": "控制 + 数据" },
+    { "id": "logic", "type": "backend", "label": "调度逻辑", "sublabel": "ControlLogic" },
+    { "id": "horizon", "type": "database", "label": "Horizon", "sublabel": "Port2 与 FDL" },
+    { "id": "oxc", "type": "cloud", "label": "OXC", "sublabel": "光交叉" },
+    { "id": "fdl", "type": "cloud", "label": "FDL", "sublabel": "τ = 20 µs" },
+    { "id": "port2", "type": "external", "label": "Port2 出纤", "sublabel": "去 sat3" }
+  ],
+  "segments": [
+    { "from": 150, "to": 264, "label": "BCP 先到，判定回环" },
+    { "from": 282, "to": 430, "label": "预约 OXC，offset 加 τ" },
+    { "from": 448, "to": 640, "label": "光进 FDL，再出 Port2" }
+  ],
+  "messages": [
+    {
+      "id": "m-bcp",
+      "from": "sat5in",
+      "to": "logic",
+      "y": 170,
+      "label": "BCP 到达，offset=Δ",
+      "variant": "emphasis",
+      "note": "Δ 约 0.5–1 ms。光突发还在 5 ms 链路上。"
+    },
+    {
+      "id": "m-qport",
+      "from": "logic",
+      "to": "horizon",
+      "y": 208,
+      "label": "Port2 在 t_b 空闲？",
+      "variant": "dashed",
+      "note": "t_b = now+Δ。sat1 已直通占用到 t_b+6.5 µs。"
+    },
+    {
+      "id": "m-conflict",
+      "from": "horizon",
+      "to": "logic",
+      "y": 246,
+      "label": "冲突，wait≈6.5 µs ≤ 20 µs",
+      "variant": "return"
+    },
+    {
+      "id": "m-oxc1",
+      "from": "logic",
+      "to": "oxc",
+      "y": 298,
+      "label": "① 预约 t_b：入纤→FDL",
+      "variant": "emphasis",
+      "note": "scheduleAt(burstArrival)：inGate → fdlOutGate"
+    },
+    {
+      "id": "m-oxc2",
+      "from": "logic",
+      "to": "oxc",
+      "y": 336,
+      "label": "② 预约 t_b+20 µs：FDL→Port2",
+      "variant": "emphasis",
+      "note": "scheduleAt(burstArrival+τ)：fdlInGate → destOutGate"
+    },
+    {
+      "id": "m-updhz",
+      "from": "logic",
+      "to": "horizon",
+      "y": 374,
+      "label": "更新 FDL 与 Port2 horizon",
+      "variant": "dashed",
+      "note": "Port2 占用推到 t_b+τ+突发时长"
+    },
+    {
+      "id": "m-fwd",
+      "from": "logic",
+      "to": "port2",
+      "y": 412,
+      "label": "转发 BCP，offset=Δ+τ−1 µs",
+      "variant": "emphasis",
+      "note": "arrivalDelta += τ − processingTime；sendDelayed 1 µs"
+    },
+    {
+      "id": "m-light",
+      "from": "sat5in",
+      "to": "oxc",
+      "y": 470,
+      "label": "t_b 光突发到达",
+      "variant": "default",
+      "note": "数据波长进 OXC，不经 O/E。"
+    },
+    {
+      "id": "m-infdl",
+      "from": "oxc",
+      "to": "fdl",
+      "y": 508,
+      "label": "第一段已接通，光进 FDL",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m-outfdl",
+      "from": "fdl",
+      "to": "oxc",
+      "y": 546,
+      "label": "t_b+20 µs 光从 FDL 返回",
+      "variant": "default",
+      "note": "FDL 对头、尾各延迟一次，器件计数为 2。"
+    },
+    {
+      "id": "m-egress",
+      "from": "oxc",
+      "to": "port2",
+      "y": 584,
+      "label": "第二段已接通，出 Port2",
+      "variant": "emphasis"
+    }
+  ],
+  "activations": [
+    { "participant": "logic", "from": 164, "to": 420, "type": "backend" },
+    { "participant": "horizon", "from": 202, "to": 382, "type": "database" },
+    { "participant": "oxc", "from": 292, "to": 592, "type": "cloud" },
+    { "participant": "fdl", "from": 502, "to": 554, "type": "cloud" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "BCP 必须先到",
+      "items": [
+        "调度只看电域 BCP；光还在 5 ms 链路上",
+        "t_b = now+Δ；sat5 等待约 6.5 µs"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "两段 OXC 预约，间隔恰好是 τ",
+      "items": [
+        "现在只预约，光稍后才进 FDL",
+        "两段接通时刻差 = τ = 20 µs"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "offset 加 τ，下游才对得上",
+      "items": [
+        "新 offset = Δ + 20 µs − 1 µs",
+        "下游按延迟后的到达时刻继续预约"
+      ]
+    }
+  ]
+}

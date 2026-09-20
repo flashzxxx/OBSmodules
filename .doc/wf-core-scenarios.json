@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "OBS 核心节点三场景调度判断",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "routing", "label": "BCP 接收与路由", "focus": ["recv", "route", "check-free"], "note": "BCP 经 O/E 后查路由表，得到出端口 / 波长 / 标签。" },
+      { "id": "scenario-a", "label": "场景 A: 直通", "focus": ["check-free", "direct"], "note": "目标通道空闲，1 次 OXC 预约直接转发。" },
+      { "id": "scenario-bc", "label": "场景 B/C: 回环或丢弃", "focus": ["check-fdl", "check-cond", "fdl-loop", "drop"], "note": "冲突时检查 FDL 条件：满足则回环，否则丢弃。" }
+    ]
+  },
+  "lanes": [
+    { "id": "bcp", "label": "BCP 接收与路由" },
+    { "id": "decision", "label": "三场景条件判断" },
+    { "id": "pass", "label": "场景 A: 直通" },
+    { "id": "loop", "label": "场景 B: FDL 回环" },
+    { "id": "fail", "label": "场景 C: 丢弃", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "receive", "label": "接收与路由", "fromCol": 0, "toCol": 1 },
+    { "id": "schedule", "label": "三场景判断与分发", "fromCol": 2, "toCol": 5, "variant": "emphasis" }
+  ],
+  "mainPath": ["recv", "route", "check-free", "check-fdl", "check-cond"],
+  "nodes": [
+    { "id": "recv", "lane": "bcp", "col": 0, "type": "messagebus", "label": "接收 BCP", "sublabel": "O/E 转换后" },
+    { "id": "route", "lane": "bcp", "col": 1, "type": "database", "label": "查路由表", "sublabel": "outPort / λ / label" },
+    { "id": "check-free", "lane": "decision", "col": 2, "type": "security", "label": "通道空闲?", "sublabel": "horizon ≤ burstArrival" },
+    { "id": "check-fdl", "lane": "decision", "col": 4, "type": "security", "label": "useFDL 开启?", "sublabel": "冲突时启用回环" },
+    { "id": "check-cond", "lane": "decision", "col": 5, "type": "security", "label": "回环条件满足?", "sublabel": "waitTime ≤ τ 且 FDL 空闲", "width": 96 },
+    { "id": "direct", "lane": "pass", "col": 2, "type": "cloud", "label": "场景 A 直通", "sublabel": "1 次 OXC 预约 · in→out" },
+    { "id": "fdl-loop", "lane": "loop", "col": 5, "type": "database", "label": "场景 B 回环", "sublabel": "2 次 OXC 预约 · 延迟 τ" },
+    { "id": "drop", "lane": "fail", "col": 4, "type": "backend", "label": "场景 C 丢弃", "sublabel": "dropCounter++ · burstLoss++", "width": 108 }
+  ],
+  "edges": [
+    { "id": "e1", "from": "recv", "to": "route", "role": "main", "fromSide": "right", "toSide": "left" },
+    { "id": "e2", "from": "route", "to": "check-free", "role": "main", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "id": "e3", "from": "check-free", "to": "direct", "role": "branch", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top", "label": "空闲" },
+    { "id": "e4", "from": "check-free", "to": "check-fdl", "role": "main", "fromSide": "right", "toSide": "left", "label": "冲突" },
+    { "id": "e5", "from": "check-fdl", "to": "check-cond", "role": "main", "fromSide": "right", "toSide": "left", "label": "开启" },
+    { "id": "e6", "from": "check-fdl", "to": "drop", "role": "error", "variant": "security", "route": "drop", "fromSide": "bottom", "toSide": "top", "label": "FDL 关" },
+    { "id": "e7", "from": "check-cond", "to": "fdl-loop", "role": "branch", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top", "label": "满足" },
+    { "id": "e8", "from": "check-cond", "to": "drop", "role": "error", "variant": "security", "route": "outside-right", "fromSide": "right", "toSide": "right", "label": "τ 不足" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "场景 A: 直通 (1 次 OXC 预约)", "items": ["条件: horizon ≤ burstArrival, 目标通道空闲", "scheduleAt 在 inGate→outGate 预约 OXC", "更新该通道 horizon", "BCP arrivalDelta -= processingTime 后转发"] },
+    { "dot": "amber", "title": "场景 B: FDL 回环 (2 次 OXC 预约)", "items": ["条件: 冲突且 useFDL=true 且 waitTime ≤ τ 且 FDL 空闲", "① OXC 预约 in→fdlOut, ② fdlIn→dest", "burst 经 FDL 延迟 τ 后重试", "BCP arrivalDelta += τ - processingTime 后转发"] },
+    { "dot": "rose", "title": "场景 C: 丢弃", "items": ["useFDL=false: 冲突即丢弃", "useFDL=true 但 waitTime > τ 或 FDL 忙: 同样丢弃", "dropCounter++ / burstLossContentionCounter++", "emit burstLoss 信号"] }
+  ]
+}

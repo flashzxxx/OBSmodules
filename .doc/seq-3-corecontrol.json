@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "核心节点调度 · OBS_CoreControlLogic 三场景",
+    "output": "seq-3-corecontrol.html",
+    "quality_profile": "showcase",
+    "viewBox": [1120, 960],
+    "column_fit": "spread",
+    "views": [
+      { "id": "bcp-receive", "label": "BCP 接收与路由", "focus": ["coreinput", "oe", "control", "rtable"], "note": "BCP 经 O/E 转换后，ControlLogic 查路由表得到出端口/波长/标签。" },
+      { "id": "scenario-a", "label": "场景 A: 直通", "focus": ["control", "horizon", "oxc", "eo"], "note": "目标通道空闲 → 1 次 OXC 预约，Burst 全光转发。" },
+      { "id": "scenario-b", "label": "场景 B: FDL 回环", "focus": ["control", "horizon", "oxc", "fdl"], "note": "冲突且 waitTime ≤ τ 且 FDL 空闲 → 2 次 OXC 预约，延迟 τ 后转发。" },
+      { "id": "scenario-c", "label": "场景 C: 丢弃", "focus": ["control", "horizon"], "note": "以上条件均不满足 → 丢弃 BCP，记录 burstLoss。" }
+    ]
+  },
+  "participants": [
+    { "id": "coreinput", "type": "backend", "label": "核心输入", "sublabel": "OBS_CoreInput" },
+    { "id": "oe", "type": "security", "label": "O/E 转换", "sublabel": "电域处理" },
+    { "id": "control", "type": "backend", "label": "调度逻辑", "sublabel": "OBS_CoreControlLogic" },
+    { "id": "rtable", "type": "database", "label": "路由表", "sublabel": "OBS_CoreRoutingTable" },
+    { "id": "horizon", "type": "database", "label": "Horizon 表", "sublabel": "OBS_CoreOutputHorizon" },
+    { "id": "oxc", "type": "cloud", "label": "OXC", "sublabel": "光交叉连接" },
+    { "id": "fdl", "type": "cloud", "label": "FDL", "sublabel": "光纤延迟线 τ" },
+    { "id": "eo", "type": "security", "label": "E/O 转换", "sublabel": "BCP 转发" }
+  ],
+  "segments": [
+    { "from": 150, "to": 290, "label": "BCP 接收与路由查表" },
+    { "from": 308, "to": 460, "label": "场景 A: 直通" },
+    { "from": 478, "to": 690, "label": "场景 B: FDL 回环" },
+    { "from": 708, "to": 880, "label": "场景 C: 丢弃 + 转发" }
+  ],
+  "messages": [
+    { "id": "m1", "from": "coreinput", "to": "oe", "y": 170, "label": "分离控制波长 → BCP", "variant": "default", "note": "数据波长直连 OXC，控制波长走 O/E" },
+    { "id": "m2", "from": "oe", "to": "control", "y": 210, "label": "电域 BCP (O/E 后)", "variant": "default" },
+    { "id": "m3", "from": "control", "to": "rtable", "y": 250, "label": "查路由表: inPort+colour+label", "variant": "dashed" },
+    { "id": "m4", "from": "rtable", "to": "control", "y": 280, "label": "返回 outPort/outColour/outLabel", "variant": "return" },
+    { "id": "m5", "from": "control", "to": "horizon", "y": 330, "label": "getHorizon ≤ burstArrival? (空闲?)", "variant": "dashed", "note": "场景 A 判断" },
+    { "id": "m6", "from": "horizon", "to": "control", "y": 370, "label": "是 → scheduled=true", "variant": "return" },
+    { "id": "m7", "from": "control", "to": "oxc", "y": 410, "label": "scheduleAt: setGate(in→out)", "variant": "emphasis", "note": "1 次 OXC 预约" },
+    { "id": "m8", "from": "control", "to": "horizon", "y": 450, "label": "updateHorizon(outPort, newHorizon)", "variant": "dashed" },
+    { "id": "m9", "from": "control", "to": "horizon", "y": 500, "label": "getHorizon > burstArrival → 冲突", "variant": "dashed", "note": "场景 B 判断" },
+    { "id": "m10", "from": "control", "to": "horizon", "y": 540, "label": "waitTime ≤ τ 且 FDL 空闲?", "variant": "dashed", "note": "useFDL=true 时检查" },
+    { "id": "m11", "from": "horizon", "to": "control", "y": 580, "label": "是 → usedFDL=true", "variant": "return" },
+    { "id": "m12", "from": "control", "to": "oxc", "y": 620, "label": "① setGate: in→fdlOut", "variant": "emphasis", "note": "第 1 次预约: 入 FDL" },
+    { "id": "m13", "from": "control", "to": "oxc", "y": 660, "label": "② setGate: fdlIn→dest", "variant": "emphasis", "note": "第 2 次预约: FDL→目标" },
+    { "id": "m14", "from": "control", "to": "fdl", "y": 700, "label": "sendDelayed(burst, τ)", "variant": "dashed", "note": "FDL 延迟 τ 重试" },
+    { "id": "m15", "from": "control", "to": "horizon", "y": 740, "label": "更新 FDL + dest horizon", "variant": "dashed" },
+    { "id": "m16", "from": "control", "to": "horizon", "y": 780, "label": "条件均不满足 → 丢弃", "variant": "dashed", "note": "场景 C: dropCounter++" },
+    { "id": "m17", "from": "control", "to": "eo", "y": 810, "label": "sendDelayed(BCP, procTime)", "variant": "default", "note": "A/B 成功后转发 BCP" },
+    { "id": "m18", "from": "oxc", "to": "eo", "y": 850, "label": "Burst 全光透传 (无 OEO)", "variant": "emphasis", "note": "数据波长不经 O/E" }
+  ],
+  "activations": [
+    { "participant": "control", "from": 204, "to": 866, "type": "backend" },
+    { "participant": "horizon", "from": 244, "to": 746, "type": "database" },
+    { "participant": "oxc", "from": 404, "to": 866, "type": "cloud" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "场景 A: 直通 (1 次 OXC 预约)", "items": ["条件: horizon ≤ burstArrival (通道空闲)", "scheduleAt: inGate → outGate", "更新 horizon: burstArrival + burstDuration + guardTime", "BCP arrivalDelta -= processingTime"] },
+    { "dot": "amber", "title": "场景 B: FDL 回环 (2 次 OXC 预约)", "items": ["条件: 冲突 且 waitTime ≤ τ 且 FDL 空闲", "① inGate → fdlOutGate (burstArrival 时刻)", "② fdlInGate → destOutGate (burstArrival+τ 时刻)", "BCP arrivalDelta += τ - processingTime"] },
+    { "dot": "rose", "title": "场景 C: 丢弃", "items": ["条件: 直通和回环均不满足", "useFDL=false: 冲突即丢弃", "useFDL=true: waitTime > τ 或 FDL 忙也丢弃", "记录 burstLossContention / burstLossTotal"] }
+  ]
+}

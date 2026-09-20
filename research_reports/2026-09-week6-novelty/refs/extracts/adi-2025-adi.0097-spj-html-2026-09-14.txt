@@ -1,0 +1,1071 @@
+A Review on All-Optical Switching in Intersatellite Laser Communication | Advanced Devices & Instrumentation
+
+Advertisement
+
+Contents
+
+## Abstract
+
+As intersatellite laser communication progresses from its early in-orbit experiments to a fully operational network, the node access scheme is becoming increasingly intricate. The electrophotonic conversion intrinsic to existing satellite communication switching technologies presents an important obstacle to both communication capacity and switching speed, making it challenging to meet the communication needs of future large-scale satellite constellations. All-optical switching offers the advantages of low latency, high capacity, and high flexibility and is becoming a promising development in this field. This paper examines the application scenarios of several mature switching modes (optical circuit switches, optical burst switches, and optical packet switches) based on an analysis of the current situation of satellite laser communication networks. Furthermore, it introduces the working principles, research status, and scenario analysis of the core components of all-optical switching. It also presents a top-to-down design idea that can be used in the design of an onboard all-optical switching system.
+
+#### SIGN UP FOR Advanced Devices & Instrumentation eTOC ALERTS!
+
+Get the latest SPJ table of contents delivered right to you!
+
+GET OUR E-ALERTS
+
+## Introduction
+
+Laser communication offers a number of advantages over traditional microwave communication, including a larger communication bandwidth, a higher communication rate, and enhanced security and confidentiality. These benefits are attributed to the high-frequency band, short wavelength, and narrow beam of laser communication. In recognition of these advantages, numerous organizations in various countries have conducted a great number of in-orbit experiments and technology verifications for the construction of satellite laser communication constellations. The earliest laser communication experiment was conducted by the European Space Agency’s (ESA) Semiconductor-laser Intersatellite Link Experiment project in 2001, achieving a maximum data rate of 50 Mbit/s on the geostationary Earth orbit (GEO)–low Earth orbit (LEO) link [1]. Amazon’s Kuiper research started in 2018 [2]. SpaceX’s constellation Starlink, which is currently under operation, has already completed the launch of thousands of satellites. In satellite V1.5 of Starlink, the laser communication module has already been installed for establishing intersatellite links. As asserted, the communication speed can reach up to 200 Gbps [3]. Also, there are other examples of satellite constellations, including Telesat from Canada [4], Tesat from Germany [5], OneWeb from the UK, and the Hongyan and Xingwang constellations from China. An increasing number of laser communication satellites are being launched into space for data transmission.
+
+As the volume of data for intersatellite communications continues to grow and the number of terminals expands, the issue of data switching assumes greater significance and demands attention. The exponential increase in the number of point-to-point communication links, coupled with the increased data on these links, which are prone to blocking, loss, delay, and errors in communication services, has led to a demand for the transmission and switching capacity of satellite links. Meanwhile, laser communication satellites, particularly those in low orbits, has to face challenges from SWaP (space, weight, and power). The power of electrical switching devices is typically high, particularly for communication devices employed in higher-order modulation formats. For example, a single typical 100G coherent transponder already reaches 100 W of power [6]. Concurrently, the bandwidth gets constrained by optoelectrical conversions, restricting the further upgrade of transmission rate [7]. LEO satellite platforms do not have enough power to support the operation of a multitude of electrical switching devices. All-optical switching technology enables the conversion of signals with low power consumption, which enhances the flexibility of node connections, along with quality of service (QoS) improvement. Furthermore, all-optical switching technology facilitates the control of transmission and reception. Optical signals can be routed across intersatellite links flexibly, without the requirement for optoelectrical conversion and the process of encoder/decoder [8]. The deployment of low-latency switching technology has the potential to enhance the capabilities of satellite communications in comparison to those of terrestrial communications, particularly over extended distances and across continental regions [9]. In certain industries, such as the financial industry, including stock exchanges, with the help of satellite communications, a slight advantage in latency (typically in milliseconds) could potentially result in substantial financial gains, amounting to billions of dollars in revenue [10].
+
+A top-to-down design of the onboard optical switching module is essential for achieving rapid switching of optical signals at higher rates between satellites. Engineers must consider how to determine the switching requirements of satellites at different layers based on the existing satellite network plan and how to select the appropriate switching mode and corresponding devices to build the onboard optical switch physically, based on different switching requirements. Given that the satellite constellation plan takes decades into consideration, it is prudent to select high-performance switching modes and devices for future communication requirements. On Earth, optical switching technology has grown for decades and offers much experience to draw upon. Building on mature applications, changes have to be taken in optical switching adapting to the space environment, including considerations of capacity, speed, power consumption, and size.
+
+This paper introduces the technology of all-optical switching in intersatellite laser communication, including reviews on laser satellite communication networks and switching requirements, switching modes, and optical switch units (OSUs). The following order is observed in the presentation of the content of this paper: Laser Communication Network and Switching provides an overview of the architecture and switching requirements of satellite laser communication networks. Optical Switching Mode introduces the principles of various optical switching modes, their application scenarios, and the diverse requirements for switches. In Optical Switching Core Units, we introduce different OSUs concerning their principles, application scenarios, and development directions. Finally, Results and Discussion presents a summary of all of the above.
+
+## Laser Communication Network and Switching
+
+The majority of existing satellite communication utilizes microwaves (usually in the Ku and Ka bands) as the main medium for space communication, with circuit or baseband switching strategies. The principal switching technologies employed include the asynchronous transfer mode [11] and Internet Protocol (IP) [12,13] technology. The 2 technologies in question exhibit distinct characteristics. As a result, asynchronous transfer mode is faster and offers a higher QoS, whereas IP has a lower bit error rate (BER) and a higher transmission efficiency. However, as the transmission medium for communication between satellites transitioned from microwaves to laser, the electrical switching system has to use encoders and decoders to facilitate the switching of optical signals. This resulted in a notable increase in the complexity of the switching system, accompanied by a rise in power consumption and volume. The signal between satellites is transmitted at the optical layer, while the switching is performed at the electrical layer. As the communication rate of laser communication increases, the complexity also rises. It generally becomes untenable due to the strict power and volume limit for satellite platforms. Concurrently, the communication rate is constrained by the limitations of electronic devices. It has long been recognized that the volume, weight, and switching efficiency of optical switching devices exceed those of their electrical counterparts. In the context of microwaves, this has led to the practice of converting microwaves into optical signals for switching, which yields better results [14]. Intersatellite optical switching did not truly attract attention until the construction of intersatellite laser networks had begun. The industry then began to explore the potential applications of all-optical switching, designing network architectures, switching modes, and routing algorithms, as well as integrated, high-capacity, small-volume onboard optical switches.
+
+Figure 1 illustrates the status of the connections between satellite and terrestrial networks. The power-hungry, bulky, and complex designs of the routers currently in use on the ground preclude the introduction of a routing layer into satellite optical communication networks [15]. In the context of satellite networks, only layer 2 switchings will be employed for the establishment of connection-oriented networks. With the exception of geosynchronous networks, all mobile satellites (in relation to terrestrial terminals or other satellites in the same constellation) must be capable of coping with path rerouting during a session. Two potential solutions exist to this problem. The first is to provide storage to buffer data during network reconfiguration, allowing for a delay of several seconds in the data flow. The second is to equip the spacecraft with additional cross-link hardware, enabling a “connect first, disconnect later” approach to connections. For LEO and medium-Earth-orbit (MEO) systems, end-to-end connections may involve dozens of nodes with cross-orbit plane links, which introduces complexity to the path routing management system due to the need for frequent reconfigurations. In the context of LEO and MEO satellite laser communication, the main requirements for switching design are enhancing the resilience of the switching system, addressing conflicts and data loss resulting from varying communication delays when multiple satellites are connected, and optimizing the utilization of link resources to establish a maximum number of channels while maintaining link stability to achieve higher communication rates.
+
+Fig. 1. The connections between satellite and terrestrial networks [19]. Reference [19] is reprinted with permission from IEEE. IAN, inter-area network.
+
+In the case of GEO satellites, distinctive orbit characteristics facilitate the establishment of robust connections to the ground, and the satellite platform shows more resilience on SWaP, allowing for the integration of sophisticated components. GEO satellites and the links between them are well suited to serve as the backbone of the overall satellite network, responsible for a big data switching with the ground. Given that GEO satellites have higher latency in communication with the ground than MEO/LEO satellites, the GEO–ground communication channel is more conducive to latency-insensitive, large-capacity wavelength division multiplexing (WDM) signal transmission. The conception of a “backbone network” in space was initially proposed by Chan in 2003 [16]. It is anticipated that the backbone network link will serve as a bridge between terrestrial high-capacity optical fiber networks and satellite laser communication networks. In addition, the architecture of the backbone network has prompted researchers to propose new algorithms and structures that diverge from those typically employed in terrestrial backbone networks, such as the multi-time slot switching technology for the backbone network proposed by Wang et al. [17], the ring structure of the backbone network and the introduction of reconfigurable optical add/drop multiplexer (ROADM) nodes proposed by Li et al. [18], and the proposal of a high-orbit data center satellite by Yao et al. [19]. In the context of a GEO-based backbone network, the main requirement of switching design is to address the challenges posed by conflicts and data loss resulting from different delays in access links. Additionally, the aim is to facilitate the deployment of large-scale, high-capacity optical switching systems with data rates reaching hundreds of gigabits per second or even terabits per second in GEOs.
+
+## Optical Switching Mode
+
+In response to the disparate switching requirements of optical signals from GEO, MEO, and LEO satellites, different all-optical switching modes can be adopted for usage on satellites, including optical circuit switches (OCSs), optical burst switches (OBSs), and optical packet switches (OPSs). In complexity, OPS > OBS > OCS, as well as in efficiency. In OCSs, the “connection establishment–transmission start–connection release” strategy is employed for transmission, with control commands and signal data transmitted serially. One single transmission service is permitted on one given link at any given time, with assured QoS. The control signals and signal data of OBSs and OPSs are transmitted in parallel, with a burst/packet constituting the basic unit of transmission. The switching is more flexible, with greater use of link resources, but there is a possibility of communication conflicts, and the system is more complex. It is necessary to select an appropriate OSU for each switching mode according to the OSU’s capacity and latency. This section introduces the operational principles of different switching modes, the scenarios in which they are applicable, and the disparate requirements of different modes for OSU design.
+
+### Optical circuit switch
+
+The OCS technology employs optical wavelengths as the unit of exchange. The switching process includes 3 stages: optical path establishment, information transmission, and optical path release. The primary characteristic of OCS technology is that, provided that the optical path is established and maintained, a round-trip time is necessary. The information necessary for establishing the link must be transmitted from the transmitting end to the receiving end via each node in order to establish the optical path. Once the transmission is complete, the release signal is transmitted from the receiving terminal through each node to the transmitting terminal. The optical channel for transmission must be occupied for a lot of time. OCSs are typically employed to address long-term, high-capacity, and stable data transmission requirements [20]. Their relatively uncomplicated switching system enables communication through a simple 2-way reservation of resources. Furthermore, given the relatively low communication workload, the majority of initial laser communication experiments typically employed a single wavelength (usually 1,550 or 1,064 nm [21]). Consequently, OCSs emerged as the predominant switching solution for these initial on-orbit laser communication experiments.
+
+Additionally, some researchers have put forth a transmission mode designated as optical flow switch [22]. It is an exchange mode between an OCS and an OBS. However, the transmission period is shorter than the cycle period, and the transmission unit is data flow, which offers greater flexibility than an OCS. The 2 transmission modes can be considered to be essentially the same. The processing procedures of the 2 transmission modes are illustrated in Fig. 2.
+
+Fig. 2. Signal transmission process of an optical circuit switch (OCS) and an optical flow switch (OFS). sat., satellite; ack., acknowledgment.
+
+In satellite communications, multiple data channels may be utilized to facilitate the simultaneous download of data from a satellite to a ground station via a series of intermediary hops. An extended occupation of the optical path can result in serious congestion issues. It can be concluded, therefore, that an OCS is not an appropriate technology for large-scale intersatellite optical switching applications, particularly in large constellations. As with its extensive utilization on terrestrial data centers [23,24], the primary advantage of an OCS remains the multiport, high-capacity signal exchange capable of reaching the terabits per second level. Therefore, while an OCS is a simple solution for initial orbital testing, it is anticipated that it will be employed as a dedicated line switching solution for high-capacity links in high-orbit satellite backbone networks in the future. In this case, the OCS system will aggregate data from LEO and MEO constellations and transmit it to the constellation and ground stations.
+
+In order for the OSU to meet the requirements of the OCS, it is necessary to ensure that the number of ports is sufficient and that its capacity is large enough. This is due to the fact that the viewing angle of high-orbit satellites is very large, and it is therefore essential to be able to connect to multiple constellation nodes and ground stations simultaneously. Given the long data transmission time and the relatively stable attitudes of GEO satellites, it is reasonable to control the switching time on the satellite to minutes or seconds (considering the switching speeds of the mechanical pointing system). Both the arrayed waveguide grating (AWG) and wavelength-selective switch (WSS) solutions can be utilized for OCS switching in the backbone network.
+
+### Optical burst switch
+
+OBSs represent an effective solution to the challenge of transmitting high-speed burst data streams in communication networks. A burst is defined as a traffic flow resulting from a period of idle time between 2 busy periods when a large number of packets arrive at the user. This phenomenon is more prevalent in data streams than in voice services, which typically exhibit a more continuous bit stream. An OBS has 2 key advantages. First, it provides a high bandwidth and the same packet-based switching granularity as an OPS, eliminating the need for complex optical buffering. Second, it offers lower packet processing overhead, comparable to that of a wavelength-routing network. Consequently, the performance parameters of OBSs fall between those of OCSs and OPSs.
+
+An OBS system operates according to the following principle: Prior to the occurrence of a transmission burst, the edge router is required to first generate a control packet and transmit it to the intended destination. Control packet and subsequent data bursts are demultiplexed, assembled, and packaged by different parts, as shown in Fig. 3, and sent to different units for processing. This action serves to establish the optical channel that will be utilized for the transmission of the burst. As the control packet is transmitted toward the destination, each OSU along the optical channel converts the control packet into electronic form and attempts to locate and reserve a wavelength channel that can accommodate the burst. Subsequently, the burst switch is able to allocate an appropriate transmission time slot on the subsequent optical channel segment for the wavelength that is carrying the burst, prior to the arrival of the burst. The burst does not await confirmation of a successful bandwidth reservation; rather, it is transmitted shortly after its control packet. In the event that the control packet is unsuccessful in reserving the requisite resources, the corresponding burst is discarded. The bursts are forwarded on a hop-by-hop basis until they reach the destination edge router, where they are decompressed and converted into raw packets. As the switching structure is established prior to the arrival of the bursts, they are all switched optically. This approach to reserving time for bursts to arrive is referred to as burst scheduling.
+
+Fig. 3. Optical burst switch (OBS) system components [115]. Reprinted with permission from the Institution of Engineering and Technology.
+
+The OBS switch design necessitates a more rapid switching rate than that of an OCS, given that a sudden burst is smaller in granularity. An optical switch with a switching delay of less than a microsecond is required for an OBS, determined by the frame structure of the signal. In certain instances, an OBS using microelectromechanical switches (MEMSs) may switch at the millisecond level. The OSU used in OBS systems can be selected from devices with high switching speeds, such as AWG devices [18] and fast optical switch arrays [17], or, depending on the lower switching speed requirements, switching devices with higher integration, such as MEMSs, can be selected.
+
+In contrast to the scenario where a physical connection (like optical fiber) on the ground is consistently maintained, the establishment of the link onboard frequently requires several minutes (and may even need tens of minutes to several hours for the initial establishment). Consequently, a stable and rapid connection comparable to the plug-in of optical fiber on the ground cannot be attained between satellites. Furthermore, the rapid movement of the satellite terminal introduces a marked change between bursts’ delay, which may result in congestion [17]. In light of these challenges, numerous researchers have proposed enhanced OBS solutions [25]. Currently, the primary focus of research on onboard OBS technology is the assessment and optimization of QoS for diverse switching services [26,27], the reduction of port contention [28], and the optimization of network protocols [29].
+
+### Optical packet switch
+
+OPS technology is distinguished by a number of key characteristics: high capacity, flexible switching, transparent speed and format, fine granularity, reconfigurability, and high resource utilization [30]. The concept of OPSs is that user information flows are routed and transmitted in the network in a specific optical data packet and that the control information within the optical data packet is contained in a packet header or label of a specific format. In the OPS systems that have been deployed thus far, both the processing and routing of packet headers have been conducted in the electrical domain. For each individual data packet, the exchange of the optical payload occurs in the optical domain. This separation of packet header or label processing from the exchange of the payload allows for the routing of data packets to be independent of the payload bit rate, coding format, and packet length.
+
+Optical label switching represents a practical technology for the implementation of OPSs. In order for an optical format data packet (containing a standard IP header and payload) to be successfully transmitted within an OPS network, it must first be associated with an optical label or control packet [31]. It is important to note that in some OPS systems, the wavelength utilized to transmit labels may differ from that employed for data packets. In the event that a data packet bearing an optical label is transmitted through the OPS network, the optical packet switching occurring at intermediate nodes will only process the optical label in the electrical domain. Optical packet switching should occur subsequent to optical label processing, with a designated amount of skew time. This allows for the extraction of routing information from the data packet and the determination of factors such as the wavelength utilized for data packet transmission and the bit rate of the payload. As the payload remains transmitted in optical format within the network, any modulation scheme can be employed and encoded at high bit rates.
+
+In general, OPSs require switching times that are very fast (in nanoseconds) so that the switching time overhead is negligible in comparison to the packet transmission time. Similar to OBSs, AWG devices and rapid optical switch arrays (e.g., OSUs based on semiconductor optical amplifiers [SOAs]) are frequently employed.
+
+In the course of its evolution, the field of optical packet switching has witnessed the emergence of numerous architectural proposals. Many of these architectures seek to address the contention issue in OPS networks, which arises when multiple incoming packets are destined for the same output port. OPS architectures can be classified as either with-buffer or without-buffer, as illustrated in Fig. 4 [8]. In contrast to with-buffer architectures, without-buffer architectures do not employ buffers for packet storage. Instead, they utilize tunable optical wavelength converters (WCs) to address contention resolution. In contrast, a with-buffer architecture typically employs fiber delay lines or all-optical variable delay buffers to store data while contention is being resolved. Nevertheless, the efficiency and loss of wavelength conversion remain unresolved issues, and the practicality of optical buffer technology is still uncertain, particularly in the context of its deployment on satellites. Consequently, although an OPS is sufficiently flexible to utilize the limited intersatellite communication resources and is an optimal architecture for interconstellation optical switching, it remains challenging to implement in satellite platforms. In terms of research, the primary focus is on the design of optical buffer solutions [32,33] and the utilization of advanced optical buffer devices. The handling of low-latency exchange requests is also a current research area of interest [34].
+
+Fig. 4. Structure of the optical packet switch (OPS) system with-buffer (A) and without-buffer (B) [8]. Reprinted with permission from the Institution of Engineering and Technology. DMUX, demultiplexer; SYN, synchronizer; WC, wavelength converter; MUX, multiplexer; OBU, optical bypass unit.
+
+### Summary
+
+The 3 principal optical switching modes are currently OCSs, OBSs, and OPSs. OCSs are the most prevalent in actual satellite applications, with simple experimental systems based on OCSs. OPSs are currently inapplicable to intersatellite laser communications due to the complexity of their system and the immaturity of their components. Given that current intersatellite communication services are primarily composed of end-to-end multiservice, multigranularity links and the resource allocation mechanism remains immature, OBS technology is the most promising switching mode for widespread intersatellite applications. Given the considerable volume of microwave communication, the switching mechanism can accommodate the compatibility of microwave/laser technologies. Furthermore, the development of a multimode compatible switching system that caters to the diverse communication requirements of OCSs, OBSs, or even OPSs [22] is an effective approach to integrating with existing satellite networks.
+
+Of course, each switching mode requires a reasonable network routing protocol and control algorithm to operate efficiently. The issues involved include wavelength allocation, topology, and order of service distribution. In the absence of a routing layer, a dedicated algorithm needs to be designed, and an execution unit needs to be carried on the satellite to route connections. Inspired by the software-defined network architecture, researchers have proposed the development of hierarchical optical wavelength-routing technology for information networks, which is called software-defined satellite networks [21]. A software-defined satellite network uses some satellites as nodes responsible for data forwarding, while other satellites act as control nodes, responsible for global network node management. It centralizes data from the management layer for global information access and can efficiently achieve functions such as resource scheduling optimization, information routing, and congestion control [35]. As more computing resources, ranging from simple field-programmable gate array chips to onboard computers, are deployed on satellites and as edge computing architectures are introduced [36–38], it is anticipated that intersatellite links will achieve greater capacity and more flexible link switching, thereby attaining the same level of performance as terrestrial data centers.
+
+## Optical Switching Core Units
+
+The OSU is the most critical component in switching technology, and its performance directly determines the performance of optical switching. In order to construct an all-optical network, a variety of optical components are necessary, including transmitters, receivers, optical fibers, optical amplifiers, multiplexers/demultiplexers, WCs, OSUs, and other related devices. The OSU is the fundamental element in the construction of an optical network, providing switching services. The structure of the OSU typically uses 1 of 2 configurations: the optical cross-connection (OXC) or the optical add/drop multiplexer (OADM) structure. An OXC is a device comprising multiple input and output ports, which enables the switching of optical signals from one port to another. An OADM is designed to execute selective data transmission to and from local nodes, without influence on other channels. In general, all-optical switches achieve the all-optical, dynamic, and nonblocking routing of input optical signals from the input port to any available output port. The optical signals traverse the OSU without undergoing an optoelectronic conversion. Consequently, connections are established between fibers that convey signals at any data rate or protocol. When the input optical signal is composed of multiple wavelengths or channels, as illustrated in Fig. 5A, the OSU can be employed as an optical fiber switch cross-connect. If the incoming optical signal is initially demultiplexed into discrete wavelengths, the demultiplexed wavelengths are then routed by the optical switch and subsequently multiplexed into the output fiber. The optical switch thus becomes a WSS. In the case of a WSS, each wavelength reaches a specific N × N OSU, as illustrated in Fig. 5B. The number of ports N is equal to the number of input fibers, and the number of switches M is equal to the number of wavelengths.
+
+Fig. 5. The structure of an optical cross-connection (OXC) with initially multiplexed input (A) and demultiplexed input (B) [116]. Reprinted with permission from IEEE.
+
+The rapid development of terrestrial backbone networks and data centers has resulted in the emergence of numerous OSUs, either already available or currently under development, including optomechanical switches, thermal–optical switches, electro-optical switches, switches based on couplers and resonators, phase-change-material (PCM)-based switches, SOA-based switches, switches based on AWGs, switches based on liquid crystals, and switches based on other switching mechanisms. Much excellent and innovative research has been conducted on the development of faster and more efficient optical switches. However, given the stringent requirements for device maturity in the aerospace industry, the initial devices to undergo in-orbit testing are often mature commercial OSUs that have been extensively studied and utilized. Accordingly, this section concentrates on such devices that are currently extensively used in terrestrial optical communication systems and are anticipated to be employed in commercial aerospace applications or devices that have already undergone in-orbit tests, including OSUs based on MEMSs, AWGs, and other mechanisms, as well as WCs used in conjunction with OSUs, and WSS&ROADM systems. Furthermore, the intersatellite communication scenarios applicable to each are analyzed.
+
+### Optical switch units
+
+#### Microelectromechanical switch
+
+MEMSs have long been important components in satellite communications. In the context of radio-frequency communications, MEMSs have become integral components in multibeam antennas and high-speed data relay systems, enhancing the performance and reliability of microwave communication systems [39]. When it comes to laser communication, MEMSs are usually employed in conjunction with reflective lenses. In addition to being manufactured into a fast-response mirror to participate in the pointing and capture tracking of laser communication beams [40,41], MEMSs can also be utilized in the form of a micromirror array, as Fig. 6 shows, where the moving micromirrors are mechanically rotated in 2 axes to alter the direction of input light propagation, thereby achieving switching.
+
+Fig. 6. Microelectromechanical switch (MEMS) micromirror array [116]. Reprinted with permission from IEEE.
+
+In the context of microwave communication, Benazet et al. [42] already used a MEMS micromirror array for the conversion of Ka-band satellite communication signals to C-band optical signals, facilitating their exchange in optics. Subsequently, the signals are converted to an optical format and amplified before being routed through an OXC. The advent of integrated optical communication technology for aerospace applications has facilitated the development of MEMS-controlled silicon waveguide-coupled optical switches, which are now being utilized for space communications [43]. As illustrated in Fig. 7A, an optical switch is constructed using a directional coupler. This structure is a composite structure, formed by the placement of 2 identical waveguides in close proximity to one another. This structure is capable of supporting 2 distinct optical modes, designated as “odd” and “even”. The odd and even modes propagate with different propagation constants and interfere constructively or destructively at varying points along the coupled transmission waveguide pair. The switching operations may be performed by modifying the distance between the waveguides. The formation of these switches into an array of 1 × N or N × N (Fig. 7B) enables the switching of signals at any port.
+
+Fig. 7. MEMS-based waveguide optical switch (A) and array (B) [116]. Reprinted with permission from IEEE.
+
+In addition to working with microscopes and waveguides, MEMSs have been employed in a multitude of other structures, largely due to their scalability. These include double-sided mirrors [44], optical micro-ring waveguides [45], 2-dimensional/3-dimensional MEMSs [46], and numerous other examples. Concurrently, the utilization of microfabrication technology helps with the integration of MEMS OSUs, which are characterized by their diminutive dimensions, low power consumption, and compatibility with compact satellite platforms. This constitutes a marked advantage of MEMSs. The operational principle of mechanical motion in MEMS devices inherently limits the switching speed of the device to approximately milliseconds. Among these, the switching time of MEMS OSUs based on adiabatic couplers can reach microseconds, while achieving a wide bandwidth (approximately 300 nm); 3-dimensional MEMSs exhibit the highest port scalability. These characteristics allow for the use of MEMS OSUs in OCSs or OBSs, depending on the different operating principles.
+
+#### Arrayed waveguide grating
+
+An AWG is an attractive passive optical component to construct optical switching networks, because it does not consume any power and has a small insertion loss even with a large number of ports. The structure of an AWG is shown in Fig. 8. An AWG with multiple inputs and outputs is essentially a fix-pattern wavelength router. The AWG forwards the signal at an input port to an output port, depending on the wavelength of the signal. Moreover, the AWG is wavelength-contention-free: an input reaches different outputs through different wavelengths, and different inputs do not access to the same output via the same wavelength.
+
+Fig. 8. Structure of an arrayed waveguide grating (AWG) [117]. Reprinted with permission from IEEE.
+
+Some researchers use AWGs to perform network architectural design and experimental simulation of intersatellite laser communication and have achieved an improvement in the system bit error rate by using sparsely configured AWG devices and an open-ring structure [18]. Other researchers have used 2 × N AWG OSUs to participate in the design of network units for free-space optical communications [47]. In terrestrial optical switching, AWGs are widely used in OXC and WSS devices as input, dispersion, and switching units [44–46].
+
+AWG OSUs have advantages in port capacity and switching speed (nanosecond level). Considering the potential low cost and compact size brought by mature integrated manufacturing processes [48], AWGs have been used in various types of optical switching networks [49]. In satellite laser communication networks, AWGs can take advantage of their small size and large port capacity to be carried on LEO or MEO satellites, where they can serve as small nodes responsible for accessing multiple terminals. The main problem with current AWG OSUs is that high cross talk limits the number of ports that can be used [49]. Researchers have proposed various methods to suppress cross talk in AWGs, including a modular architecture for multistage networks [49] and adjusting the bend angle of the AWG to reduce cross talk [50].
+
+#### Other OSUs
+
+Magneto-optical switch. A magneto-optical switch is a relatively simple optical switch that employs a polarization diversity design and a current-controlled magnetic field to facilitate switching. The switching speed can reach the microsecond level, and it can be used in OCSs. The simple structure of this device contributes to its high reliability. To the best of our knowledge, commercial devices have been tested in orbit, and some researchers have also employed it as a low-power switching device in hybrid switching architectures [18]. Numerous novel switching devices have been devised based on the Faraday rotation [51–53]. Recently, studies have also been conducted combining magneto-optical switches and waveguides, resulting in a marked increase in the switching speed of magneto-optical switches to 200 ps [54]. This illustrates that magneto-optical switches still possess considerable potential for further development.
+
+SOA. SOA OSUs are employed to provide ultrafast optical switching. Such devices are frequently employed in conjunction with optical couplers/splitters to construct an optical switch array, where the SOA serves as the switching apparatus to establish the requisite optical path. The switching time of an SOA-based optical switch is in nanoseconds, as evidenced by Guo et al. [55] and Renaud et al. [56]. Furthermore, zero-loss optical switching can also be achieved. It is anticipated that SOA OSUs will become the preferred choice in OPS systems. However, they have limited ports and, as amplifiers, they exhibit high power consumption in integrated cases, rendering them unsuitable for large-scale use in backbone networks. Nevertheless, they can be employed as switching technology for small satellites, with an SOA array comprising several ports utilized on a single satellite to reduce the overall switching delay of the constellation.
+
+OSUs based on a change in refractive index. This includes thermo-optical switches, electro-optical switches, and optical switches that employ PCMs. The underlying principle is the alteration of the refractive index of the material, which enables the switching of light [57–59]. The switching time of a thermo-optical switch is in the order of microseconds, that of an electro-optical switch is in the order of nanoseconds, and that of a PCM switch is between the 2. The scalability of the 3 is relatively average, and the primary challenge associated with their implementation is the ability to dissipate the power and heat generated by the electrical and thermal effects within the given space.
+
+In conclusion, these OSUs, which are based on different physical effects, are effective in terms of speed, with switching times of less than microseconds. However, they are not optimal in terms of port numbers. They are well suited for optical switching on the terminal satellites of laser communication networks as interconnections of the intersatellite links of LEO. However, it is essential to consider methods to reduce the size and power consumption and minimize heat generation to align with the operational constraints of small satellites (or CubeSats). Given that satellites continue to rely primarily on electricity as their main energy source, it may be advantageous to consider the potential for earlier integration of magneto-optical switches and electro-optical switches based on electric control, taking into account the need to minimize energy conversion and loss.
+
+### Wavelength converter
+
+WCs represent a crucial element within the context of switching systems. The typical operation of some OSUs necessitates the involvement of WCs. To illustrate, when devices such as AWGs and MEMSs operate as OXCs, they are only capable of physical beam switching. In order to process WDM signals, these devices must be used in conjunction with WCs in order to facilitate switching between different wavelength channels. Wavelength conversion can be defined as the process of converting transmitted information from one wavelength to another. Wavelength conversion technology represents a fundamental technology in WDM optical communication systems and all-optical switching networks. It can enhance the flexibility, scalability, and reliability of the network [60]. Presently, researchers employ WDM technology and wavelength allocation [61,62] to enhance the transmission capacity and spectral utilization of intersatellite optical links in the context of satellite laser communication. However, due to the characteristics of satellite services, such as their inherent unpredictability and variability, allocating fixed-size bandwidths for different services can easily result in the waste of valuable spectrum resources, thereby further exacerbating the shortage of bandwidth resources. In contrast, a distributed WDM satellite network is prone to wavelength conflicts due to frequent information exchange and multi-hop forwarding. Furthermore, the limited continuity of wavelengths restricts the number of access services that can be supported in the satellite network. In the current research on satellite optical networks, optical data are exchanged between channels at the link or wavelength level, and there are few methods for flexible bandwidth allocation and exchange. Consequently, the introduction of wavelength conversion at key nodes in the satellite optical network can effectively reduce service blocking caused by wavelength conflicts between nodes and improve the transmission capacity and spectral utilization of the intersatellite optical link.
+
+A variety of technical methods can be employed to achieve wavelength conversion. One of the more prevalent techniques is to leverage the 4-wave mixing (FWM) phenomenon of a material to achieve wavelength conversion. This involves utilizing pump light and input signal light to generate novel wavelengths in a nonlinear medium. In FWM, 2 pump photons interact with a signal photon to produce a new signal photon and a photon of the idle frequency. In the context of all-optical wavelength conversion based on FWM, researchers are also directing their attention toward enhancing conversion efficiency and achieving wavelength conversion more delicately or in wider spectral ranges. One direction is to use materials with higher nonlinear coefficients to improve the efficiency of the nonlinear conversion process; 2-dimensional materials, such as graphene oxide, have been demonstrated to possess high nonlinear coefficients [63,64]. Another direction for optimization pertains to the pump source. The realization of a pump source with a narrower peak width and delicate tunability would permit the generation of free-spectrum light with the same high quality and carrying the information of the signal light [65,66], as would be produced by an FWM process. Moreover, the use of waveguide structures has enabled researchers to identify that particular resonator structures can augment the FWM effect, thereby facilitating more efficient wavelength conversion [67,68]. These resonator structures, which are based on SiN materials and silicon-on-insulator technology, are compatible with the complementary metal–oxide–semiconductor technique. Consequently, it is anticipated that wavelength convertors can be integrated on chips, thereby conserving space in communication modules.
+
+In addition to the FWM effect, other nonlinear effects can achieve wavelength conversion, including third harmonic generation [69,70] and coherent anti-Stokes Raman scattering [71]. It is anticipated that in the future, wavelength conversion devices with enhanced performance and increased integration will emerge. Furthermore, nonlinear devices can also be utilized in satellite communications for the recovery and regeneration of laser communication signals transmitted over long distances [72,73], indicating that nonlinear devices may become more prevalent in future satellite communication networks. Highlight studies among the references above are listed in Fig. 9.
+
+Fig. 9. Highlight studies about wavelength converters [63,66,69,71]. Reference [63] is reprinted with permission from Elsevier. Reference [66] is reprinted with permission from IEEE. Reference [69] is reprinted under a Creative Commons Attribution 4.0 International License. Reference [71] is reprinted with permission from the American Chemical Society. GO, graphene oxide; FWM, 4-wave mixing; THG, third harmonic generation; CARS, coherent anti-Stokes Raman scattering.
+
+### WSS&ROADM
+
+The lack of wavelength-level-switching operation capabilities inherent to both MEMS optical switches and AWGs necessitates the use of WCs to enable optical switching functions for arbitrary channels. When it comes to wavelength division multiplexing signals (up to dozens of channels) and multiterminal access, the deployment of a WC for each channel will inevitably lead to an increase in the size and power of the system, which is a great challenge for satellite platforms. In contrast, a WSS is equipped with the capability to manage disparate wavelength channels with a built-in multiplexer/demultiplexer. Additionally, the spectrum allocation for switching requests is adaptable. Consequently, when deployed in an OXC, it can attain enhanced processing efficiency in handling big data within the backbone network. Furthermore, it is well suited for satellite backbone data transmission on large satellite platforms, including MEOs and GEOs. Additionally, a WSS can be utilized in a ROADM as a core component of the node to facilitate the uplink and downlink functions of big data in space and to more effectively utilize the backbone network as the core network connecting various constellations and ground networks.
+
+#### Wavelength-selective switch
+
+The main function of a WSS is to “disperse and select” WDM signals. “Disperse” refers to separating the different wavelength components in the WDM signal, and “select” refers to distributing the separated different wavelength components to any target port as needed. The distribution process is usually realized by deflecting the angle of the optical beam in combination with a Fresnel lens, which displaces the optical beam in the direction parallel to the optical axis. For an optical fiber array arranged in the same direction, this means that the beam enters and exits from different ports. There are several main technical solutions for WSSs. MEMS mirrors are used to deflect the beam by controlling the deflection of the mirror array. They have a low loss and a simple optical path, and the port scalability is good. With the help of semiconductor manufacturing technology, a very small device size can be achieved, but MEMS mirrors do not support flexible grid characteristics, which are a very valuable feature in communication [74,75]. They can improve the spectral utilization rate while increasing the transmission rate [76]. The liquid crystal with crystal optical wedge solution is also a feasible solution. Generally, the polarization state of the light beam is adjusted by controlling the liquid crystal, and then the controllable deflection of the light beam is achieved with the help of the crystal optical wedge. However, the overall system is more complex and has poor port expandability.
+
+The liquid-crystal-on-silicon (LCOS)-based spatial light modulator is currently the mainstream WSS solution used in communications because it supports flexible grid characteristics and has good port expandability. The basic structure of a LCOS-based WSS is shown in Fig. 10. Fiber IN inputs the dense wavelength division multiplexing (DWDM) signal, which is switched to other output ports by writing a phase grating on the LCOS. Since LCOS devices [77] and dispersion devices are phase sensitive, polarization diversity components are necessary. The beam-shaping units change the shape of the beam converging onto the surface of the LCOS device, while the diffraction grating is responsible for separating the beam of different wavelengths. The combination of these 2 implements the disperse-select function of the WSS. A grating with a different period is loaded onto the LCOS to change the wavefront of the beam and deflect the signals of different wavelengths, thereby transmitting the input WDM signal to any target port.
+
+Fig. 10. Schematic of wavelength-selective switch (WSS) based on liquid crystal on silicon (LCOS) [118]. Reprinted with permission from Elsevier. SLM, spatial light modulator.
+
+Compared to optical switching arrays [17,78], which are more commonly used in current onboard switching technology, a WSS has unique advantages. Optical switching arrays cannot process signals at the wavelength level and need to be combined with other components to access WDM signals. As the current satellite laser communication is mainly in the small-scale in-orbit test stage, the optical switch array is suitable for this kind of small network test. The WSS, on the other hand, natively supports fine control of DWDM signals at small intervals (50 GHz or less) and is capable of handling communication signals at higher rates. Due to the wide range of modern satellite communication system services, the volume of communications data may increase dozens of times as the number of satellites increases. A WSS is able to better serve the backbone network and handle all kinds of communication signals at higher rates. At present, the switching speed of a WSS is mainly from milliseconds to seconds. The applicable scenario is mainly the large-capacity data exchange in the backbone network, and small WSS devices can also be used in the on-orbit experiments of WDM signal transceivers. The switching speed of a WSS is expected to be further improved by improving the electrical control [79].
+
+Currently, most of the research on WSS devices focuses on more ports [80–82], lower loss [83–86], and more integrated design structures [87–91], which are optimized by combining the techniques of novel materials [92], new structures [90,93–95], and integrated optical design [96,97]. In addition to being the basic unit of ROADM nodes, a WSS can also be used as a component of the wavelength conversion of intersatellite links and participate in multichannel up-and-down conversion [98], and with the development of intersatellite communication networks, a WSS will have more application opportunities with its large-capacity switching ability and flexible wavelength handling.
+
+#### Reconfigurable OADM
+
+As a satellite-carried OADM node is unable to artificially modify the hardware equipment to achieve the add/drop (A/D) configuration change that is possible on the ground, it is necessary to establish a ROADM node that can be remotely controlled in order to enable the normal A/D functions. Following over 2 decades of development, the ROADM has become a fundamental component of contemporary fiber-optic communication networks [99–102]. A reconfigurable all-optical communication network is achieved through the implementation of efficient channel picking and wavelength-level routing allocation at communication nodes. As a result of the uploading, downloading, and forwarding of communication signals all being conducted in the optical domain, a ROADM is compatible with a range of rates for wavelength channels and a variety of modulation formats for optical signals. This is achieved without being subject to the limitations of photo-optical conversion, which can restrict the speed of processing signals and introduce additional noise and power consumption. Consequently, a ROADM is capable of achieving lossless routing of optical signals at very low power.
+
+The fundamental configuration of a ROADM system is illustrated in Fig. 11A, which can be divided into 2 principal sections: the transmission part and the A/D part. The transmission part is primarily responsible for the allocation of WDM channels between different dimensions. The A/D part can download a portion of the input WDM signals from each dimension from the network to the local processing applications or upload new local WDM signals to the output ports of different dimensions for transmission to other nodes. The transmission part typically comprises a series of 1 × N WSS one-to-one cascades. The input WDM channel from a given dimension is assigned by the corresponding input WSS of that dimension either to the WSS of the target output dimension or to the local add and drop ports. If the WDM channel requires transmission to a subsequent destination, the target output WSS takes responsibility for multiplexing the WDM channel to the corresponding output port. This architectural configuration is referred to as the “route and select” architecture (Fig. 11C). In this architectural configuration, the passage of each WDM channel through 2 WSSs, and thus the application of 2 filters, results in the effective suppression of noise outside the channel’s spectral range [103]. This improvement in network transmission quality and distance is a consequence of the aforementioned suppression. This architectural approach has become the prevailing methodology for high-dimensional ROADM transmission. In theory, the 1 × N WSS at the input side can be replaced by a 1 × N splitter to reduce costs, which is called the “broadcast and select” architecture (Fig. 11B). The insertion loss of the splitter increases with the number of ports, however, limiting its applicability to lower-dimensional ROADM systems. Furthermore, this architecture results in a reduction in the transmission signal-to-noise ratio due to the lack of filtering capability inherent to the splitter.
+
+Fig. 11. Reconfigurable optical add/drop multiplexer (ROADM) structure (A), “broadcast and select” (B&S) architecture (B), and “route and select” (R&S) architecture (C) [103]. Reprinted with permission from the Chinese Journal of Liquid Crystals and Displays. A/D, add/drop; WXC, wavelength cross-connect; SS, space switch.
+
+The objective of future telecommunication satellites, as outlined by the ESA in the HydRON (High Throughput Optical Network) project plan, is to become interoperable with terrestrial high-capacity networks (in a seamless way), providing capabilities that are not currently available in terrestrial communication system (e.g., ubiquity, mobility, and multicast/broadcast), rather than continuing the provision of services in an isolated way, or offering satellite bandwidth to Internet service providers [104,105]. In conjunction with the advent of the backbone network concept and architecture [15,16], satellites must be equipped with onboard switching and A/D capabilities that are compatible with broadband switching operations. ROADMs represent a crucial technology for interconnecting onboard and terrestrial communications. They are capable of supporting the connection of optical communications traffic at rates of tens/hundreds of gigabits per second, and even terabits per second in terrestrial communication networks, which relies on DWDM signals with advanced modulation formats.
+
+The growing number of data center and metro-backbone network accesses and communication traffic on the ground has led to an increased demand for multiport, miniaturized, high-performance WSSs. Much research [80–82,87–91] has taken place with good improvement, which is particularly advantageous for satellite communication applications that are constrained by SWaP consideration. Stronger WSS OSUs allow for an increase in the number of access points, a reduction in the overall size, and a more efficient use of power. Some intersatellite network architecture models have commenced the design of onboard ROADM nodes [18]. However, given the limited scale of current space laser communications trials and the relatively low number of terminals connected to a single node, there are few in-orbit verification examples available to validate the application of ROADMs in satellite laser communication networks. Nevertheless, with the progressive establishment of intersatellite laser communication networks and the transformation of the backbone network from concept to reality, it is anticipated that ROADM nodes will be constructed on satellite platforms.
+
+The research on ROADMs is primarily classified into several categories. System design encompasses the structural design of the local A/D part [106,107], with an emphasis on an increased number of ports [108], a reduced blocking probability [109], and innovative structures employing micro–nano optics [110–112]. Additionally, there have been numerous investigations into routing strategies and system control [113,114]. ROADMs are a technology that has reached a high level of maturity and are now being used commercially in high-speed optical communication networks. The capacity of ROADMs to manage substantial quantities of intricate optical communications has been validated in data centers and metro-backbone networks. With the benefit of technological maturity, the advancement of satellite laser communication links/networks, in addition to the general evolution of the backbone network from concept to reality, ROADM technology is expected to be extensively utilized in intersatellite networks and to facilitate the integration of satellite and terrestrial optical networks.
+
+### Summary
+
+The various OSU performances referenced in this section are illustrated in Fig. 12. The most crucial performance indicators of the OSU are the number of ports and switching time. It is important to note that, despite the numerous optical switching mechanisms proposed by the research community over the years, the mature commercial products used in the communication industry remain concentrated in a few devices. In light of the exceedingly high standards for technical maturity and reliability inherent to space-based operations, MEMSs, AWGs, optical switch arrays, and WSSs remain the most promising OSUs for integration into orbital experiments and large-scale constellation applications in recent years. However, this prospect hinges on rigorous testing and verification, including vibration/heat/radiation resistance, and thermodynamic simulation, to ensure their suitability for the environment of aerospace. Based on mature all-optical switching technology, further work is required on the aerospace modification of the decided OSU, including the reduction of volume and power consumption, as well as the anti-vibration/radiation design. The objective of these modifications is to achieve the goal of taking an all-optical switching system into the satellite.
+
+Fig. 12. Number of ports and switching time of different optical switch units (OSUs). We combine a figure from Stepanovsky [116] and data from other references to make this figure as a comparison of different OSUs. Reference [116] is reprinted with permission from IEEE. SOA, semiconductor optical amplifier.
+
+## Results and Discussion
+
+As countries and institutions begin to deploy laser communication satellite constellations, transmitting optical signals of hundreds of gigabits per second among thousands of satellites, the intersatellite exchange technology for high-capacity optical signals has become a pressing problem that needs to be solved. Optical switching technology developed for terrestrial applications offers numerous potential solutions for satellite applications. However, the unique characteristics of the space environment necessitate the consideration of new problems. This paper presents the following conclusions:
+
+•
+
+The specific requirements for switching vary depending on the particular constellation. The GEO constellation is primarily responsible for big data switching with the ground, collecting data from various constellations, and sending switching control commands to constellations. It has higher requirements for the number of ports, communication capacity, and latency blocking. In comparison, the MEO and LEO constellations are smaller in scale, and the satellite platforms have stricter restrictions. Consequently, they have higher requirements for the power consumption and volume of the switching module, as well as for the flexibility of switching.
+
+•
+
+Different optical switching modes have different application scenarios. OCSs are currently used in on-orbit experiments and can be used in the future for high-capacity data exchange in backbone networks, as well as for small-capacity switching as a connection to node for terminal satellites. OBSs, as a more flexible optical switching technology, can not only be used in high-orbit backbone networks but also be widely used in medium- and low-orbit constellations for data exchange at key nodes. Although OPSs have even more ideal performance, their intersatellite application needs to wait for the further maturity of the technology. A multimode compatible switching system is more suitable for existing satellite communication planning, and the use of more computing resources can also effectively improve switching efficiency.
+
+•
+
+The selection of appropriate optical switches is decided upon the specific optical switching mode. A variety of optical switches, based on disparate principles, can be employed for intersatellite all-optical switching. MEMS micromirror arrays, magneto-optical switches, and WSSs are more suitable for OCS switching, while faster devices such as waveguide-based MEMSs, some optical switches, and AWGs can be used for OBS switching, but they require the use of WCs. In the context of the backbone network, the deployment of ROADM nodes based on WSSs can facilitate the realization of high-speed data uplink and downlink, thereby enabling the establishment of an integrated space–terrestrial network. Based on the highly mature design of terrestrial OSUs, the design of onboard OSUs should prioritize the reduction of power consumption and volume, as well as the enhancement of communication stability within the context of the spaceflight communication environment.
+
+•
+
+Besides the overview of the essential technologies involved in optical switching in satellite laser communication networks, we also present a comprehensive top-to-down design idea for an onboard optical switching system, encompassing the network layer, connection layer, and physical layer. This idea enables seamless integration of satellite and terrestrial networks, eliminating loss or conversion, and achieving efficient connectivity between satellite terminals and terrestrial terminals. It also allows for the full exploitation of the advantages offered by satellite laser communication while providing support for terrestrial communications and space exploration.
+
+## Acknowledgments
+
+Funding: The authors acknowledge that they received no funding in support for this research.
+
+Author contributions: F.L. was responsible for the primary references’ analysis and the writing, editing, and typesetting of the paper. S.Y. participated in the analysis and discussion of the references and made an important contribution to the conclusions drawn in the paper. Z.W., Z.X., K.Z., H.W., and Z.D. were responsible for collecting and organizing the references. Y.H. and Z.Z. provided detailed guidance, analysis, and revision comments on all of the work processes of the paper, from organizing references to writing and revising.
+
+Competing interests: The authors declare that they have no competing interests.
+
+## Data Availability
+
+Data are available within the article.
+
+## References
+
+1
+
+Zhang M, Liu L, Wan L, Sun J. How to perform communication for SILEX. Laser Optoelectron Prog. 2004;41(5):16–22.
+
+Google Scholar
+
+2
+
+Kohnstamm T. Everything you need to know about Project Kuiper, Amazon’s satellite broadband network. Amazon News. 2024. [accessed 18 Sep 2024] https://www.aboutamazon.com/news/innovation-at-amazon/what-is-amazon-project-kuiper
+
+Google Scholar
+
+3
+
+SpaceX. Starlink | Technology. Starlink. 2024. [accessed 18 Sep 2024] https://www.starlink.com/technology
+
+Google Scholar
+
+4
+
+Telesat. Telesat lightspeed LEO network | Telesat. Telesat. 2024. [accessed 18 Sep 2024] https://www.telesat.com/leo-satellites/
+
+Google Scholar
+
+5
+
+Tesat-Spacecom. Products-TESAT. Tesat-Spacecom. 2022. [accessed 18 Sep 2024] https://www.tesat.de/products
+
+Google Scholar
+
+6
+
+Ji YF, Zhang J, Zhao Y, Li H, Yang Q, Ge C, Xiong Q, Xue D, Yu J, Qiu S. All optical switching networks with energy-efficient technologies from components level to network level. IEEE J Sel Areas Commun. 2014;32(8):1600–1614.
+
+Web of Science
+
+Google Scholar
+
+7
+
+Hauschildt H, Elia C, Moeller HL, Schmitt D. ScyLight—ESA’s secure and laser communication technology framework for SatCom. Paper presented at: 2017 IEEE International Conference on Space Optical Systems and Applications (ICSOS); 2017 Nov 14–16; Naha, Japan.
+
+Google Scholar
+
+8
+
+Jue JP, Yang WH, Kim YC, Zhang Q. Optical packet and burst switched networks: A review. IET Commun. 2009;3(3):334–352.
+
+Web of Science
+
+Google Scholar
+
+9
+
+Chaudhry AU, Yanikomeroglu H. Free space optics for next-generation satellite networks. IEEE Consum Electron Mag. 2021;10(6):21–31.
+
+Web of Science
+
+Google Scholar
+
+10
+
+Chaudhry AU, Yanikomeroglu H. Laser intersatellite links in a Starlink constellation: A classification and analysis. IEEE Veh Technol Mag. 2021;16(2):48–56.
+
+Web of Science
+
+Google Scholar
+
+11
+
+Mertzanis I, Sfikas G, Tafazolli R, Evans BG. Protocol architectures for satellite ATM broadband networks. IEEE Commun Mag. 1999;37(3):46–54.
+
+Google Scholar
+
+12
+
+Walsh W. An architecture for IP multicast in satellite systems. Paper presented at: 2005 IEEE International Conference on Networking, Sensing and Control; 2005 Mar 19–22; Tucson, AZ.
+
+Google Scholar
+
+13
+
+Partridge C, Shepard TJ. TCP/IP performance over satellite links. IEEE Netw. 1997;11(5):44–49.
+
+Google Scholar
+
+14
+
+Baister GC, Gatenby PV, Aldridge N, Stace C, White H. The optical crossbar switch for signal routeing on board communication satellites. Int J Satell Commun. 1994;12(2):135–145.
+
+Google Scholar
+
+15
+
+Chan VWS. Optical satellite network architecture. J Opt Commun Netw. 2024;16(1):A53–A67.
+
+Web of Science
+
+Google Scholar
+
+16
+
+Chan VWS. Optical satellite networks. J Lightwave Technol. 2003;21(11):2811–2827.
+
+Google Scholar
+
+17
+
+Wang C, Yoshikane N, Guo HX, Gao X, Tsuritani T. OSBN: Architecture and control mechanism of optical switched satellite backbone network. Photonic Netw Commun. 2022;43(3):165–176.
+
+Web of Science
+
+Google Scholar
+
+18
+
+Li Y, Zhu Y, Li L, Guo Z, Hu W. Satellite backbone ring network with Ω-topology based on sparse configuration arrayed waveguide grating. Paper presented at: Asia Communications and Photonics Conference/International Conference on Information Photonics and Optical Communications (ACP/IPOC); 2020 Oct 24–27; Beijing, People’s Republic of China.
+
+Google Scholar
+
+19
+
+Yao HP, Wang LY, Wang XD, Lu Z, Liu YJ. The space-terrestrial integrated network: An overview. IEEE Commun Mag. 2018;56(9):178–185.
+
+Web of Science
+
+Google Scholar
+
+20
+
+Vahdat A, Zhao X, Germano P, Koley B, Liu H. A method for improving the response speed of phase-controlled silicon-based liquid crystal devices. Google Inc. (Goog-C), Patent US8867915-B1; 2014.
+
+Google Scholar
+
+21
+
+Li R, Lin B, Liu Y, Dong M, Zhao S. A survey on laser space network: Terminals, links, and architectures. IEEE Access. 2022;10:34815–34834.
+
+Web of Science
+
+Google Scholar
+
+22
+
+Zhao Z, Sun HW, Ma W, Zhao, Fan YJ. Feasibility analysis and design of multi-mode optical switching. Paper presented at: 6th Symposium on Novel Optoelectronic Detection Technology and Applications; 2019 Dec 3–5; Beijing, People’s Republic of China.
+
+Google Scholar
+
+23
+
+Matsumoto R, Konoike R, Matsuura H, Suzuki K, Inoue T, Ikeda K, Namiki S, Sato KI. 7424 × 7424 optical circuit switch with 1.4 μs switching time enabled by silicon-photonic 64-port space switches and burst-mode coherent receivers. J Lightwave Technol. 2024;42(4):1231–1241.
+
+Google Scholar
+
+24
+
+Taka H, Inoue T, Oki E. Design model of a twisted and folded Clos network with multi-step grouped intermediate switches guaranteeing admissible blocking probability. J Opt Commun Netw. 2024;16(3):328–341.
+
+Web of Science
+
+Google Scholar
+
+25
+
+Zhao Z, Qiu ZL, Pan WT, Sun HW, Zheng L. Distributed competitive satellite optical burst switching mechanism for satellite networks with ultra-high link delays. Opt Eng. 2022;61(6):19.
+
+Web of Science
+
+Google Scholar
+
+26
+
+Vo VMN, Pham TD, Dang TC, Le V. A mechanism of QoS differentiation based on offset time and adjusted burst length in OBS networks. Turk J Electr Eng Comput Sci. 2020;28(5):2808–2820.
+
+Web of Science
+
+Google Scholar
+
+27
+
+Cui LS, Srivastava G. QoS routing algorithm for OBS networks based on a multi-objective genetic algorithm. IEEE Access. 2022;10:12047–12056.
+
+Web of Science
+
+Google Scholar
+
+28
+
+Bhattacharya P, Singh A, Tiwari AK, Pathak VK, Srivastava R. DbOBS: Dual buffered switch for variable optical bursts in future datacenters. Opt Quant Electron. 2021;53(5):23.
+
+Web of Science
+
+Google Scholar
+
+29
+
+Poorzare R, Calveras A, Abedidarabad S. An improvement over TCP Vegas to enhance its performance in optical burst switching networks. Opt Rev. 2021;28(2):215–226.
+
+Web of Science
+
+Google Scholar
+
+30
+
+Andreades P, Zervas G. Parallel modular scheduler design for Clos switches in optical data center networks. J Lightwave Technol. 2020;38(13):3506–3518.
+
+Web of Science
+
+Google Scholar
+
+31
+
+Calabretta N, Jung HD, Tangdiongga E, Dorren H. All-optical packet switching and label rewriting for data packets beyond 160 Gb/s. IEEE Photon J. 2010;2(2):113–129.
+
+Web of Science
+
+Google Scholar
+
+32
+
+Chen KS, Yang CC. Noise-immune labels of residual codes for improving solution efficiency to packet overflow in an optical label-switched buffer. Photonics. 2021;8(8):10.
+
+Web of Science
+
+Google Scholar
+
+33
+
+Shukla V, Sonkar RK, Srivastava R. Performance comparison between recirculating loop buffer-based optical packet switch architectures. Indian J Phys. 2020;94(7):1085–1096.
+
+Web of Science
+
+Google Scholar
+
+34
+
+Terzenidis N, Tsakyridis A, Giamougiannis G, van Kerrebrouck J, Verbeke M, Torfs G, Moralis-Pegios M, Pleros N. End-to-end 1024-port optical packet switching with 25 Gbs burst-mode reception for data centers. IEEE Photon J. 2021;13(3):15.
+
+Web of Science
+
+Google Scholar
+
+35
+
+Xu S, Wang XW, Huang M. Software-defined next-generation satellite networks: Architecture, challenges, and solutions. IEEE Access. 2018;6:4027–4041.
+
+Web of Science
+
+Google Scholar
+
+36
+
+Spaceborne Computer. NASA. 2021. [accessed 19 Feb 2021] https://www.nasa.gov/podcasts/houston-we-have-a-podcast/spaceborne-computer/
+
+Google Scholar
+
+37
+
+Zhang Y, Chen C, Liu L, Lan D, Jiang H, Wan S. Aerial edge computing on orbit: A task offloading and allocation scheme. IEEE Trans Netw Sci Eng. 2023;10(1):275–285.
+
+Web of Science
+
+Google Scholar
+
+38
+
+Cao X, Yang B, Shen Y, Yuen C, Zhang Y, Han Z, Poor HV, Hanzo L. Edge-assisted multi-layer offloading optimization of LEO satellite-terrestrial integrated networks. IEEE J Sel Areas Commun. 2023;41(2):381–398.
+
+Web of Science
+
+Google Scholar
+
+39
+
+Shao BQ, Lu CJ, Xiang YJ, Li FX, Song MX. Comprehensive review of RF MEMS switches in satellite communications. Sensors. 2024;24(10):30.
+
+Web of Science
+
+Google Scholar
+
+40
+
+Liu J, Yu S. Li F, Chen Y, Zhou Z. Laser communication terminal for small satellite platform based on MEMS beam control. China, 2021, Patent CN202110257286.1.
+
+Google Scholar
+
+41
+
+Wang X, Han J, Wang C, Xie M, Liu P, Cao Y, Jing F, Wang F, Su Y, Meng X. Beam scanning and capture of micro laser communication terminal based on MEMS micromirrors. Micromachines. 2023;14(7):14.
+
+Web of Science
+
+Google Scholar
+
+42
+
+Benazet B, Sotom M, Maignan M, Perdigues J. Microwave photonics cross-connect repeater for telecommunication satellites. Paper presented at: Conference on Millimeter-Wave and Terahertz Photonics; 2006 Apr 5–6; Strasbourg, France.
+
+Google Scholar
+
+43
+
+Tao Y, Wang X, Han C, Jin M, Shu H. Integrated photonics for space applications. Sci Sin Phys Mech Astronom. 2021;51(2): Article 024201.
+
+Google Scholar
+
+44
+
+Nakamura F, Asakura H, Suzuki K, Tanizawa K, Ohtsuka M, Yokoyama N. Silicon based 1 × M wavelength selective switch using arrayed waveguide gratings with fold-back waveguides. J Lightwave Technol. 2021;39(8):2413–2420.
+
+Google Scholar
+
+45
+
+Kaler R, Kaler RS. Performance analysis of metro WDM network based on an optical cross connects and arrayed waveguide grating demultiplexer. Optik. 2011;122(7):620–625.
+
+Web of Science
+
+Google Scholar
+
+46
+
+Tsai CM, Taga H, Chiou PW. Demonstration of N/2 2 × 2 optical cross-connectors in one pair of N × N cyclic-AWGs and multiple tunable fiber gratings. IEEE Photon J. 2018;10(5): Article 7203510.
+
+Google Scholar
+
+47
+
+Yeh CH, Ko H-S, Liaw S-K, Lu L-H, Chen J-H, Chow C-W. A survivable and flexible WDM access network by alternate FSO- and fiber-paths for fault protection. IEEE Photon J. 2022;14(1):5.
+
+Web of Science
+
+Google Scholar
+
+48
+
+Zhang ZY, Wang Y, Tsang HK. Ultracompact 40-channel arrayed waveguide grating on silicon nitride platform at 860 nm. IEEE J Quantum Electron. 2020;56(1):8.
+
+Web of Science
+
+Google Scholar
+
+49
+
+Ye T, Lee TT, Hu WS. A study of modular AWGs for large-scale optical switching systems. J Lightwave Technol. 2012;30(13):2125–2133.
+
+Web of Science
+
+Google Scholar
+
+50
+
+Hildén P, Shevchenko A. Matrix analysis of high-density arrayed waveguides: Crosstalk suppression by bending. Phys Rev Appl. 2024;22(2):14.
+
+Web of Science
+
+Google Scholar
+
+51
+
+Bahuguna R, Mina M, Tioh JW, Weber RJ. Magneto-optic-based fiber switch for optical communications. IEEE Trans Magn. 2006;42(10):3099–3101.
+
+Web of Science
+
+Google Scholar
+
+52
+
+Rahman H, Ali H, Ahmad I, Din RU, Ge GQ. Magneto-optical rotation of surface plasmon polaritons. J Phys D Appl Phys. 2021;54(17):6.
+
+Web of Science
+
+Google Scholar
+
+53
+
+Wang HY, Wang Z, Fu Z, Jiang R, Liu L, Wang J, Wu C. Silicon-on-insulator optical buffer based on magneto-optical 1 × 3 micro-rings array coupled Sagnac ring. Photonics. 2022;9(6):306.
+
+Google Scholar
+
+54
+
+Yajima S, Nishiyama N, Shoji Y. High-speed modulation in a waveguide magneto-optical switch with impedance-matching electrode. Opt Express. 2023;31(10):16243–16250.
+
+Web of Science
+
+Google Scholar
+
+55
+
+Guo XT, Zhang Y, Jiang Y, Wu SG, Li HN. A novel decomposed optical architecture for satellite terrestrial network edge computing. Mathematics. 2022;10(14):14.
+
+Web of Science
+
+Google Scholar
+
+56
+
+Renaud M, Bachmann M, Erman M. Semiconductor optical space switches. IEEE J Sel Top Quant Electron. 1996;2(2):277–288.
+
+Google Scholar
+
+57
+
+Coppola G, Sirleto L, Rendina I, Iodice M. Advance in thermo-optical switches: Principles, materials, design, and device structure. Opt Eng. 2011;50(7):14.
+
+Web of Science
+
+Google Scholar
+
+58
+
+Qiao L, Tang WJ, Chu T. 32 × 32 silicon electro-optic switch with built-in monitors and balanced-status units. Sci Rep. 2017;7:7.
+
+Google Scholar
+
+59
+
+Jain P, Tanaka D, Tsuda H. Mach Zehnder interferometer optical switch using phase-change material. Paper presented at: 2012 International Conference on Photonics in Switching (PS); 2012 Sep 11–14; Ajaccio, France.
+
+Google Scholar
+
+60
+
+Barry RA, Humblet PA. Models of blocking probability in all-optical networks with and without wavelength changers. Paper presented at: 14th Annual Joint Conference of the IEEE Computer and Communications Societies (IEEE INFOCOM 95)—Bringing Information to People; 1995 Apr 2–6; Boston, MA.
+
+Google Scholar
+
+61
+
+Gu LL, Zhao F, Shi Z, Liu J, Chen RT. Four-channel coarse WDM for inter- and intra-satellite optical communications. Opt Laser Technol. 2005;37(7):551–554.
+
+Web of Science
+
+Google Scholar
+
+62
+
+Yang QL, Tan LY, Ma J, Jiang SQ. An analytic method of dimensioning required wavelengths for optical WDM satellite networks. IEEE Commun Lett. 2011;15(2):247–249.
+
+Web of Science
+
+Google Scholar
+
+63
+
+Gao YHL, Chen XY, Cheng TL, Wang F, Yan X. Cascaded four-wave mixing all-optical wavelength converter based on highly nonlinear fiber deposited graphene oxide. J Mater Sci Technol. 2024;171:10–15.
+
+Web of Science
+
+Google Scholar
+
+64
+
+Lei D, Ding X, Han D, Sui L, Tao Z, Ma W, Tianshu W, Wang Y. 1.9 μm all-optical wavelength converter based on a graphene oxide coated microfiber. Opt Express. 2021;29(24):40286–40293.
+
+Google Scholar
+
+65
+
+Matsuo S, Uenohara H. Wide wavelength selectable and high frequency precision of all-optical wavelength conversion using pump light generated from optical combs and SSB modulation. J Lightwave Technol. 2022;40(21):7006–7013.
+
+Web of Science
+
+Google Scholar
+
+66
+
+Yamazaki M, Seno K, Hashimoto T, Uenohara H. Experimental investigation of wavelength conversion using highly-nonlinear fiber and two-stage-comb-generated pump with high frequency precision. J Lightwave Technol. 2020;38(8):2219–2225.
+
+Web of Science
+
+Google Scholar
+
+67
+
+Morichetti F, Canciamilla A, Ferrari C, Samarelli A, Sorel M, Melloni A. Travelling-wave resonant four-wave mixing breaks the limits of cavity-enhanced all-optical wavelength conversion. Nat Commun. 2011;2(1):296.
+
+Google Scholar
+
+68
+
+Zhao P, He ZL, Shekhawat V, Karlsson M, Andrekson PA. 100-Gbps per-channel all-optical wavelength conversion without pre-amplifiers based on an integrated nanophotonic platform. Nano. 2023;12(17):3427–3434.
+
+Google Scholar
+
+69
+
+Gao JN, Vincenti MA, Frantz J, Clabeau A, Qiao X, Feng L, Scalora M, Litchinitser NM. Near-infrared to ultra-violet frequency conversion in chalcogenide metasurfaces. Nat Commun. 2021;12(1):5.
+
+Web of Science
+
+Google Scholar
+
+70
+
+Gao JN, Vincenti MA, Frantz J, Clabeau A, Qiao X, Feng L, Scalora M, Litchinitser NM. All-optical tunable wavelength conversion in opaque nonlinear nanostructures. Nano. 2022;11(17):4027–4035.
+
+Google Scholar
+
+71
+
+Zhang YJ, Zhong KY, Zhou W, Tsang HK. Low-threshold continuous-wave anti-Stokes Raman lasing in silicon racetrack resonators. ACS Photonics. 2021;8(12):3462–3468.
+
+Web of Science
+
+Google Scholar
+
+72
+
+Dong Y, Zhao S, Li Y, Han L, Zhao W. Property improvement of inter-satellite DPSK modulation/self-heterodyne detection system by all-optical 2R regeneration. Laser Optoelectron Prog. 2013;50(9): Article 091405.
+
+Google Scholar
+
+73
+
+Dong Y, Zhao S, Zheng X, Li Y, Zhao W, Han L. A SOA-based all-optical regeneration of DPSK signals for satellite application. Optik. 2014;125(14):3545–3548.
+
+Web of Science
+
+Google Scholar
+
+74
+
+Pavon-Marino P, Bueno-Delgado MV, Izquierdo-Zaragoza JL. Evaluating internal blocking in noncontentionless flex-grid ROADMs. J Opt Commun Netw. 2015;7(3):A474–A481.
+
+Web of Science
+
+Google Scholar
+
+75
+
+Egorov R. Next generation ROADM architecture and design. Paper presented at: 2013 Optical Fiber Communication (OFC)/National Fiber Optic Engineers Conference (NFOEC); 2013 Mar 17–21; Anaheim, CA.
+
+Google Scholar
+
+76
+
+Frisken S, Baxter G, Abakoumov, Zhou H, Clarke I, Poole S. Flexible and grid-less wavelength selective switch using LCOS technology. Paper presented at: 2011 Fiber Communication (OFC)/National Fiber Optic Engineers Conference (NFOEC); 2011 Mar 6–10; Los Angeles, CA.
+
+Google Scholar
+
+77
+
+Wang M, Zong L, Mao L, Marquez A, Ye Y, Zhao H, Vaquero Caballero F. LCoS SLM study and its application in wavelength selective switch. Photonics. 2017;4(4):22.
+
+Google Scholar
+
+78
+
+Chen T, Dang Z, Liu Z, Ding Z, Yang Z, Zhang X, Jiang X, Zhang Z. Coupling-controlled multiport thermo-optic switch using polymer waveguide array. IEEE Photon Technol Lett. 2021;33(20):1135–1138.
+
+Web of Science
+
+Google Scholar
+
+79
+
+Zhang Z, You Z, Chu D. A method for improving the response speed of phase-controlled silicon-based liquid crystal devices. Patent CN103197455B; 2013.
+
+Google Scholar
+
+80
+
+Wang H, Nie J, Guo R, Yang H. Holographic optical fibre switching with high isolation. Paper presented at: 2023 Opto-Electronics and Communications Conference (OECC); 2023 Jul 2–6; Shanghai, China.
+
+Google Scholar
+
+81
+
+Robertson B, Yang H, Redmond MM, Collings N, Moore JR, Liu J, Jeziorska-Chapman AM, Pivnenko M, Lee S, Wonfor A, et al. Demonstration of multi-casting in a 1 × 9 LCOS wavelength selective switch. J Lightwave Technol. 2014;32(3):402–410.
+
+Google Scholar
+
+82
+
+Suzuki K, Ikuma Y, Hashimoto E, Yamagutchi K, Itoh M, Takashi T. Ultra-high port count wavelength selective switch employing waveguide-based I/O frontend. Paper presented at: 2015 Optical Fiber Communications Conference and Exhibition (OFC); 2015 Mar 22–26; Los Angeles, CA.
+
+Google Scholar
+
+83
+
+Suzuki K, Moriwaki O, Hadama K, Yamaguchi K, Taniguchi H, Kisaka Y, Ogawa D, Takeshita M, Camatel S, Ma Y, et al. A transponder aggregator with efficient use of filtering function for transponder noise suppression. J Lightwave Technol. 2023;41(10):3074–3083.
+
+Web of Science
+
+Google Scholar
+
+84
+
+Yang H, Robertson B, Yu D, Zhang Z, Chu DP. Origin of transient crosstalk and its reduction in phase-only LCOS wavelength selective switches. J Lightwave Technol. 2013;31(23):3822–3829.
+
+Web of Science
+
+Google Scholar
+
+85
+
+Colbourne PD, McLaughlin S, Murley C, Gaudet S, Burke D. Contentionless twin 8x24 WSS with low insertion loss. Paper presented at: Optical Fiber Communications Conference and Exposition (OFC); 2018 Mar 11–15; San Diego, CA.
+
+Google Scholar
+
+86
+
+Xie D, Liu Z, You Q, Yu S. Demonstration of a 3 × 4 tunable bandwidth WSS with tunable attenuation using compact spatial light paths. Opt Express. 2017;25(10):11173–11186.
+
+Google Scholar
+
+87
+
+Yang H, Wilkinson P, Robertson B, Giltrap S, Snowdon O, Prudden H, Chu D. 24 [1×12] wavelength selective switches integrated on a single 4k LCoS device. J Lightwave Technol. 2021;39(4):1033–1039.
+
+Google Scholar
+
+88
+
+Yang H, Robertson B, Wilkinson P, Chu D. Small phase pattern 2D beam steering and a single LCOS design of 40 1 × 12 stacked wavelength selective switches. Opt Express. 2016;24(11):12240–12253.
+
+Google Scholar
+
+89
+
+Yang H, Robertson B, Wilkinson P, Chu D. Low-cost CDC ROADM architecture based on stacked wavelength selective switches. J Opt Commun Netw. 2017;9(5):375–384.
+
+Web of Science
+
+Google Scholar
+
+90
+
+Ma Y, Stewart L, Armstrong J, Clarke IG, Baxter G. Recent progress of wavelength selective switch. J Lightwave Technol. 2021;39(4):896–903.
+
+Web of Science
+
+Google Scholar
+
+91
+
+Lin J, Zhai Z, Li Y, Chang Z, Zong L, Deng N. Performance evaluation of WSS-based all-optical spine-leaf data center network. Paper presented at: 2022 Asia Communications and Photonics Conference (ACP); 2022 Nov 5–8; Shenzhen, China.
+
+Google Scholar
+
+92
+
+Hyman RM, Lorenz A, Morris SM, Wilkinson TD. Polarization-independent phase modulation using a blue-phase liquid crystal over silicon device. Appl Opt. 2014;53(29):6925–6929.
+
+Web of Science
+
+Google Scholar
+
+93
+
+Chen H, Fontaine NK, Mazur M, Ryf R, Neilson DT. Virtually imaged phase array (VIPA)-Based wavelength selective switch with high spectral resolution. Paper presented at: 2020 European Conference on Optical Communications (ECOC); 2020 Dec 6–10; Brussels, Belgium.
+
+Google Scholar
+
+94
+
+Lin J, Chang T, Zhai Z, Bose SK, Shen G. Wavelength selective switch-based clos network: Blocking theory and performance analyses. J Lightwave Technol. 2022;40(17):5842–5853.
+
+Web of Science
+
+Google Scholar
+
+95
+
+Xu J, Chen K, Qu Y, Liu C, Fu S, Liu D. Reciprocating reflective double gratings based LCOS spectral filter with sharp response. J Lightwave Technol. 2021;39(12):3961–3966.
+
+Web of Science
+
+Google Scholar
+
+96
+
+Ikuma Y, Suzuji K, Nemoto N, Hashimoto E, Moriwaki O, Takashi T. 8 × 24 wavelength selective switch for low-loss transponder aggregator. Paper presented at: 2015 Optical Fiber Communications Conference and Exhibition (OFC); 2015 Mar 22–26; Los Angeles, CA.
+
+Google Scholar
+
+97
+
+Zhang C, Xiang Y, Liu S, Liu D, Yan H, Peng Y, Li H, Shi Y, Liu L, Kumar R, et al. Silicon photonic wavelength-selective switch based on an array of adiabatic elliptical-microrings. J Lightwave Technol. 2023;41(17):5660–5667.
+
+Web of Science
+
+Google Scholar
+
+98
+
+Wu G, Zheng J, Pu T, Yin Z, Zhang X, Li J, Chen S, Zhao J, Liu J, Zhang Y, et al. Four-channel all-optical wavelength conversion unit based on nonlinear effect of three-section monolithically integrated semiconductor lasers. Appl Opt. 2023;62(7):1689–1694.
+
+Web of Science
+
+Google Scholar
+
+99
+
+Frisken S, Poole SB, Baxter GW. Wavelength-selective reconfiguration in transparent agile optical networks. Proc IEEE. 2012;100(5):1056–1064.
+
+Web of Science
+
+Google Scholar
+
+100
+
+Gringeri S, Basch B, Shukla V, Egorov R, Xia TJ. Flexible architectures for optical transport nodes and networks. IEEE Commun Mag. 2010;48(7):40–50.
+
+Web of Science
+
+Google Scholar
+
+101
+
+Pascar L, Karubi R, Frenkel B, Marom DM. Port-reconfigurable, wavelength-selective switch array for colorless/directionless/contentionless optical add/drop multiplexing. Paper presented at: 2015 International Conference on Photonics in Switching (PS); 2015 Sep 22–25; Florence, Italy.
+
+Google Scholar
+
+102
+
+Nelson LE, Feuer MD, Abedin K, Zhou X, Taunay TF, Fini JM, Zhu B, Isaac R, Harel R, Cohen G, et al. Spatial superchannel routing in a two-span ROADM system for space division multiplexing. J Lightwave Technol. 2014;32(4):783–789.
+
+Web of Science
+
+Google Scholar
+
+103
+
+Yang H, Li K, Chu D. Liquid crystal on silicon technology and reconfigurable all-optical networks. Chinese J Liq Cryst Displ. 2021;36(6):772–788.
+
+Web of Science
+
+Google Scholar
+
+104
+
+Perdigues J, Hauschildt H, El-Dali W, Mezzasoma S, Politano M, Dosnik Z. HYDRON: The ESA initiative towards optical networking in space. Paper presented at: 2021 European Conference on Optical Communication (ECOC); 2021 Sep 13–16; Bordeaux, France.
+
+Google Scholar
+
+105
+
+European Space Agency. Developing future optical high-capacity satellite. European Space Agency. 2024. [accessed 18 Sep 2024] https://connectivity.esa.int/developing-future-optical-highcapacity-satellite
+
+Google Scholar
+
+106
+
+Ikuma Y, Suzuki K, Nemoto N, Hashimoto E, Moriwaki O, Takahashi T. Low-loss transponder aggregator using spatial and planar optical circuit. J Lightwave Technol. 2016;34(1):67–72.
+
+Web of Science
+
+Google Scholar
+
+107
+
+Ma Y, Suzuki K, Clarke I, Yanagihara A, Wong P, Saida T. Novel CDC ROADM architecture utilizing low loss WSS and MCS without necessity of inline amplifier and filter. Paper presented at: 2019 Optical Fiber Communications Conference and Exhibition (OFC); 2019 Mar 3–7; San Diego, CA.
+
+Google Scholar
+
+108
+
+Zong L, Zhao H, Yan Y, Feng Z. Demonstration of quasi-contentionless flexible ROADM based on a multiport WXC. J Opt Commun Netw. 2016;8(7):A141–A151.
+
+Web of Science
+
+Google Scholar
+
+109
+
+Li Y, Lin J, Zong L, Bose SK, Mukherjee B, Shen G. Colorless, partially directionless, and contentionless architecture for high-degree ROADMs. J Opt Commun Netw. 2022;14(6):481–492.
+
+Web of Science
+
+Google Scholar
+
+110
+
+Suzuki K, Seno K, Ikuma Y. Application of waveguide/free-space optics hybrid to ROADM device. J Lightwave Technol. 2017;35(4):596–606.
+
+Web of Science
+
+Google Scholar
+
+111
+
+Masood MU, Tunesi L, Correia B, Khan I, Ghillino E, Bardella P. Photonics integrated multiband WSS based ROADM architecture: A networking analysis. Paper presented at: 2022 Asia Communications and Photonics Conference (ACP); 2022 Nov 5–8; Shenzhen, China.
+
+Google Scholar
+
+112
+
+Kuno T, Mori Y, Subramaniam S, Jinno M, Hasegawa H. Design and evaluation of a reconfigurable optical add-drop multiplexer with flexible wave-band routing in SDM networks. J Opt Commun Netw. 2022;14(4):248–256.
+
+Web of Science
+
+Google Scholar
+
+113
+
+Ambrosone R, D’Ingillo R, Borraccini C, Straullu S, D’Amico A, Virgilito E. Autonomous equalization of independent open ROADMs via NETCONF protocol. Paper presented at: 2023 23rd International Conference on Transparent Optical Networks (ICTON); 2023 Jul 2–6; Bucharest, Romania.
+
+Google Scholar
+
+114
+
+Mo W, Gutterman CL, Li Y, Zhu S, Zussman G, Kilper DC. Deep-neural-network-based wavelength selection and switching in ROADM systems. J Opt Commun Netw. 2018;10(10):D1–D11.
+
+Web of Science
+
+Google Scholar
+
+115
+
+Li R, Zhao S-H, Yao Z, Zheng W, Li Y-J, Qian Y. Research of on-board optical/electric switching of broadband multimedia satellite. Paper presented at: 4th IET International Conference on Wireless, Mobile & Multimedia Networks (ICWMMN 2011); 2011 Nov 27–30; Beijing, China.
+
+Google Scholar
+
+116
+
+Stepanovsky M. A comparative review of MEMS-based optical cross-connects for all-optical networks from the past to the present day. IEEE Commun Surv Tutor. 2019;21(3):2928–2946.
+
+Web of Science
+
+Google Scholar
+
+117
+
+Yuan JX, Du JB, Liu JC, He ZY. Arrayed-waveguide-grating based on proton exchange and etching combined fabrication over bulk lithium-niobate substrate. Paper presented at: IEEE 24th International Workshop on Multimedia Signal Processing (MMSP); 2022 Sep 26–28; Shanghai, China.
+
+Google Scholar
+
+118
+
+Gao Y, Chen X, Chen G, Chen Y, Chen Q, Xiao F, Wang Y. 1 × 25 LCOS-based wavelength selective switch with flexible passbands and channel selection. Opt Fiber Technol. 2018;45:29–34.
+
+Google Scholar
+
+Advanced Devices & Instrumentation 6 Mar 2026
+
+Development and Installation of a Modified and Automated Trans-epithelial Electrical Resistance Measuring Device
+
+By
+
+- et al.
+- Samuel J. Piper
+- Hannah K. Piper
+
+Advanced Devices & Instrumentation 3 Mar 2026
+
+Multi-Camera Stereo-Digital Image Correlation: A Review
+
+By
+
+- Xinxing Shao
+- Jinke Huang
+
+Advanced Devices & Instrumentation 3 Mar 2026
+
+Algorithms for Increasing the Fault Tolerance of Strapdown Redundant Inertial Navigation Systems
+
+By
+
+- Elena V. Dranitsyna
+- Egor V. Lukoyanov
+
+|
+
+More…

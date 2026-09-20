@@ -1,0 +1,476 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "OBS 卫星全光交换架构",
+    "subtitle": "SatelliteNode 三层嵌套 — OMNeT++ 仿真模块",
+    "output": "obs-satellite-architecture.html"
+  },
+  "components": [
+    {
+      "id": "isl_in",
+      "type": "external",
+      "label": "ISL 输入",
+      "sublabel": "星间链路",
+      "pos": [
+        40,
+        310
+      ],
+      "size": [
+        100,
+        55
+      ]
+    },
+    {
+      "id": "isl_out",
+      "type": "external",
+      "label": "ISL 输出",
+      "sublabel": "星间链路",
+      "pos": [
+        960,
+        310
+      ],
+      "size": [
+        100,
+        55
+      ]
+    },
+    {
+      "id": "host",
+      "type": "frontend",
+      "label": "StandardHost",
+      "sublabel": "用户终端",
+      "pos": [
+        150,
+        60
+      ],
+      "size": [
+        130,
+        55
+      ],
+      "tag": "IP 流量源"
+    },
+    {
+      "id": "net_layer",
+      "type": "backend",
+      "label": "NetworkLayer",
+      "sublabel": "IP 路由",
+      "pos": [
+        150,
+        175
+      ],
+      "size": [
+        130,
+        55
+      ]
+    },
+    {
+      "id": "assembler",
+      "type": "backend",
+      "label": "BurstAssembler",
+      "sublabel": "组帧器",
+      "pos": [
+        340,
+        145
+      ],
+      "size": [
+        130,
+        55
+      ],
+      "tag": "P1-P4 优先级"
+    },
+    {
+      "id": "dispatcher",
+      "type": "security",
+      "label": "PacketDispatcher",
+      "sublabel": "调度器",
+      "pos": [
+        340,
+        220
+      ],
+      "size": [
+        130,
+        55
+      ],
+      "tag": "4 种调度模式"
+    },
+    {
+      "id": "sender",
+      "type": "backend",
+      "label": "BurstSender",
+      "sublabel": "发送器",
+      "pos": [
+        340,
+        70
+      ],
+      "size": [
+        130,
+        55
+      ]
+    },
+    {
+      "id": "disassembler",
+      "type": "backend",
+      "label": "BurstDisassembler",
+      "sublabel": "解帧器",
+      "pos": [
+        150,
+        280
+      ],
+      "size": [
+        130,
+        55
+      ]
+    },
+    {
+      "id": "core_input",
+      "type": "cloud",
+      "label": "CoreInput",
+      "sublabel": "分流器",
+      "pos": [
+        555,
+        220
+      ],
+      "size": [
+        120,
+        55
+      ]
+    },
+    {
+      "id": "oe",
+      "type": "cloud",
+      "label": "OE 转换",
+      "sublabel": "光→电",
+      "pos": [
+        555,
+        80
+      ],
+      "size": [
+        120,
+        55
+      ]
+    },
+    {
+      "id": "ctrl_logic",
+      "type": "security",
+      "label": "ControlLogic",
+      "sublabel": "核心调度",
+      "pos": [
+        710,
+        80
+      ],
+      "size": [
+        130,
+        55
+      ],
+      "tag": "FDL 决策"
+    },
+    {
+      "id": "routing_tbl",
+      "type": "database",
+      "label": "RoutingTable",
+      "sublabel": "路由表",
+      "pos": [
+        710,
+        155
+      ],
+      "size": [
+        130,
+        55
+      ]
+    },
+    {
+      "id": "horizon",
+      "type": "database",
+      "label": "OutputHorizon",
+      "sublabel": "信道预约",
+      "pos": [
+        870,
+        155
+      ],
+      "size": [
+        130,
+        55
+      ]
+    },
+    {
+      "id": "eo",
+      "type": "cloud",
+      "label": "EO 转换",
+      "sublabel": "电→光",
+      "pos": [
+        870,
+        80
+      ],
+      "size": [
+        120,
+        55
+      ]
+    },
+    {
+      "id": "oxc",
+      "type": "messagebus",
+      "label": "OXC",
+      "sublabel": "光交叉连接",
+      "pos": [
+        695,
+        310
+      ],
+      "size": [
+        130,
+        55
+      ],
+      "tag": "全光交换"
+    },
+    {
+      "id": "fdl",
+      "type": "security",
+      "label": "FDL",
+      "sublabel": "光纤延迟线",
+      "pos": [
+        695,
+        420
+      ],
+      "size": [
+        130,
+        55
+      ],
+      "tag": "延迟 = τ"
+    },
+    {
+      "id": "core_output",
+      "type": "cloud",
+      "label": "CoreOutput",
+      "sublabel": "合流器",
+      "pos": [
+        870,
+        310
+      ],
+      "size": [
+        120,
+        55
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "SatelliteNode (卫星复合节点)",
+      "wraps": [
+        "host",
+        "net_layer",
+        "assembler",
+        "dispatcher",
+        "sender",
+        "disassembler",
+        "core_input",
+        "oe",
+        "ctrl_logic",
+        "routing_tbl",
+        "horizon",
+        "eo",
+        "oxc",
+        "fdl",
+        "core_output"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "EdgeNode — 边缘节点 (第一层)",
+      "wraps": [
+        "net_layer",
+        "assembler",
+        "dispatcher",
+        "sender",
+        "disassembler"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "CoreNode — 核心节点 (第二层)",
+      "wraps": [
+        "core_input",
+        "oe",
+        "ctrl_logic",
+        "routing_tbl",
+        "horizon",
+        "eo",
+        "oxc",
+        "fdl",
+        "core_output"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "host",
+      "to": "net_layer",
+      "label": "100GbE",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "net_layer",
+      "to": "assembler",
+      "label": "IP 分组",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "assembler",
+      "to": "sender",
+      "label": "burst",
+      "fromSide": "top",
+      "toSide": "left",
+      "labelDy": -28
+    },
+    {
+      "from": "dispatcher",
+      "to": "assembler",
+      "label": "调度规则",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "from": "disassembler",
+      "to": "net_layer",
+      "label": "IP 分组",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "from": "sender",
+      "to": "core_input",
+      "label": "BCP + Burst",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "isl_in",
+      "to": "core_input",
+      "label": "光信号",
+      "variant": "emphasis"
+    },
+    {
+      "from": "core_input",
+      "to": "oe",
+      "label": "BCP (控制)",
+      "fromSide": "top",
+      "toSide": "left",
+      "labelDy": -28
+    },
+    {
+      "from": "core_input",
+      "to": "oxc",
+      "label": "Burst (数据)",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "from": "oe",
+      "to": "ctrl_logic",
+      "label": "电信号"
+    },
+    {
+      "from": "ctrl_logic",
+      "to": "eo"
+    },
+    {
+      "from": "eo",
+      "to": "core_output",
+      "label": "BCP 转发",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 38
+    },
+    {
+      "from": "ctrl_logic",
+      "to": "routing_tbl",
+      "label": "查询",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "ctrl_logic",
+      "to": "horizon",
+      "label": "预约",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "oxc",
+      "to": "fdl",
+      "label": "回环输入",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "fdl",
+      "to": "oxc",
+      "label": "延迟输出",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": 50
+    },
+    {
+      "from": "oxc",
+      "to": "core_output",
+      "label": "直通",
+      "variant": "emphasis"
+    },
+    {
+      "from": "core_output",
+      "to": "isl_out",
+      "label": "光信号",
+      "variant": "emphasis"
+    },
+    {
+      "from": "core_output",
+      "to": "disassembler",
+      "label": "本地 burst",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "labelDy": 68
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "第一层 — 边缘节点",
+      "items": [
+        "智能组帧: P1-P4 优先级 + LRU 抢占",
+        "4 种调度模式 (FCFS/LQF/LPF/EDF)",
+        "IP 分组汇聚为光突发 (Burst)"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "第二层 — 核心节点 FDL",
+      "items": [
+        "OXC 全光交叉连接: 数据不做 OEO",
+        "FDL 回环: 冲突时延迟 τ 后重试",
+        "ControlLogic: BCP 处理 + FDL 决策",
+        "OutputHorizon: 信道预约管理"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "第三层 — 光标签 (远期)",
+      "items": [
+        "光域控制信息识别 (offset=0)",
+        "消除 BCP 的 OEO 转换瓶颈",
+        "需要 FDL 作为光域暂存基础"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="460" viewBox="0 0 980 460">
+  <rect width="980" height="460" fill="#ffffff"/>
+  <text x="490" y="34" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="20" font-weight="700" fill="#111">图 B  回环 FDL / 输入 FDL / 全光证据链边界</text>
+  <rect x="40" y="55" width="220" height="70" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="150" y="85" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="14" font-weight="700" fill="#334155">平台标定</text>
+  <text x="150" y="108" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="12" fill="#475569">useFDL=false · 仅负载可信</text>
+  <line x1="260" y1="90" x2="360" y2="180" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="300" y="125" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="12" fill="#b91c1c">✗ 不得连到「回环已证明」</text>
+  <text x="40" y="175" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="15" font-weight="700" fill="#1d4ed8">回环 FDL（竞争）</text>
+  <rect x="40" y="190" width="130" height="44" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="105" y="217" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#1e3a8a">冲突处理</text>
+  <line x1="175" y1="212" x2="205" y2="212" stroke="#2563eb" stroke-width="2"/>
+  <rect x="210" y="190" width="150" height="44" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-dasharray="6 3"/>
+  <text x="285" y="217" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="12" fill="#9a3412">待：useFDL=true 复认</text>
+  <line x1="365" y1="212" x2="395" y2="212" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 3"/>
+  <rect x="400" y="190" width="130" height="44" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-dasharray="6 3"/>
+  <text x="465" y="217" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#1e3a8a">实验 A/B</text>
+  <text x="40" y="275" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="15" font-weight="700" fill="#7c3aed">输入 FDL（时序）</text>
+  <rect x="40" y="290" width="150" height="44" rx="8" fill="#f3e8ff" stroke="#7c3aed" stroke-dasharray="6 3"/>
+  <text x="115" y="317" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#5b21b6">边缘 offset=0</text>
+  <line x1="195" y1="312" x2="225" y2="312" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 3"/>
+  <rect x="230" y="290" width="160" height="44" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-dasharray="6 3"/>
+  <text x="310" y="317" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#5b21b6">处理窗口吸收</text>
+  <line x1="395" y1="312" x2="425" y2="312" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 3"/>
+  <rect x="430" y="290" width="120" height="44" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-dasharray="6 3"/>
+  <text x="490" y="317" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#5b21b6">实验 C</text>
+  <text x="40" y="375" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="15" font-weight="700" fill="#0f766e">严格全光目标</text>
+  <rect x="40" y="390" width="200" height="44" rx="8" fill="#ccfbf1" stroke="#0d9488"/>
+  <text x="140" y="417" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#115e59">数据面无 OEO（目标）</text>
+  <line x1="245" y1="412" x2="275" y2="412" stroke="#0d9488" stroke-width="2" stroke-dasharray="6 3"/>
+  <rect x="280" y="390" width="280" height="44" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-dasharray="6 3"/>
+  <text x="420" y="417" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="13" fill="#115e59">控制面无独立 BCP OEO（未闭环）</text>
+  <text x="490" y="452" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="12" fill="#666">实线=已有基础；虚线=未完成。回环 ≠ 输入 FDL ≠ 已实现严格全光</text>
+</svg>

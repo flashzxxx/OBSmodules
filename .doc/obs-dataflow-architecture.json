@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "OBS 卫星星间全光交换 — 整体数据流架构",
+    "output": "obs-dataflow-architecture.html",
+    "quality_profile": "showcase",
+    "viewBox": [1300, 640],
+    "views": [
+      {
+        "id": "e2e-data",
+        "label": "端到端数据流",
+        "focus": ["host-src", "burstifier", "sender", "coreinput", "oxc", "disassembler", "host-dst"],
+        "note": "IP 包组装为光突发，全光透传核心节点后还原为 IP 包。"
+      },
+      {
+        "id": "bcp-control",
+        "label": "BCP 电域控制",
+        "focus": ["sender", "coreinput", "controllogic", "oxc"],
+        "note": "BCP 走电域 OEO，调度逻辑查路由表并配置 OXC 光开关。"
+      },
+      {
+        "id": "fdl-loop",
+        "label": "FDL 光域回环",
+        "focus": ["oxc", "fdl"],
+        "note": "冲突时 Burst 进入 FDL 光域缓存，延迟 τ 后重试一次。"
+      }
+    ]
+  },
+  "components": [
+    { "id": "host-src", "type": "external", "label": "源主机 Host", "sublabel": "IP 流量源", "pos": [30, 300], "size": [96, 60] },
+    { "id": "burstifier", "type": "backend", "label": "组帧器", "sublabel": "OBS_PacketBurstifier", "pos": [188, 300], "size": [130, 60], "tag": "超时/大小/数量→组装" },
+    { "id": "sender", "type": "backend", "label": "突发发送器", "sublabel": "OBS_BurstSender", "pos": [380, 300], "size": [130, 60], "tag": "BCP先发·Burst延迟offset" },
+    { "id": "coreinput", "type": "backend", "label": "核心输入", "sublabel": "OBS_CoreInput", "pos": [572, 300], "size": [120, 60], "tag": "分离控制/数据波长" },
+    { "id": "controllogic", "type": "backend", "label": "核心调度逻辑", "sublabel": "OBS_CoreControlLogic", "pos": [572, 120], "size": [120, 66], "tag": "查路由·判horizon·配OXC" },
+    { "id": "oxc", "type": "cloud", "label": "光交叉连接", "sublabel": "OBS_OpticalCrossConnect", "pos": [740, 300], "size": [160, 60], "tag": "scheduleAt预约光开关" },
+    { "id": "fdl", "type": "cloud", "label": "光纤延迟线", "sublabel": "OBS_FiberDelayLine", "pos": [810, 470], "size": [140, 60], "tag": "sendDelayed τ·单次回环" },
+    { "id": "disassembler", "type": "backend", "label": "拆包器", "sublabel": "OBS_BurstDisassembler", "pos": [1012, 300], "size": [130, 60], "tag": "匹配ID·逐包还原IP" },
+    { "id": "host-dst", "type": "external", "label": "目标主机 Host", "sublabel": "IP 流量宿", "pos": [1186, 300], "size": [96, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "源边缘节点 · OBS_EdgeNode", "wraps": ["burstifier", "sender"] },
+    { "kind": "region", "label": "光域 · 全光透传 (无 OEO)", "wraps": ["oxc", "fdl"] },
+    { "kind": "region", "label": "目标边缘节点 · OBS_EdgeNode", "wraps": ["disassembler"] }
+  ],
+  "connections": [
+    { "id": "c1", "from": "host-src", "to": "burstifier", "label": "IP 数据包", "labelAt": [157, 380] },
+    { "id": "c2", "from": "burstifier", "to": "sender", "label": "组装 Burst", "labelAt": [349, 380] },
+    { "id": "c3", "from": "sender", "to": "coreinput", "label": "BCP + Burst", "labelAt": [541, 380] },
+    { "id": "c4", "from": "coreinput", "to": "controllogic", "label": "BCP → O/E", "variant": "emphasis", "fromSide": "top", "toSide": "bottom", "labelAt": [648, 243] },
+    { "id": "c5", "from": "coreinput", "to": "oxc", "label": "Burst (光域)", "labelAt": [723, 380] },
+    { "id": "c6", "from": "controllogic", "to": "oxc", "label": "配置光开关", "variant": "dashed", "fromSide": "right", "toSide": "top", "labelAt": [835, 226] },
+    { "id": "c7", "from": "oxc", "to": "fdl", "label": "FDL 回环", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [905, 420] },
+    { "id": "c8", "from": "fdl", "to": "oxc", "label": "τ 延迟重试", "fromSide": "left", "toSide": "bottom", "labelAt": [745, 430] },
+    { "id": "c9", "from": "oxc", "to": "disassembler", "label": "全光透传", "variant": "emphasis", "labelAt": [948, 380] },
+    { "id": "c10", "from": "disassembler", "to": "host-dst", "label": "IP 数据包", "labelAt": [1164, 380] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "数据平面 · 光域 (全光)",
+      "items": [
+        "Data Burst 全程保持光信号，核心节点无 OEO",
+        "OXC 按 BCP 预约切换光路，scheduleAt() 控制开关",
+        "FDL 提供光域缓存：冲突且 waitTime ≤ τ 时单次回环"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "控制平面 · 电域 (OEO)",
+      "items": [
+        "BCP 在每个核心节点经 O/E 转换取路由信息",
+        "CoreControlLogic 执行 JET 调度，管理 output horizon",
+        "useFDL=false 基线丢弃 / =true Always-FDL 回环"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "边缘节点 · 专利 A",
+      "items": [
+        "PacketBurstifier 按超时/大小/数量组装 Burst",
+        "BurstSender 提前发 BCP、延迟 offset 发 Data Burst",
+        "四模式调度：Dynamic / NoPreemption / RoundRobin / Static"
+      ]
+    }
+  ]
+}

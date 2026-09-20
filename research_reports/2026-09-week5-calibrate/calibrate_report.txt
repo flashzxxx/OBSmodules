@@ -1,0 +1,39 @@
+Measured load per calibration run
+==========================================================================================
+run                meanInterval  rep     seed        rho    maxLoss   busiest channel
+------------------------------------------------------------------------------------------
+FDL-Calibrate-12.s       21.3us    0       12     0.5949     0.2677   sat7 port1
+FDL-Calibrate-13.s       21.3us    1       13     0.5934     0.2678   sat7 port1
+FDL-Calibrate-10.s         30us    0       10     0.4651     0.2116   sat7 port1
+FDL-Calibrate-11.s         30us    1       11     0.4653     0.2122   sat7 port1
+FDL-Calibrate-8.sc       42.6us    0        8     0.3457     0.1644   sat7 port1
+FDL-Calibrate-9.sc       42.6us    1        9     0.3495     0.1669   sat7 port1
+FDL-Calibrate-6.sc         60us    0        6     0.2609     0.1237   sat7 port1
+FDL-Calibrate-7.sc         60us    1        7     0.2593     0.1288   sat7 port1
+FDL-Calibrate-4.sc        100us    0        4     0.1637     0.0860   sat7 port1
+FDL-Calibrate-5.sc        100us    1        5     0.1677     0.0809   sat7 port1
+FDL-Calibrate-2.sc        200us    0        2     0.0842     0.0470   sat7 port1
+FDL-Calibrate-3.sc        200us    1        3     0.0856     0.0427   sat7 port1
+FDL-Calibrate-0.sc        400us    0        0     0.0438     0.0256   sat7 port1
+FDL-Calibrate-1.sc        400us    1        1     0.0447     0.0241   sat7 port1
+
+No usable calibration points: every run was either saturated (loss > 1%) or carried no traffic.
+Widen the meanInterval sweep in [Config FDL-Calibrate] and re-run.
+
+Week-5 platform checks
+==============================================================================
+W=1 runtime: PASS, all 36 recorded portLambdas[] entries equal 1.
+Multi-source: PASS, all 10 satellites sent bursts in FDL-Calibrate-0.sca.
+              sat1=468 sat2=469 sat3=466 sat4=458 sat5=471 sat6=469 sat7=466 sat8=471 sat9=460 sat10=473
+Transit:      PASS, every core recorded burstsReceived > 0.
+Randomised:   PASS, 7 interval(s) differ across seeds.
+  21.3us  seed 12 rho=0.5949 sent=79702 recv=201289  vs  seed 13 rho=0.5934 sent=79372 recv=200749  differs
+  30us  seed 10 rho=0.4651 sent=56297 recv=149334  vs  seed 11 rho=0.4653 sent=56466 recv=149677  differs
+  42.6us  seed 8 rho=0.3457 sent=39915 recv=109993  vs  seed 9 rho=0.3495 sent=39927 recv=110328  differs
+  60us  seed 6 rho=0.2609 sent=28493 recv=81287  vs  seed 7 rho=0.2593 sent=28154 recv=80413  differs
+  100us  seed 4 rho=0.1637 sent=16913 recv=50027  vs  seed 5 rho=0.1677 sent=16892 recv=50120  differs
+  200us  seed 2 rho=0.0842 sent=8576 recv=26201  vs  seed 3 rho=0.0856 sent=8509 recv=26039  differs
+  400us  seed 0 rho=0.0438 sent=4671 recv=14544  vs  seed 1 rho=0.0447 sent=4600 recv=14319  differs
+FDL off:      PASS, fdlUsageCount is 0 on every node of every run.
+
+WEEK 5: incomplete. Fix the FAIL lines above before treating any rho label as measured.

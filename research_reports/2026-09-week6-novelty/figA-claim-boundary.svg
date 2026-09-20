@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420">
+  <rect width="960" height="420" fill="#ffffff"/>
+  <text x="480" y="36" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="20" font-weight="700" fill="#111">图 A  已有基础 / 避免说满 / 近期推进重点</text>
+  <rect x="30" y="60" width="290" height="330" rx="10" fill="#f3f7ff" stroke="#3b82f6" stroke-width="2"/>
+  <rect x="335" y="60" width="290" height="330" rx="10" fill="#fff5f5" stroke="#ef4444" stroke-width="2"/>
+  <rect x="640" y="60" width="290" height="330" rx="10" fill="#f3fbf6" stroke="#16a34a" stroke-width="2"/>
+  <text x="175" y="95" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="18" font-weight="700" fill="#1d4ed8">已有（近邻）</text>
+  <text x="480" y="95" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="18" font-weight="700" fill="#b91c1c">避免说满</text>
+  <text x="785" y="95" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="18" font-weight="700" fill="#15803d">近期推进重点</text>
+  <g font-family="Microsoft YaHei, SimHei, sans-serif" font-size="14" fill="#222">
+    <text x="50" y="140">· 地面 OBS+FDL 竞争缓解</text>
+    <text x="50" y="170">· 卫星 DC-SOBS / 无缓存星座 OBS</text>
+    <text x="50" y="200">· L-OBS / 输入 FDL 路线</text>
+    <text x="355" y="140">· 把 FDL 模块接入说成性能已证明</text>
+    <text x="355" y="170">· 把平台标定写成回环已验证</text>
+    <text x="355" y="200">· 把回环 FDL 写成已实现全光</text>
+    <text x="660" y="140">· 完成回环确定性用例复认</text>
+    <text x="660" y="170">· 开展 τ 扫描与联合对照实验</text>
+    <text x="660" y="200">· 后续推进输入 FDL 时序模型</text>
+  </g>
+  <text x="480" y="400" text-anchor="middle" font-family="Microsoft YaHei, SimHei, sans-serif" font-size="12" fill="#666">说明：第 5 周标定数字不出现在本图；本图不表示「已验证全光」</text>
+</svg>
