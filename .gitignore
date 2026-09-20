@@ -21,23 +21,43 @@
 .settings/
 
 # --- Simulation Outputs ---
-# Exclude simulation results under any results/ directory
-**/results/*.sca
-**/results/*.vec
-**/results/*.vci
+# Raw result sets are not versioned: only the .gitkeep placeholders are kept.
+# Whole-directory rule on purpose - the former per-extension list missed
+# everything nested in a subdirectory of results/.
+**/results/*
 # Exclude simulation runtime logs and pdf charts in Examples
 *.log
 .tkenvlog
 .tkenvrc
 Rplots.pdf
-# Exclude R plots or specific png figures inside results directories
-**/results/fig_*.png
-**/results/*.txt
 
 # --- Simulation Raw Data ---
 # Exclude historical raw simulation data and archive
 /仿真原始数据/
 /仿真原始数据.zip
+/.仿真原始数据/
+/.仿真原始数据.zip
+
+# --- Archived Research Working Dependencies ---
+# Keep deck sources and QA records, but do not version restored package caches.
+/research_reports/**/_working/**/node_modules/
+
+# --- Local-only Artifacts ---
+# Analysis, plotting and runner scripts stay on the workstation.
+/Examples/RingFdlOBS/tools/
+# Direction-review deck build sandbox: pptx renders, node_modules, unzip.exe.
+/research_reports/2026-08-direction-review/_working/
+# Binary deck outputs and their render dumps (the .md write-ups stay tracked).
+/research_reports/**/*.pptx
+/research_reports/**/*.inspect.ndjson
+/research_reports/**/slide-*.png
+# Diagram QA renders; the .html/.json deliverables next to them stay tracked.
+/.doc/*.visual-check.*
+# Agent session scratch space.
+/.dsh-uploads/
+/.dsh-vision-toolkit/
+# Editor/skill backups.
+*.bak-*
 
 # --- Keep Results Directories ---
 # Do not ignore .gitkeep files so results/ dirs are tracked by Git
