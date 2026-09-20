@@ -250,10 +250,29 @@ release 通过后对工作区做了一次严格分类，只把必要内容纳入
 `archive/fdl-epoch-split-2026-09-20`：
 
 ```bash
-git log --oneline 1d45cf4..archive/fdl-epoch-split-2026-09-20   # 09-15 / 09-17 两段
-git show archive/fdl-epoch-split-2026-09-20~2                    # 09-15 的中间状态
-git diff archive/fdl-epoch-split-2026-09-20~2~1 archive/fdl-epoch-split-2026-09-20~2 -- src   # 09-17 的修复段
+git log --oneline 1d45cf4..archive/fdl-epoch-split-2026-09-20   # 两段时间点都在
+git show archive/fdl-epoch-split-2026-09-20~4                    # 09-15 的中间状态（即 f2c523e）
+git diff archive/fdl-epoch-split-2026-09-20~4 archive/fdl-epoch-split-2026-09-20~3 -- src   # 09-17 那批修复：17 文件 +133/−10
 ```
 
 提交身份沿用仓库既有作者 `zhengzhx <759274219@qq.com>`，通过环境变量传入，**未写入任何 git config**；
 作者日期按阶段设定，提交日期为实际提交时间。
+
+## 十三、GitHub 连通性与 git 代理配置（2026-09-20）
+
+推送完成后排查了这台机器的外网链路，记录供后续会话复用：
+
+- **症状**：`git push` 报 `Failed to connect to github.com port 443 ... Couldn't connect to server`。
+- **根因**：本机对 `github.com` 的解析（路由器 `192.168.8.17`、`223.5.5.5`、`114.114.114.114`、
+  `1.1.1.1`、`8.8.8.8` 全都试过）一律返回 `20.205.243.166`，而该 IP 直连不可达（5 s 超时）；
+  同一时刻 GitHub 其他 IP（`140.82.121.4` / `140.82.112.3` / `140.82.114.3`）0.2 s 返回 200。
+  **换 DNS 服务器解决不了**——各解析器给的是同一个不可达 IP。
+- **可用通道**：Clash Verge（`verge-mihomo`）监听 `127.0.0.1:7897`，系统 WinINET 代理也指向它
+  （所以浏览器正常），但 git/curl 走直连，因此 git 被墙。
+- **已做的配置**：`git config --global http.proxy http://127.0.0.1:7897`。验证：
+  `git ls-remote --heads origin` 与 `git push --dry-run` 均通过（配置前 5/5 次直连推送全部失败）。
+  撤销：`git config --global --unset http.proxy`（Clash 关闭时 git 远端操作会报连接 7897 失败）。
+- **临时替代法（已还原）**：往 Git 自带的 `/etc/hosts`（`D:\Git\etc\hosts`）临时加
+  `140.82.121.4 github.com`，推送完成后逐字节还原；系统 hosts 需要管理员权限，本会话不可用。
+- 若要让 GitHub 对**所有**程序可用（IDE、pip 等），需在 Clash Verge 启用 TUN/虚拟网卡模式，
+  或由管理员在系统 hosts 固定可用 IP。
