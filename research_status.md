@@ -4,7 +4,7 @@
 > 技术栈：OMNeT++ 4.x / C++ / NED
 > 最终目标：实现卫星星间链路中的全光交换，数据 burst 在传输过程中不经过 OEO
 > 当前重点：有条件 Go、主叙事收缩已冻结。**第 9 周已完成（2026-09-20）**：实现并验证两条对照臂——VF 调度器选项（`enableVoidFilling`，默认关，`OBS_ChannelCalendar`，是 Horizon 的严格推广）与 host 侧无缓存重传基线（`src/Retransmit/`，不改 `src/EdgeNode/`）；`useFDL=false` 回归**逐标量全同**（Basic/TooShort/Off/SO 1701/1701、Compatibility 1697/1697）。**本周最重要的结论是负面的**：载入实测下 VF 补了 **0 个** burst——`OBS_BurstSender` 让所有 burst 的偏移恒等于 `maxOffset`（1 ms），到达顺序 ≡ BCP 顺序，被 horizon 拒绝的 burst 必然与已有预约窗口重叠，**无空隙可补**（附证明）；把各源偏移改成 700–970 µs 后 VF 立即生效（全网已调度 +23.0%）。重传确定性用例给出 5.2 要的对比：完成时延差 30.00 ms 恰等于超时值。第 8 周结论不变：**τ 最优区间在 τ/T_burst ≈ 1**，ρ≈0.59 下 τ/T=4 丢包（19.61%）反高于不加 FDL（18.71%）；热点 **19.5 µs → ρ=0.8074**。第一篇论文骨架见 `research_reports/2026-09-week6-novelty/论文骨架.md`。**D1 已闭合（2026-09-20）**：器件参数取自公开文献与厂商资料（`research_reports/2026-09-week8/器件参数与三条不等式.md`），仅质量/体积/功耗预算留作假设 + 敏感性。第 7 周遗留的两篇单波长排队论文已于第 9 周取得**全文**（`laevens2003single`、`vanhoudt2004channel`）——**τ/T_burst≈1 属已知粒度结论，不得当新发现**。不得把第 5 周标定写成回环性能。
-> 当前研究周：第 9 周已完成（2026-09-20）。下一周为第 10 周：ExpA pilot（3 负载 × 调度器 × 5 τ）并冻结网格；**先由用户裁决 VF 口径**（同步偏移下 VF≡Horizon，是加"偏移异质"维度还是把 VF 降级为结构结论）；冻结网格时把构建模式写进结果目录名。
+> 当前研究周：第 9 周已完成（2026-09-20），**D4 已裁决（A+B 并行）**。下一周为第 10 周：ExpA pilot 冻结网格。主网格 `ExpA-TauSweep` / `ExpA-NoFDL` 保持第 8 周同步偏移 + Horizon 口径不变；VF 以"同步情形结构结论 + 异步偏移臂"两条线呈现（`FDL-Scenario-Async`、`ExpA-AsyncTauSweep`、`ExpA-AsyncNoFDL` 已建）。待冻结项：异步臂最终 repeat、是否并入 ρ≈0.81 热点矩阵（需"流量形态"维度）；冻结时把构建模式写进结果目录名。
 > 更新时间：2026-09-20（第 9 周收口）
 
 ---
@@ -352,10 +352,10 @@ flowchart LR
 1. **仿真线速率归一化（D2）。** 实验在 1 Gbps 下进行、结果以 τ/T_burst 归一化报告，物理设计点为 10 Gbps。`FDL-RateCheck` 设有 go/no-go 闸门：主判据锚定 `maxChannelUtilization`、`fdlUsageCount`、`carriedBursts`（相对偏差 < 10%/15%/10%），辅助判据为 `burstLossRate` 相对偏差 < 10% 或 绝对差 < 0.1 百分点。**状态：待确认。**
 2. **FDL 延迟器预算（D1）。** **已于 2026-09-20 闭合，改为公开文献建表。** 用户决定不向他人询问（"问的人不一定准确"）；盘查后发现原稿 7 个参数里只有"质量/体积/功耗预算"真正在别人手上。器件参数取自 Mouammar 2026 TABLE II 及**原始厂商出处**（Polatis / GLsun / Agiltron 厂商页 + Feyisa 2022 *JLT*），表 1 可标「器件手册」。**MEMS 被定量排除**（τ ≥ 8 ms → τ/T_burst ≈ 2.3×10³）；电光开关 τ/T=1 时总插损 **10.64 dB**，InP SOA 仅 **0.14 dB**（但成熟度为实验阶段）。**更正旧默认**："每级插损 0.5 dB"过于乐观（Agiltron 实际 **3.5 dB/级**）。文档：`research_reports/2026-09-week8/器件参数与三条不等式.md`；原询问稿已作废。
 3. **BCP 电子处理时延（D3）。** `fdl_params.ini` 中 1 µs 为假设值（assumed, to be confirmed against device datasheet），对实验 A/B 几乎无影响，对实验 C 敏感。实验 C（第 17 周起）前须做 0.5/1/5 µs 敏感性扫描。**状态：已关闭——暂用 1 µs。**
-4. **VF 口径（D4，2026-09-20 新增，第 10 周 pilot 的先决项）。** 第 9 周实测：在现有"各源同 `maxOffset`"的同步偏移下，VF **恒等于** Horizon（`voidFilledBursts = 0`，逐标量相同），因为到达顺序 ≡ BCP 处理顺序 ⇒ 被 horizon 拒绝的 burst 必与已有预约窗口重叠。三个选项：
-   - **(A) 加"偏移异质"维度**（纯 ini：每个源一个 `maxOffset`）。实测该配置下 VF 生效（全网已调度 burst +23.0%）。代价：异质偏移同时改变 FDL 臂的竞争形态，**ExpA 需重跑**。
-   - **(B) 把 VF 降级为结构结论**：主网格只留 Horizon，正文写"同步偏移的 W=1 链路不存在可补空隙"（附证明 + 实测 0）。
-   - **Agent 建议 A+B 并行**：主网格仍只跑 Horizon（第 8 周 ExpA 可解释性不变），另用一组异质偏移配置回答"何时 VF 才值"。**状态：待用户裁决。**
+4. **VF 口径（D4，2026-09-20 裁决：A+B 并行）。** 第 9 周实测：在现有"各源同 `maxOffset`"的同步偏移下，VF **恒等于** Horizon（`voidFilledBursts = 0`，逐标量相同），因为到达顺序 ≡ BCP 处理顺序 ⇒ 被 horizon 拒绝的 burst 必与已有预约窗口重叠（证明见 `walkthrough.md` 第十五节与 `OBS_ChannelCalendar.cc` 头部）。
+   - **(A) 加"偏移异质"维度**（纯 ini：每个源一个 `maxOffset`）。
+   - **(B) 把 VF 降级为结构结论**：主网格只留 Horizon。
+   - **用户裁决（2026-09-20）：A+B 并行。** 落地方式：主网格 `ExpA-TauSweep` / `ExpA-NoFDL` **保持第 8 周口径不变**（同步偏移 + Horizon），同步情形下"VF≡Horizon"写成结构性结论（附证明）；另建 `FDL-Scenario-Async`（每源一个偏移，700–970 µs）+ `ExpA-AsyncTauSweep` / `ExpA-AsyncNoFDL` 两组配置回答"何时 VF 才值"。**状态：已裁决，异步臂 pilot 进行中（0.2 s 冒烟已显示 VF 把丢包降 7.9–9.4 个百分点）。** 待第 10 周冻结：异步臂的最终 repeat、是否并入 ρ≈0.81 热点矩阵（需"流量形态"维度）。
 
 ---
 

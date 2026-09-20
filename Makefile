@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for obsmodules
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out -Xdoc -Xdocs -Xdownload-ripgrep0ikR1b -X仿真原始数据 -ID:/inet/src/linklayer/ieee80211/radio -ID:/inet/src/networklayer/routing/aodv -ID:/inet/src/networklayer/common -ID:/inet/src/networklayer/icmpv6 -ID:/inet/src -ID:/inet/src/world/obstacles -ID:/inet/src/networklayer/xmipv6 -ID:/inet/src/networklayer/contract -ID:/inet/src/networklayer/autorouting/ipv4 -ID:/inet/src/util -ID:/inet/src/transport/contract -ID:/inet/src/linklayer/common -ID:/inet/src/status -ID:/inet/src/linklayer/radio/propagation -ID:/inet/src/linklayer/ieee80211/radio/errormodel -ID:/inet/src/linklayer/radio -ID:/inet/src/util/headerserializers/tcp -ID:/inet/src/networklayer/ipv4 -ID:/inet/src/mobility/contract -ID:/inet/src/util/headerserializers/ipv4 -ID:/inet/src/base -ID:/inet/src/util/headerserializers -ID:/inet/src/world/radio -ID:/inet/src/linklayer/ieee80211/mac -ID:/inet/src/networklayer/ipv6 -ID:/inet/src/transport/sctp -ID:/inet/src/util/headerserializers/udp -ID:/inet/src/networklayer/ipv6tunneling -ID:/inet/src/applications/pingapp -ID:/inet/src/battery/models -ID:/inet/src/util/headerserializers/ipv6 -ID:/inet/src/util/headerserializers/sctp -ID:/inet/src/linklayer/contract -ID:/inet/src/networklayer/arp -ID:/inet/src/transport/tcp_common -ID:/inet/src/transport/udp -LD:/inet/out/$$\(CONFIGNAME\)/src -linet -DINET_IMPORT -KINET_PROJ=D:/inet
+#  opp_makemake -f --deep -O out -Xdoc -Xdocs -Xdownload-ripgrep0ikR1b -X仿真原始数据 -Xresearch_reports -XExamples/RingFdlOBS/tools -XExamples/RingFdlOBS/results -XExamples/TreeTopologyOBS/results -XExamples/jitel09/results -ID:/inet/src/linklayer/ieee80211/radio -ID:/inet/src/networklayer/routing/aodv -ID:/inet/src/networklayer/common -ID:/inet/src/networklayer/icmpv6 -ID:/inet/src -ID:/inet/src/world/obstacles -ID:/inet/src/networklayer/xmipv6 -ID:/inet/src/networklayer/contract -ID:/inet/src/networklayer/autorouting/ipv4 -ID:/inet/src/util -ID:/inet/src/transport/contract -ID:/inet/src/linklayer/common -ID:/inet/src/status -ID:/inet/src/linklayer/radio/propagation -ID:/inet/src/linklayer/ieee80211/radio/errormodel -ID:/inet/src/linklayer/radio -ID:/inet/src/util/headerserializers/tcp -ID:/inet/src/networklayer/ipv4 -ID:/inet/src/mobility/contract -ID:/inet/src/util/headerserializers/ipv4 -ID:/inet/src/base -ID:/inet/src/util/headerserializers -ID:/inet/src/world/radio -ID:/inet/src/linklayer/ieee80211/mac -ID:/inet/src/networklayer/ipv6 -ID:/inet/src/transport/sctp -ID:/inet/src/util/headerserializers/udp -ID:/inet/src/networklayer/ipv6tunneling -ID:/inet/src/applications/pingapp -ID:/inet/src/battery/models -ID:/inet/src/util/headerserializers/ipv6 -ID:/inet/src/util/headerserializers/sctp -ID:/inet/src/linklayer/contract -ID:/inet/src/networklayer/arp -ID:/inet/src/transport/tcp_common -ID:/inet/src/transport/udp -LD:/inet/out/$$\(CONFIGNAME\)/src -linet -DINET_IMPORT -KINET_PROJ=D:/inet
 #
 
 # Name of target to be created (-o option)
@@ -52,6 +52,7 @@ INCLUDE_PATH = \
     -I$(INET_PROJ)/src/transport/tcp_common \
     -I$(INET_PROJ)/src/transport/udp \
     -I. \
+    -I-p \
     -IExamples \
     -IExamples/BurstifierTest \
     -IExamples/BurstifierTest/results \
@@ -63,14 +64,12 @@ INCLUDE_PATH = \
     -IExamples/EdgeNodeTest/results \
     -IExamples/RingFdlOBS \
     -IExamples/RingFdlOBS/config \
-    -IExamples/RingFdlOBS/results \
     -IExamples/TreeTopologyOBS \
-    -IExamples/TreeTopologyOBS/results \
     -IExamples/jitel09 \
-    -IExamples/jitel09/results \
     -Isrc \
     -Isrc/CoreNode \
     -Isrc/EdgeNode \
+    -Isrc/Retransmit \
     -Isrc/SatelliteNode \
     -Isrc/messages \
     -Isrc/misc \
@@ -123,12 +122,11 @@ OBJS = \
     $O/src/EdgeNode/OBS_FileBurstifier.o \
     $O/src/EdgeNode/OBS_PacketBurstifier.o \
     $O/src/EdgeNode/OBS_PacketDispatcher.o \
+    $O/src/Retransmit/OBS_RetransmitSink.o \
+    $O/src/Retransmit/OBS_RetransmitSource.o \
     $O/src/messages/OBS_Burst.o \
     $O/src/misc/OBS_DropBurst.o \
     $O/src/misc/OBS_OpticalMonitor.o \
-    $O/src/Retransmit/OBS_RetransmitPacket_m.o \
-    $O/src/Retransmit/OBS_RetransmitSink.o \
-    $O/src/Retransmit/OBS_RetransmitSource.o \
     $O/src/tests/PacketConverter.o \
     $O/src/tests/sinks/testSink1.o \
     $O/src/tests/sinks/testSink2.o \
@@ -146,6 +144,7 @@ OBJS = \
     $O/src/EdgeNode/OBS_BurstifierInfo_m.o \
     $O/src/EdgeNode/OBS_BurstSenderInfo_m.o \
     $O/src/EdgeNode/OBS_ScheduledBurstItem_m.o \
+    $O/src/Retransmit/OBS_RetransmitPacket_m.o \
     $O/src/messages/OBS_Burst_m.o \
     $O/src/messages/OBS_BurstControlPacket_m.o \
     $O/src/tests/sources/SourceControlInfo_m.o
@@ -158,8 +157,8 @@ MSGFILES = \
     src/EdgeNode/OBS_BurstifierInfo.msg \
     src/EdgeNode/OBS_BurstSenderInfo.msg \
     src/EdgeNode/OBS_ScheduledBurstItem.msg \
-    src/messages/OBS_Burst.msg \
     src/Retransmit/OBS_RetransmitPacket.msg \
+    src/messages/OBS_Burst.msg \
     src/messages/OBS_BurstControlPacket.msg \
     src/tests/sources/SourceControlInfo.msg
 
@@ -238,6 +237,7 @@ clean:
 	$(Q)-rm -rf $O
 	$(Q)-rm -f obsmodules obsmodules.exe libobsmodules.so libobsmodules.a libobsmodules.dll libobsmodules.dylib
 	$(Q)-rm -f ./*_m.cc ./*_m.h
+	$(Q)-rm -f -p/*_m.cc -p/*_m.h
 	$(Q)-rm -f Examples/*_m.cc Examples/*_m.h
 	$(Q)-rm -f Examples/BurstifierTest/*_m.cc Examples/BurstifierTest/*_m.h
 	$(Q)-rm -f Examples/BurstifierTest/results/*_m.cc Examples/BurstifierTest/results/*_m.h
@@ -249,18 +249,15 @@ clean:
 	$(Q)-rm -f Examples/EdgeNodeTest/results/*_m.cc Examples/EdgeNodeTest/results/*_m.h
 	$(Q)-rm -f Examples/RingFdlOBS/*_m.cc Examples/RingFdlOBS/*_m.h
 	$(Q)-rm -f Examples/RingFdlOBS/config/*_m.cc Examples/RingFdlOBS/config/*_m.h
-	$(Q)-rm -f Examples/RingFdlOBS/results/*_m.cc Examples/RingFdlOBS/results/*_m.h
 	$(Q)-rm -f Examples/TreeTopologyOBS/*_m.cc Examples/TreeTopologyOBS/*_m.h
-	$(Q)-rm -f Examples/TreeTopologyOBS/results/*_m.cc Examples/TreeTopologyOBS/results/*_m.h
 	$(Q)-rm -f Examples/jitel09/*_m.cc Examples/jitel09/*_m.h
-	$(Q)-rm -f Examples/jitel09/results/*_m.cc Examples/jitel09/results/*_m.h
 	$(Q)-rm -f src/*_m.cc src/*_m.h
 	$(Q)-rm -f src/CoreNode/*_m.cc src/CoreNode/*_m.h
 	$(Q)-rm -f src/EdgeNode/*_m.cc src/EdgeNode/*_m.h
+	$(Q)-rm -f src/Retransmit/*_m.cc src/Retransmit/*_m.h
 	$(Q)-rm -f src/SatelliteNode/*_m.cc src/SatelliteNode/*_m.h
 	$(Q)-rm -f src/messages/*_m.cc src/messages/*_m.h
 	$(Q)-rm -f src/misc/*_m.cc src/misc/*_m.h
-	$(Q)-rm -f src/Retransmit/*_m.cc src/Retransmit/*_m.h
 	$(Q)-rm -f src/tests/*_m.cc src/tests/*_m.h
 	$(Q)-rm -f src/tests/sinks/*_m.cc src/tests/sinks/*_m.h
 	$(Q)-rm -f src/tests/sources/*_m.cc src/tests/sources/*_m.h
@@ -284,18 +281,18 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/RingFdlOBS/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/Retransmit/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc -p/*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/TreeTopologyOBS/*.cc Examples/jitel09/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/Retransmit/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/src/CoreNode/OBS_BCPControlInfo_m.o: src/CoreNode/OBS_BCPControlInfo_m.cc \
 	src/CoreNode/OBS_BCPControlInfo_m.h
-$O/src/CoreNode/OBS_ControlUnitInfo_m.o: src/CoreNode/OBS_ControlUnitInfo_m.cc \
-	src/CoreNode/OBS_ControlUnitInfo_m.h
 $O/src/CoreNode/OBS_ChannelCalendar.o: src/CoreNode/OBS_ChannelCalendar.cc \
 	src/CoreNode/OBS_ChannelCalendar.h
+$O/src/CoreNode/OBS_ControlUnitInfo_m.o: src/CoreNode/OBS_ControlUnitInfo_m.cc \
+	src/CoreNode/OBS_ControlUnitInfo_m.h
 $O/src/CoreNode/OBS_CoreControlLogic.o: src/CoreNode/OBS_CoreControlLogic.cc \
-	src/CoreNode/OBS_ChannelCalendar.h \
 	src/CoreNode/OBS_BCPControlInfo_m.h \
+	src/CoreNode/OBS_ChannelCalendar.h \
 	src/CoreNode/OBS_ControlUnitInfo_m.h \
 	src/CoreNode/OBS_CoreControlLogic.h \
 	src/CoreNode/OBS_CoreInput.h \
@@ -412,6 +409,39 @@ $O/src/EdgeNode/OBS_PacketDispatcher.o: src/EdgeNode/OBS_PacketDispatcher.cc \
 	src/messages/OBS_Burst_m.h
 $O/src/EdgeNode/OBS_ScheduledBurstItem_m.o: src/EdgeNode/OBS_ScheduledBurstItem_m.cc \
 	src/EdgeNode/OBS_ScheduledBurstItem_m.h
+$O/src/Retransmit/OBS_RetransmitPacket_m.o: src/Retransmit/OBS_RetransmitPacket_m.cc \
+	src/Retransmit/OBS_RetransmitPacket_m.h
+$O/src/Retransmit/OBS_RetransmitSink.o: src/Retransmit/OBS_RetransmitSink.cc \
+	$(INET_PROJ)/src/applications/common/ApplicationBase.h \
+	$(INET_PROJ)/src/base/Compat.h \
+	$(INET_PROJ)/src/base/ILifecycle.h \
+	$(INET_PROJ)/src/base/INETDefs.h \
+	$(INET_PROJ)/src/base/LifecycleOperation.h \
+	$(INET_PROJ)/src/base/NodeOperations.h \
+	$(INET_PROJ)/src/base/OperationalBase.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
+	$(INET_PROJ)/src/transport/contract/UDPControlInfo_m.h \
+	$(INET_PROJ)/src/transport/contract/UDPSocket.h \
+	src/Retransmit/OBS_RetransmitPacket_m.h \
+	src/Retransmit/OBS_RetransmitSink.h
+$O/src/Retransmit/OBS_RetransmitSource.o: src/Retransmit/OBS_RetransmitSource.cc \
+	$(INET_PROJ)/src/applications/common/ApplicationBase.h \
+	$(INET_PROJ)/src/base/Compat.h \
+	$(INET_PROJ)/src/base/ILifecycle.h \
+	$(INET_PROJ)/src/base/INETDefs.h \
+	$(INET_PROJ)/src/base/LifecycleOperation.h \
+	$(INET_PROJ)/src/base/NodeOperations.h \
+	$(INET_PROJ)/src/base/OperationalBase.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
+	$(INET_PROJ)/src/networklayer/contract/IPvXAddressResolver.h \
+	$(INET_PROJ)/src/transport/contract/UDPControlInfo_m.h \
+	$(INET_PROJ)/src/transport/contract/UDPSocket.h \
+	src/Retransmit/OBS_RetransmitPacket_m.h \
+	src/Retransmit/OBS_RetransmitSource.h
 $O/src/messages/OBS_Burst.o: src/messages/OBS_Burst.cc \
 	src/messages/OBS_Burst.h \
 	src/messages/OBS_Burst_m.h
@@ -419,14 +449,6 @@ $O/src/messages/OBS_BurstControlPacket_m.o: src/messages/OBS_BurstControlPacket_
 	src/messages/OBS_BurstControlPacket_m.h
 $O/src/messages/OBS_Burst_m.o: src/messages/OBS_Burst_m.cc \
 	src/messages/OBS_Burst_m.h
-$O/src/Retransmit/OBS_RetransmitPacket_m.o: src/Retransmit/OBS_RetransmitPacket_m.cc \
-	src/Retransmit/OBS_RetransmitPacket_m.h
-$O/src/Retransmit/OBS_RetransmitSink.o: src/Retransmit/OBS_RetransmitSink.cc \
-	src/Retransmit/OBS_RetransmitSink.h \
-	src/Retransmit/OBS_RetransmitPacket_m.h
-$O/src/Retransmit/OBS_RetransmitSource.o: src/Retransmit/OBS_RetransmitSource.cc \
-	src/Retransmit/OBS_RetransmitSource.h \
-	src/Retransmit/OBS_RetransmitPacket_m.h
 $O/src/misc/OBS_DropBurst.o: src/misc/OBS_DropBurst.cc \
 	src/messages/OBS_Burst.h \
 	src/messages/OBS_BurstControlPacket_m.h \
@@ -488,6 +510,7 @@ $O/src/tests/sinks/testSink3.o: src/tests/sinks/testSink3.cc \
 	$(INET_PROJ)/src/transport/tcp_common/TCPSegment_m.h \
 	$(INET_PROJ)/src/transport/udp/UDPPacket_m.h \
 	src/CoreNode/OBS_BCPControlInfo_m.h \
+	src/CoreNode/OBS_ChannelCalendar.h \
 	src/CoreNode/OBS_ControlUnitInfo_m.h \
 	src/CoreNode/OBS_CoreControlLogic.h \
 	src/CoreNode/OBS_CoreInput.h \
