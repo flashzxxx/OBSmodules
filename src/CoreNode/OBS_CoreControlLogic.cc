@@ -74,6 +74,11 @@ void OBS_CoreControlLogic::initialize(){
    switchReconfigTime = coreNode->par("switchReconfigTime");
    maxFdlLoopsPerBurst = coreNode->par("maxFdlLoopsPerBurst");
 
+   // Horizon + void filling scheduler option, read from the CoreNode exactly like useFDL so
+   // the ini pattern is **.sat*.coreSwitch.enableVoidFilling. It is a comparison arm of
+   // experiment A and independent of useFDL: with the option off nothing below changes.
+   enableVoidFilling = coreNode->par("enableVoidFilling").boolValue();
+
    // OBS_CoreNode.ned binds this submodule parameter as `delayTime = fdlDelayTime`,
    // and an ini entry cannot override a NED submodule-block assignment. The two
    // values are therefore equal by construction: this is an invariant assertion
@@ -110,6 +115,7 @@ void OBS_CoreControlLogic::initialize(){
    // Initialize FDL statistics
    numPorts = coreOutput->par("numPorts");
    fdlUsageCountCounter = 0;
+   voidFilledBursts = 0;
    busyTime = 0.0;
    busyTimeInFlight = 0.0;
    burstLossContentionCounter = 0;
@@ -120,6 +126,7 @@ void OBS_CoreControlLogic::initialize(){
    outgoingOffsetMin = -1;
 
    WATCH(useFDL);
+   WATCH(enableVoidFilling);
    WATCH(tau);
    WATCH(numPorts);
    WATCH(fdlUsageCountCounter);
@@ -141,6 +148,29 @@ void OBS_CoreControlLogic::initialize(){
    portBusyTime = (simtime_t*)calloc(numOutPorts,sizeof(simtime_t));
    portCarriedBytes = (double*)calloc(numOutPorts,sizeof(double));
 
+   // The void filling calendar is sized here and never touched again unless the option is on,
+   // so a run with enableVoidFilling=false allocates nothing and behaves exactly as before.
+   //
+   // The channel counts come from the lambdasPerOutPort parameter, NOT from
+   // gatesHorizon->getPortLambdas(): GatesHorizon is declared after ControlLogic in
+   // OBS_CoreControlUnit.ned, so its initialize() has not run yet and its arrays are still
+   // empty. Sizing the calendar from there produced zero-channel calendars, which made every
+   // admission query read out of bounds and every burst get dropped - found on Test-VF-On,
+   // 2026-09-20, and the reason OBS_ChannelCalendar now rejects a malformed size loudly.
+   if(enableVoidFilling){
+      std::vector<int> lambdasPerPort;
+      cStringTokenizer tokenizer(coreOutput->par("lambdasPerPort").stringValue());
+      while(tokenizer.hasMoreTokens()) lambdasPerPort.push_back(atoi(tokenizer.nextToken()));
+      if((int)lambdasPerPort.size() != numOutPorts){
+         opp_error("enableVoidFilling: lambdasPerOutPort has %d tokens but the core node has %d output ports; the void filling calendar cannot be sized",
+                   (int)lambdasPerPort.size(), numOutPorts);
+      }
+      calendar.setChannelCounts(numOutPorts,lambdasPerPort);
+      // Front pruning is only safe with a margin the query window can never reach back past
+      // (see OBS_ChannelCalendar.h); guardTime is comfortably above the required guardTime/2.
+      calendar.setPruneMargin(guardTime);
+   }
+
    int i=0;
    for(i=0;i<numInPorts;i++){
       recvBurstCounter[i] = 0;
@@ -152,6 +182,42 @@ void OBS_CoreControlLogic::initialize(){
       portCarriedBytes[i] = 0.0;
       WATCH(schedBurstCounter[i]);
       WATCH(portBusyTime[i]);
+   }
+}
+
+// Is (port,lambda) able to take a burst arriving at burstArrival?
+//
+// With the void filling option off this is the historical horizon test, unchanged:
+// the channel is usable when it has become free again at or before the burst arrives.
+// With the option on, the calendar is asked whether the burst's OXC window overlaps an
+// existing reservation. The two are equivalent whenever the channel has no hole (the
+// derivation is in OBS_ChannelCalendar.cc), so enabling the option can only ever admit
+// bursts the horizon rule had to refuse, never refuse one it would have admitted.
+bool OBS_CoreControlLogic::channelAccepts(int port,int lambda,simtime_t burstArrival,simtime_t burstDuration){
+   if(enableVoidFilling){
+      return calendar.fits(port,lambda,windowStart(burstArrival),windowEnd(burstArrival,burstDuration));
+   }
+   return gatesHorizon->getHorizon(port,lambda) <= burstArrival;
+}
+
+// Channel selection for the "*" routing case: nearest horizon, or the first channel whose
+// calendar has room. Under W=1 (the red line of this project) both degenerate to the single
+// data channel of the port, so the multi-channel ordering below is not part of any result.
+int OBS_CoreControlLogic::selectLambda(int port,simtime_t burstArrival,simtime_t burstDuration){
+   if(enableVoidFilling){
+      return calendar.findFittingLambda(port,windowStart(burstArrival),windowEnd(burstArrival,burstDuration));
+   }
+   return gatesHorizon->findNearestLambda(port,burstArrival);
+}
+
+// Book burstDuration on (port,lambda) for a burst arriving at burstArrival. The horizon is
+// always updated; the calendar only exists when the option is on. Both reservations of a
+// loopback go through here, so the FDL pseudo-channel is calendar-managed as well and the
+// FDL itself can be void-filled like any output channel.
+void OBS_CoreControlLogic::reserveChannel(int port,int lambda,simtime_t burstArrival,simtime_t burstDuration,simtime_t newHorizon){
+   gatesHorizon->updateHorizon(port,lambda,newHorizon);
+   if(enableVoidFilling){
+      calendar.reserve(port,lambda,windowStart(burstArrival),windowEnd(burstArrival,burstDuration));
    }
 }
 
@@ -249,16 +315,15 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
 
    if(outColour == -9){ // * option. Choose the lambda with closest horizon
       	// Choose the best channel
-        lambda = gatesHorizon->findNearestLambda(outPort,burstArrival);        
+        lambda = selectLambda(outPort,burstArrival,burstDuration);        
 
 	if(lambda != -1){
             scheduled = true;
 	} else if (fdlAllowed) {
             // Scenario B: FDL Loopback
-            simtime_t fdlHorizon = gatesHorizon->getHorizon(numPorts, 0);
-            if (fdlHorizon <= burstArrival) {
+            if (channelAccepts(numPorts, 0, burstArrival, burstDuration)) {
                 // Look for free lambda at burstArrival + tau
-                lambda = gatesHorizon->findNearestLambda(outPort, burstArrival + tau);
+                lambda = selectLambda(outPort, burstArrival + tau, burstDuration);
                 if (lambda != -1) {
                     scheduled = true;
                     usedFDLForThisBurst = true;
@@ -286,13 +351,12 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
 	    //Check if channel is free at the burst arrival moment. (outColour is actually a colour, that's why I convert it using getLambdaByColour method)
       	lambda = coreOutput->getLambdaByColour(outPort,outColour);
 
-	if(gatesHorizon->getHorizon(outPort,lambda) <= burstArrival ){
+	if(channelAccepts(outPort,lambda,burstArrival,burstDuration)){
             scheduled = true;
 	} else if (fdlAllowed) {
             // Scenario B: FDL Loopback
-            simtime_t fdlHorizon = gatesHorizon->getHorizon(numPorts, 0);
-            simtime_t waitTime = gatesHorizon->getHorizon(outPort, lambda) - burstArrival;
-            if (waitTime <= tau && fdlHorizon <= burstArrival) {
+            if (channelAccepts(numPorts, 0, burstArrival, burstDuration) &&
+                channelAccepts(outPort, lambda, burstArrival + tau, burstDuration)) {
                 scheduled = true;
                 usedFDLForThisBurst = true;
             }
@@ -327,10 +391,13 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
 
       if(countStats){
          schedBurstCounter[outPort]++;
+         // Admitted into a hole: the append-only horizon rule would have had to refuse
+         // this burst, because the channel is not free again until after its arrival.
+         if(enableVoidFilling && burstArrival < gatesHorizon->getHorizon(outPort,lambda)) voidFilledBursts++;
       }
 
-      //Update horizon array
-      gatesHorizon->updateHorizon(outPort,lambda, newHorizon);
+      //Update horizon array (and the void filling calendar, when enabled)
+      reserveChannel(outPort,lambda,burstArrival,burstDuration, newHorizon);
 
       OBS_ControlUnitInfo *controlInfo = new OBS_ControlUnitInfo();
       OBS_ControlUnitInfo *controlInfo1 = new OBS_ControlUnitInfo();
@@ -377,7 +444,7 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
       simtime_t fdlDisconnectTime = burstArrival + burstDuration + guardTime/4;
       simtime_t newFDLHorizon = burstArrival + burstDuration + (3*guardTime)/4;
 
-      gatesHorizon->updateHorizon(numPorts, 0, newFDLHorizon);
+      reserveChannel(numPorts,0,burstArrival,burstDuration, newFDLHorizon);
 
       OBS_ControlUnitInfo *fdlControlInfo = new OBS_ControlUnitInfo();
       OBS_ControlUnitInfo *fdlControlInfo1 = new OBS_ControlUnitInfo();
@@ -403,7 +470,7 @@ void OBS_CoreControlLogic::handleMessage(cMessage *msg){
          schedBurstCounter[outPort]++;
       }
 
-      gatesHorizon->updateHorizon(outPort, lambda, newDestHorizon);
+      reserveChannel(outPort,lambda,delayedArrival,burstDuration, newDestHorizon);
 
       OBS_ControlUnitInfo *destControlInfo = new OBS_ControlUnitInfo();
       OBS_ControlUnitInfo *destControlInfo1 = new OBS_ControlUnitInfo();
@@ -550,6 +617,18 @@ void OBS_CoreControlLogic::finish(){
    recordScalar("maxChannelUtilization", maxUtilization);
    recordScalar("maxIslChannelUtilization", maxIslUtilization);
    recordScalar("maxIslUtilPort", maxIslUtilPort);
+
+   // Void filling arm only. These are deliberately absent when the option is off: a default
+   // run must produce the same .sca as before this feature existed, which is what makes the
+   // "useFDL=false is unchanged" regression check byte-for-byte rather than approximate.
+   // calendarScanCount is the LAUC-VF cost proxy (interval comparisons) and
+   // calendarMaxReservations the largest number of live reservations on one channel, i.e. how
+   // many voids W=1 actually has to look at. Both feed the compute-budget red line.
+   if(enableVoidFilling){
+      recordScalar("voidFilledBursts", voidFilledBursts);
+      recordScalar("calendarScanCount", calendar.getScanCount());
+      recordScalar("calendarMaxReservations", calendar.getMaxReservationCount());
+   }
 
    if (data_f != NULL){
       fclose(data_f);

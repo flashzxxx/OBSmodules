@@ -21,6 +21,7 @@
 #include <omnetpp.h>
 #include "OBS_CoreRoutingTable.h"
 #include "OBS_CoreOutputHorizon.h"
+#include "OBS_ChannelCalendar.h"
 #include "OBS_ControlUnitInfo_m.h"
 #include "OBS_BurstControlPacket_m.h"
 #include "OBS_BCPControlInfo_m.h"
@@ -57,6 +58,8 @@ class OBS_CoreControlLogic : public cSimpleModule{
      double *portCarriedBytes; //!< Payload bytes reserved on each output fiber. double avoids overflow on long runs.
 
      bool useFDL; //!< Whether to use FDL loopback.
+     bool enableVoidFilling; //!< Horizon + void filling scheduler option (comparison arm, default off).
+     OBS_ChannelCalendar calendar; //!< Channel reservation calendar; only maintained when enableVoidFilling.
      simtime_t tau; //!< FDL delay time.
      int numPorts; //!< Number of ports.
      simtime_t switchReconfigTime; //!< Physical lower bound on tau when FDL is on.
@@ -65,6 +68,7 @@ class OBS_CoreControlLogic : public cSimpleModule{
      simtime_t warmupPeriod; //!< Copied from simulation.getWarmupPeriod(). Statistics use burstArrival.
 
      int fdlUsageCountCounter; //!< Usage counter for FDL.
+     long voidFilledBursts; //!< Bursts admitted into a hole the append-only horizon rule would have refused.
      simtime_t busyTime; //!< Accumulated FDL entry occupancy (burstDuration).
      simtime_t busyTimeInFlight; //!< Accumulated FDL in-fibre occupancy (burstDuration+tau).
      int burstLossContentionCounter; //!< Counter for contention drops.
@@ -83,7 +87,19 @@ class OBS_CoreControlLogic : public cSimpleModule{
    protected:
 
      FILE *data_f; //!< Output file descriptor.
-     
+
+     //! Window the burst would hold on (port,lambda): the exact OXC reservation interval.
+     simtime_t windowStart(simtime_t burstArrival) { return burstArrival - guardTime/2; }
+     simtime_t windowEnd(simtime_t burstArrival,simtime_t burstDuration) { return burstArrival + burstDuration + guardTime/4; }
+
+     //! Can (port,lambda) hold a burst arriving at burstArrival? Horizon rule, or the void
+     //! filling calendar when enableVoidFilling is set. The two agree when there is no hole.
+     bool channelAccepts(int port,int lambda,simtime_t burstArrival,simtime_t burstDuration);
+     //! Best lambda of port for that burst, or -1. Horizon scheduling or void filling.
+     int selectLambda(int port,simtime_t burstArrival,simtime_t burstDuration);
+     //! Update the horizon and, when void filling is on, record the window in the calendar.
+     void reserveChannel(int port,int lambda,simtime_t burstArrival,simtime_t burstDuration,simtime_t newHorizon);
+
 	 virtual void initialize();
      virtual void finish();
      virtual void handleMessage(cMessage *msg);

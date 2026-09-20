@@ -32,6 +32,10 @@ module OBS_CoreNode
         string inputColours; // Colour of each input data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
         string outputColours; // Colour of each output data channel of each fiber. Should be a list of int numbers and vertical bars separated by spaces (each vertical bar separates a fiber). Use an empty string if you don't want to use colours. Example: "2 3 4 | 4 3 2 | 5 4 3" (3 fibers with 3 lambdas each one)
         bool useFDL = default(false);
+        // Horizon + void filling scheduler option. Comparison arm of experiment A, not a
+        // third FDL strategy: default off keeps the append-only horizon rule, and it is
+        // independent of useFDL (both combinations are legal and reported separately).
+        bool enableVoidFilling = default(false);
         double fdlDelayTime @unit(s) = default(10us);
         double switchReconfigTime @unit(s) = default(0s); // Lower bound for tau when useFDL=true. 0 disables the check.
         string fdlOffsetMode = default("DO"); // "DO": BCP offset += tau. "SO": hold BCP by tau so downstream offset matches cut-through.

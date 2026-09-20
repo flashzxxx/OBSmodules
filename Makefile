@@ -106,6 +106,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
+    $O/src/CoreNode/OBS_ChannelCalendar.o \
     $O/src/CoreNode/OBS_CoreControlLogic.o \
     $O/src/CoreNode/OBS_CoreInput.o \
     $O/src/CoreNode/OBS_CoreOutput.o \
@@ -125,6 +126,9 @@ OBJS = \
     $O/src/messages/OBS_Burst.o \
     $O/src/misc/OBS_DropBurst.o \
     $O/src/misc/OBS_OpticalMonitor.o \
+    $O/src/Retransmit/OBS_RetransmitPacket_m.o \
+    $O/src/Retransmit/OBS_RetransmitSink.o \
+    $O/src/Retransmit/OBS_RetransmitSource.o \
     $O/src/tests/PacketConverter.o \
     $O/src/tests/sinks/testSink1.o \
     $O/src/tests/sinks/testSink2.o \
@@ -155,6 +159,7 @@ MSGFILES = \
     src/EdgeNode/OBS_BurstSenderInfo.msg \
     src/EdgeNode/OBS_ScheduledBurstItem.msg \
     src/messages/OBS_Burst.msg \
+    src/Retransmit/OBS_RetransmitPacket.msg \
     src/messages/OBS_BurstControlPacket.msg \
     src/tests/sources/SourceControlInfo.msg
 
@@ -255,6 +260,7 @@ clean:
 	$(Q)-rm -f src/SatelliteNode/*_m.cc src/SatelliteNode/*_m.h
 	$(Q)-rm -f src/messages/*_m.cc src/messages/*_m.h
 	$(Q)-rm -f src/misc/*_m.cc src/misc/*_m.h
+	$(Q)-rm -f src/Retransmit/*_m.cc src/Retransmit/*_m.h
 	$(Q)-rm -f src/tests/*_m.cc src/tests/*_m.h
 	$(Q)-rm -f src/tests/sinks/*_m.cc src/tests/sinks/*_m.h
 	$(Q)-rm -f src/tests/sources/*_m.cc src/tests/sources/*_m.h
@@ -278,14 +284,17 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/RingFdlOBS/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc Examples/*.cc Examples/BurstifierTest/*.cc Examples/BurstifierTest/results/*.cc Examples/DispatcherTest/*.cc Examples/DispatcherTest/results/*.cc Examples/EdgeNodeExample/*.cc Examples/EdgeNodeExample/results/*.cc Examples/EdgeNodeTest/*.cc Examples/EdgeNodeTest/results/*.cc Examples/RingFdlOBS/*.cc Examples/RingFdlOBS/config/*.cc Examples/RingFdlOBS/results/*.cc Examples/TreeTopologyOBS/*.cc Examples/TreeTopologyOBS/results/*.cc Examples/jitel09/*.cc Examples/jitel09/results/*.cc src/*.cc src/CoreNode/*.cc src/EdgeNode/*.cc src/SatelliteNode/*.cc src/messages/*.cc src/misc/*.cc src/Retransmit/*.cc src/tests/*.cc src/tests/sinks/*.cc src/tests/sources/*.cc test/*.cc test/BurstDisassemblerTest/*.cc test/BurstSenderTest/*.cc test/CoreInputTest/*.cc test/CoreNodeTest/*.cc test/CoreOutputTest/*.cc test/DropBurstTest/*.cc test/EOConverterTest/*.cc test/FileBurstifierTest/*.cc test/OEConverterTest/*.cc test/OpticalMonitorTest/*.cc test/PacketBurstifierTest/*.cc test/PacketDispatcherTest/*.cc utils/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/src/CoreNode/OBS_BCPControlInfo_m.o: src/CoreNode/OBS_BCPControlInfo_m.cc \
 	src/CoreNode/OBS_BCPControlInfo_m.h
 $O/src/CoreNode/OBS_ControlUnitInfo_m.o: src/CoreNode/OBS_ControlUnitInfo_m.cc \
 	src/CoreNode/OBS_ControlUnitInfo_m.h
+$O/src/CoreNode/OBS_ChannelCalendar.o: src/CoreNode/OBS_ChannelCalendar.cc \
+	src/CoreNode/OBS_ChannelCalendar.h
 $O/src/CoreNode/OBS_CoreControlLogic.o: src/CoreNode/OBS_CoreControlLogic.cc \
+	src/CoreNode/OBS_ChannelCalendar.h \
 	src/CoreNode/OBS_BCPControlInfo_m.h \
 	src/CoreNode/OBS_ControlUnitInfo_m.h \
 	src/CoreNode/OBS_CoreControlLogic.h \
@@ -410,6 +419,14 @@ $O/src/messages/OBS_BurstControlPacket_m.o: src/messages/OBS_BurstControlPacket_
 	src/messages/OBS_BurstControlPacket_m.h
 $O/src/messages/OBS_Burst_m.o: src/messages/OBS_Burst_m.cc \
 	src/messages/OBS_Burst_m.h
+$O/src/Retransmit/OBS_RetransmitPacket_m.o: src/Retransmit/OBS_RetransmitPacket_m.cc \
+	src/Retransmit/OBS_RetransmitPacket_m.h
+$O/src/Retransmit/OBS_RetransmitSink.o: src/Retransmit/OBS_RetransmitSink.cc \
+	src/Retransmit/OBS_RetransmitSink.h \
+	src/Retransmit/OBS_RetransmitPacket_m.h
+$O/src/Retransmit/OBS_RetransmitSource.o: src/Retransmit/OBS_RetransmitSource.cc \
+	src/Retransmit/OBS_RetransmitSource.h \
+	src/Retransmit/OBS_RetransmitPacket_m.h
 $O/src/misc/OBS_DropBurst.o: src/misc/OBS_DropBurst.cc \
 	src/messages/OBS_Burst.h \
 	src/messages/OBS_BurstControlPacket_m.h \

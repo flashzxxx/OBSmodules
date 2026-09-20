@@ -412,23 +412,24 @@
 @inproceedings{laevens2003single,
   author    = {Koenraad Laevens and Herwig Bruneel},
   title     = {Analysis of a Single-Wavelength Optical Buffer},
-  booktitle = {{IEEE} {INFOCOM} 2003},
+  booktitle = {{IEEE} {INFOCOM} 2003. Twenty-Second Annual Joint Conference of the {IEEE} Computer and Communications Societies},
   year      = {2003},
   doi       = {10.1109/INFCOM.2003.1209246},
   url       = {https://doi.org/10.1109/INFCOM.2003.1209246},
-  urldate   = {2026-09-18},
-  note    = {题录级（经 rogiest2007degenerate / lambert2008hessenberg 参考文献表核对）。未取得全文 PDF。**与本文 W=1 情形最近的解析工作之一，不假设波长变换**；第 6 周"排队论都假定多波长/全波长变换"的说法对本篇不成立，写 2.1 前必须先读}
+  urldate   = {2026-09-20},
+  note    = {**全文已读**（作者稿 6 页 PDF，2026-09-20 经 web.archive.org 取 ieee-infocom.org/2003/papers/55_02.PDF 的 2016 存档；抽取文本见 refs/extracts/laevens2003-infocom-text-2026-09-20.txt）。单波长、单出信道、若干条 FDL；用 PGF 求无限缓存下排队 horizon 的分布，**不要求 burst/packet 长度分布的任何特殊假设**。对本文最重要的两条：(1) 只实现**离散**延迟集合 → 信道容量利用不足（underutilization）；(2) 定长 burst 下 **FDL 长度与 burst 时长相等并非最优**，最优解同时取决于 burst 尺寸特征与**到达负载**。因此本文测到的 tau/T_burst≈1 最优只是该解析结论在本文器件模型下的一个具体点，**不能当作新发现**；本文的增量是载荷代价（插损/切换时间/档位）与星间 W=1，以及与无缓存重传的量化对照}
 }
 
 @inproceedings{vanhoudt2004channel,
   author    = {Benny Van Houdt and Koenraad Laevens and Joke Lambert and Chris Blondia and Herwig Bruneel},
   title     = {Channel Utilization and Loss Rate in a Single-Wavelength Fibre Delay Line ({FDL}) Buffer},
   booktitle = {{IEEE} {GLOBECOM} 2004},
+  pages     = {1900--1906},
   year      = {2004},
   doi       = {10.1109/GLOCOM.2004.1378323},
   url       = {https://doi.org/10.1109/GLOCOM.2004.1378323},
-  urldate   = {2026-09-18},
-  note    = {题录级（经 lambert2008hessenberg 参考文献表核对）。未取得全文 PDF。**单波长 FDL 缓存的信道利用率与丢包率解析**，与本文的利用率/丢包率口径直接重叠，是 5.1 图最需要区分的上界文}
+  urldate   = {2026-09-20},
+  note    = {**全文已读**（作者稿 7 页 PDF，2026-09-20 取自作者主页 win.uantwerpen.be/~vanhoudt/papers/2004/Globe04.pdf；抽取文本见 refs/extracts/vanhoudt2004-globecom-text-2026-09-20.txt；卷期页与作者机构经 biblio.ugent.be/publication/411394 与 ISC 423194 双源核对，作者含 Joke Lambert，PATS/安特卫普 + SMACS/根特）。单波长 FDL 缓存的**信道最大利用率与丢包率精确解**（矩阵解析法），此前工作只给近似。对本文最关键的 5 条：(1) FDL 只能实现**粒度为 D 的离散延迟** → 造成 voids → 降低信道利用率与系统容量；(2) 最大可达信道利用率只取决于 **burst 尺寸分布 mod D**；(3) 最优粒度 D_opt 与 burst 长度分布紧密相关，且 **D 偏离最优 10% 时丢包率在最坏情况下可差数个数量级**；(4) D_opt 在最优点较窄（负载越低或 FDL 数越多越窄）——与 laevens2003single 的"最优依赖负载"一致；(5) 高 MACU 的 D 同时也是低丢包的 D。**对本文的直接约束**：tau/T_burst≈1 的"粒度"选择属已知结论，本文**不得**把"最优粒度约等于 burst 时长"当新发现；本文可站住的是把该粒度接到载荷可实现的延迟器（二进制档位、每级插损、切换时间）上。**另**：该文的 voids 来自 burst 尺寸 mod D，而第 9 周实测显示匀速（同偏移）W=1 卫星链路上 void filling 无法补任何被 horizon 拒绝的 burst——两种 voids 不是一回事，正文须区分}
 }
 
 @article{rogiest2007degenerate,

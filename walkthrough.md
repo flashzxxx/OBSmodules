@@ -337,3 +337,65 @@ Mouammar 原文（p.3）明确写：OPS/OBS "**not technologically mature due to
 
 **入库提示**：`Examples/RingFdlOBS/tools/` 已被 09-20 的决定设为不入库，
 因此本轮没有新增工具脚本需要提交；D1 交付物是 Markdown 文档，正常纳入。
+
+---
+
+## 十五、第 9 周：VF 调度器与 host 侧重传基线（2026-09-20）
+
+### 做了什么
+
+1. **VF（Horizon + void filling）**：新类 `src/CoreNode/OBS_ChannelCalendar.{h,cc}`（每个 (port,lambda) 一条预约区间表），
+   `OBS_CoreNode.ned` 新增 `enableVoidFilling`（默认 false），`OBS_CoreControlLogic` 新增
+   `channelAccepts()` / `selectLambda()` / `reserveChannel()` 三个谓词，四条决策路径统一走它们。
+2. **重传基线（实验 R）**：新目录 `src/Retransmit/`（`OBS_RetransmitSource` / `OBS_RetransmitSink` / `OBS_RetransmitPacket.msg`），
+   两个模块 `like IUDPApp`，直接替换 `udpApp[i].typename`；`ExpR-Retransmit` 从占位改为真正跑重传。**未改 `src/EdgeNode/`**。
+3. **确定性用例**：VF 4 例 + 重传 2 例 + 载入诊断 4 例，写入 `fdl_tests.ini`；新工具 `tools/compare_sca.py`（逐标量对照，可当 pass/fail）。
+4. **文献**：`laevens2003single`、`vanhoudt2004channel` 两篇全文取得（作者稿 PDF），抽取文本入 `refs/extracts/`，`refs.bib` 由"题录级"升为"全文已读"。
+
+### 设计要点（为什么默认路径一定没变）
+
+Horizon 存标量 `horizon = A0 + D0 + 3g/4`，最后一条预约窗口右端 `= horizon − g/2`，
+故 `horizon ≤ A'` ⟺ `A' − g/2 ≥ 窗口右端`，正是区间不重叠判据。
+**无空隙时 VF 与 Horizon 判定完全相同**，VF 只能多接纳。实现上 `enableVoidFilling=false` 时
+日历不分配、不访问，VF 标量不记录，因此默认运行的 `.sca` 与改动前**逐标量全同**。
+
+### 验证方法与结果
+
+编译：`mingw32-make MODE=release`、`MODE=debug` 均 exit 0、无 error/warning。
+运行环境需把 OMNeT++ 的 `tools/win32/usr/bin`（MSYS `mkdir -p`/`sh`）也放进 PATH，否则 Makefile 的 `MKPATH` 会失败。
+
+| 检查 | 结果 |
+|---|---|
+| `useFDL=false` 回归（debug，改动前备份 vs 改动后） | Basic/TooShort/Off/SO 各 **1701/1701 相同**；Compatibility **1697/1697 相同**；差异 0、新增标量 0 |
+| VF 确定性对照 | Off：丢 1、收 2；On：丢 0、收 3、`voidFilledBursts=1`；FDLOn：同上且 `fdlUsageCount=0`；FDLOnNoVF：丢 1、收 2 |
+| 重传确定性对照 | On：sat5 重传 1 / 放弃 0 / 完成时延 **52.02 ms**；Off：重传 0 / 放弃 1 / 未完成；差值 30.00 ms = 超时 |
+| FDL 载入冒烟（`Test-FDL-Diag-LoopStrict`） | exit 0；`burstsLoopedMultiple` 全 0（红线仍成立）；`fdlUsageCount` 最大 35,443 |
+
+**两个必须记住的坑**：
+
+1. **`.sca` 不能跨构建模式比较**。release 跑回归时出现 79–84 条末位差异 + 3 ps 结束时刻差；
+   把同一份新代码分别编 debug/release 对比得到同样量级的差异，而 debug 版对旧基线 0 差异 —— 差异来自构建模式，不是代码。
+   跨周比较必须固定模式（第 8 周 ExpA 的模式未记录，第 10 周起写进结果目录名）。
+2. **日历初始化顺序缺陷（已修）**：首版按 `gatesHorizon->getPortLambdas()` 定尺寸，而 `GatesHorizon` 在 NED 里声明在
+   `ControlLogic` 之后、initialize 尚未执行 → 日历建成 0 信道 → 越界读导致**每个 burst 都被拒绝**。
+   改为解析 `lambdasPerOutPort` 参数，并让 `OBS_ChannelCalendar` 对越界/0 信道**响亮 opp_error**，不再静默改结果。
+
+### 新发现（负面但可发表）
+
+载入实测（`Test-VF-Diag-LoadedOff/On`，ρ≈0.59，双种子）显示 **VF 补了 0 个 burst**，与 Horizon 逐标量相同。
+原因是 `OBS_BurstSender` 使所有 burst 的偏移恒等于 `maxOffset`（本场景 1 ms）⇒ 到达顺序 ≡ BCP 顺序 ⇒
+被 horizon 拒绝的 burst 必与已存在窗口重叠，**没有空隙可补**（分析见 week9/分析.md 第三节，附证明）。
+把 10 个源的 `maxOffset` 改成 700–970 µs 后 VF 立即生效：全网已调度 burst 38,843 → **47,748（+23.0%）**。
+**第 10 周需要用户裁决**：主网格是否引入"偏移异质"维度，或把 VF 降级为结构结论。
+
+### 改动文件
+
+新增：`src/CoreNode/OBS_ChannelCalendar.{h,cc}`；`src/Retransmit/OBS_RetransmitPacket.msg`、
+`OBS_RetransmitSource.{h,cc,ned}`、`OBS_RetransmitSink.{h,cc,ned}`；
+`research_reports/2026-09-week9/{分析.md,周会材料.md,文献精读-排队论单波长两篇.md}`；
+`refs/extracts/laevens2003-infocom-text-2026-09-20.txt`、`refs/extracts/vanhoudt2004-globecom-text-2026-09-20.txt`。
+改：`src/CoreNode/OBS_CoreNode.ned`、`src/CoreNode/OBS_CoreControlLogic.{h,cc}`、`Makefile`（OBJS/MSGFILES/依赖/clean/makedepend）、
+`fdl_params.ini`（`enableVoidFilling` 默认值）、`fdl_tests.ini`（+10 个配置）、`fdl_experiments.ini`（ExpR 接线 + 说明）、`refs.bib`。
+
+未提交（本地工具，按 09-20 决定不入库）：`tools/compare_sca.py`、`tools/run-week9-regression.ps1`、
+`results/_regression-baseline-week9/`、`results/_week9-logs/`、`results/_week9-release-new/`。

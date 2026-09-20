@@ -1,0 +1,1050 @@
+Channel Utilization and Loss Rate in a
+single-wavelength Fibre Delay Line (FDL) Buffer
+B. Van Houdt∗, K. Laevens†, J. Lambert∗, C. Blondia∗and H. Bruneel†
+∗PATS Research Group, University of Antwerp, Middelheimlaan 1, B-2020 Antwerpen, Belgium
+Email: {benny.vanhoudt,joke.lambert,chris.blondia}@ua.ac.be
+†SMACS Research Group, University of Gent, St-Pietersnieuwsstraat 41, B-9000 Gent, Belgium
+Email: {koenraad.laevens,herwig.bruneel}@ugent.be
+Abstract— We present a detailed analysis of the maximum
+channel utilization and loss performance in an optical buffer
+having access to a single outgoing channel. As opposed to a
+conventional electronic buffer, such a system - consisting of a
+number of ﬁber delay lines - can only realize a discrete set
+of delays to resolve output port contention. This leads to an
+underutilization of the channel capacity, which reduces overall
+performance.
+The framework considered in this paper greatly simpliﬁes the
+assumptions made in previous work, which allows us to study
+the impact of a variety of new parameters on the performance,
+e.g., the burstiness of the arrival process and the correlation
+of consecutive burst lengths. Moreover, we present exact results
+for both the channel utilization and loss rate in such a system,
+this in contrast with all prior work which provided accurate
+approximations for the loss rate.
+Matrix analytic methods are used to perform this analysis. To
+the best of our knowledge, this is the ﬁrst time that such an
+approach is used to analyze an optical buffer. We show, amongst
+others, that carefully choosing the granularity parameter can, in
+some cases, make a substantial difference when trying to realize
+lower buffer losses or a high channel utilization. Optimal values
+of the granularity parameter are shown to be closely related to
+the optical burst length distribution.
+I. INTRODUCTION
+As advances in Dense Wavelength Division Multiplexing
+(DWDM) push ﬁber transmission capacities well beyond the
+Tbit/s, electronic switches and routers are becoming the bottle-
+necks of the backbone network. All-optical packet switching
+(OPS) could alleviate the problem. However, OPS requires
+practical and cost-effective implementations of optical header
+processing, which is still some years away. As an intermediate
+solution, optical burst switching (OBS) has been proposed [1],
+[2], [3], which avoids the need to process headers in the optical
+domain. Although wavelength conversion greatly reduces the
+need for OBS network buffering [4], contention can still arise.
+Resolving this contention is not straightforward due to the lack
+of optical RAM. The use of Fiber Delay Lines (FDLs) has
+been introduced to partially resolve this problem, and several
+architectures that make use of an FDL buffer have already
+been studied [5], [6], [7].
+A limited number of analytic results concerning the stability
+and loss of such FDL based buffer systems has been published
+so far [8], [9], [10]. Our work consists in generalizing the
+results presented in [9] in a number of ways. First, we assume
+that new incoming optical bursts (OBs) follow a general
+Markovian arrival process instead of a simple Bernoulli arrival
+process. Second, we allow correlation between the length of
+consecutive OBs, as well as correlation between the inter
+arrival times (IATs) and OB lengths. Finally, when studying
+the loss rates in a ﬁnite FDL buffer, our method allows us to
+produce exact analytical results, whereas all prior work relied
+on accurate approximations. To obtain these analytical results
+we make use of the matrix analytic method (MAM) which, to
+our best knowledge, is the ﬁrst time that this method is used
+to analyze the performance of FDL buffers.
+We focus on a single WDM channel and assume contention
+for it is resolved by means of an FDL buffer, which can delay,
+if necessary, OBs until the channel becomes available again.
+Unlike conventional buffers, however, it can not delay bursts
+for an arbitrary period of time, but only for multiples of a basic
+unit D, called the granularity of the FDLs [8], [9]. Each OB is
+thus either delayed nD time units, for some n = 0, 1, . . . , N,
+or is dropped. Hereby, N is the size of the FDL buffer, the
+maximum achievable delay being ND. We assume time is
+slotted and we will use the duration of a single slot as the
+unit of time. A natural choice for the slot length would be
+the clock cycle in a synchronous system. Thus, for instance,
+the granularity D would be expressed as an integer number of
+slots. Note that when D equals one (slot), the optical buffer
+functions as a conventional time-slotted one, i.e., it is no longer
+degenerate, since then the whole range of delays (up to N) can
+be realized.
+We will show that carefully choosing the granularity param-
+eter D can, in some cases, make a substantial difference when
+trying to realize low buffer losses or a high channel utilization.
+In general, the less uniform the burst length distribution, the
+more profound the impact of the granularity parameter D
+becomes on the OB loss rate (as well as on the achievable
+channel utilization). Optimal values of D are, in such cases,
+closely related to the most common OB lengths.
+The paper is structured as follows. In Section II we start by
+presenting a stability condition for an inﬁnite FDL buffer fed
+by a general Markovian arrival process. In order to improve
+our understanding of this stability condition, a number of
+special cases are considered next, e.g., Bernoulli arrivals and
+uncorrelated burst lengths. Within Section II we also present
+a number of analytical and numerical results that demonstrate
+which parameters inﬂuence the maximum channel utilization
+
+D
+D
+Hk
+Hk+1
+tk
+kth arrival
+(k+1)st arrival
+Bk
+void
+l
+Fig. 1.
+Evolution of the scheduling horizon H from one arrival to the next.
+lk is the length of the k-th OB and τk the burst IAT.
+and how. Section III presents an exact method to compute
+the loss rate in a ﬁnite FDL buffer. A variety of numerical
+results, both for Bernoulli and Markovian arrivals, show that
+ﬁnding the optimal granularity is a delicate problem. Finally,
+conclusions are drawn in Section IV.
+II. STABILITY OF INFINITE FDL BUFFERS
+A. General Case
+In this section we assume that the buffer is of inﬁnite size
+(N = ∞), so that no loss occurs. Denote by ¯Hk the scheduling
+horizon as seen by the k-th arrival. It is, by deﬁnition, the ear-
+liest time (measured in slots) by which all previously arrived
+OBs will have left the system, and is thus the equivalent of
+the virtual waiting time in conventional queues. In Figure 1,
+the relation between ¯Hk and ¯Hk+1 is illustrated. When the
+k-th burst sees a scheduling horizon ¯Hk upon arrival, it will
+have to be delayed by at least that amount to avoid contention.
+Since the buffer is degenerate, however, this delay can not be
+realized exactly, the closest match being given by D⌈¯Hk/D⌉.
+(Note that ⌈¯Hk/D⌉represents the index of the FDL the k-th
+OB must traverse.) Thus, the ﬁnite granularity D of the FDLs
+leads to voids, as illustrated in Figure 1, reducing channel
+utilization and lowering the system’s overall capacity. The aim
+of this section is to obtain a simple condition to determine
+the maximum channel utilization ρmax of a channel preceded
+by an inﬁnite FDL buffer, and to determine which parameters
+inﬂuence ρmax and how. Notice, in case of an electrical buffer
+ρmax always equals 1 as the use of an inﬁnite RAM buffer
+does not create voids.
+New incoming OBs arrive according to a general Markovian
+arrival process [11]. Such a process is characterized by a set
+of b × b matrices (Bs)s≥0, where the (i, j)-th element of Bs
+represents the probability that the background Markov chain
+makes a transition from state i to j, while, for s > 0, a new
+OB with a length of s time units arrives and, for s = 0, there
+is no new burst arrival. Such an arrival process generally has
+correlated inter arrival times, as well as a correlation structure
+on the length of consecutive OBs, meaning that the length
+of an OB can be inﬂuenced by the size of (all) prior OBs.
+Moreover, the inter arrival times may also inﬂuence the length
+of an OB and vice versa.
+Let Hn be the value of the scheduling horizon at time slot n
+and Jn the state of the arrival process at time n (for all n ≥0).
+Then, (Hn, Jn)n≥0 forms a discrete-time Markov chain1 (MC)
+with transition matrix P as shown in Eq. (1). By reblocking P
+into blocks of dimension Db one ﬁnds that the MC (Hn, Jn)
+is an M/G/1 type MC with blocks of dimension Db [11]. We
+can study the stability of the FDL buffer by investigating the
+ergodicity of the MC characterized by P. An M/G/1 type MC
+is known to be ergodic if and only if
+πβ < 1,
+(2)
+where π is a left stochastic invariant vector of A = P
+i≥0 Ai
+and β = P
+i≥1 iAi1Db (where 1j is a j ×1 vector with all its
+entries equal to one). We can determine π = [π1, π2, . . . , πD],
+where πi is a 1 × b vector, explicitly as follows. Deﬁne ¯Bs,
+for s ∈{1, . . . , D}, as P
+j≥0 Bs+jD, then A is found as
+A = 1D⊗
+ ¯B1
+¯B2
+. . .
+¯BD
+
++
+
+
+0
+. . .
+0
+1
+1
+. . .
+0
+0
+...
+...
+...
+...
+0
+. . .
+1
+0
+
+⊗B0.
+Some basic algebraic manipulations and the fact that θ =
+PD
+i=1 πi show
+π1 = θ
+D
+X
+s=1
+¯Bs(B0)s−1[I −(B0)D]−1,
+(3)
+where θ is the 1 × b left stochastic invariant vector of B =
+P
+s≥0 Bs. Notice, B is the transition matrix of the underlying
+MC of the arrival process, thus, θi is the probability that the
+arrival process is in state i at an arbitrary time instant n. A
+similar expression can be found for π2, . . . , πD, though we do
+not need these to determine an expression for πβ.
+Looking at the matrices Ai it should be clear that β can be
+written as [βT
+1 βT
+2 . . . βT
+2 ]T , where β1 and β2 are b × 1 vectors
+and vT represents the transposed of v. Let ˆBs = PD
+j=1 Bj+sD,
+for s ≥0, then
+β1 =
+X
+s≥1
+s ˆBs−11b
+(4)
+and β2 = B01b + P
+s≥2 s ˆBs−21b. This implies β2 = β1 + 1b
+as P
+s≥0 Bs1b = 1b. Therefore, πβ = π1β1 + PD
+j=2 πjβ2 =
+π1β1 + (θ −π1)(β1 + 1b) = θβ1 + 1 −π11b. Making use of
+Eq. (2), this leads us to the conclusion that the FDL buffer is
+stable (meaning that a burst has a ﬁnite delay with probability
+one) if and only if
+θβ1 < π11b.
+(5)
+The left hand side θβ1 actually corresponds to λE[⌈L/D⌉],
+where L is the OB length distribution2 and λ represents the
+arrival rate, that is, the probability that a new incoming OB
+arrives at an arbitrary time instant (λ = θ P
+s>0 Bs1b = θ(I −
+B0)1b). The right hand side π11b of Eq. (5) indicates what
+1Notice, we observe the system at every time slot and not solely at OB
+arrival times.
+2P [L = k] = θBk1b/(θ(I −B0)1b).
+
+P =
+
+
+B0 + B1
+B2
+. . .
+BD
+BD+1
+BD+2
+. . .
+B2D
+B2D+1
+. . .
+B0
+0
+. . .
+0
+B1
+B2
+. . .
+BD
+BD+1
+. . .
+...
+...
+...
+...
+...
+...
+...
+...
+...
+...
+0
+0
+...
+0
+B1
+B2
+. . .
+BD
+BD+1
+. . .
+0
+0
+. . .
+B0
+B1
+B2
+. . .
+BD
+BD+1
+. . .
+0
+0
+. . .
+0
+B0
+0
+. . .
+0
+B1
+. . .
+...
+...
+...
+...
+...
+...
+...
+...
+...
+...
+0
+0
+. . .
+0
+0
+0
+...
+0
+B1
+. . .
+0
+0
+. . .
+0
+0
+0
+. . .
+B0
+B1
+. . .
+...
+...
+...
+...
+...
+...
+...
+...
+...
+...
+
+
+=
+
+
+C
+A2
+A3
+. . .
+A0
+A1
+A2
+...
+0
+A0
+A1
+...
+...
+...
+...
+...
+
+
+(1)
+the probability would be that the scheduling horizon H = 0
+mod D at an arbitrary time instant if H had no boundary at
+zero.
+If we approximate π11b by 1/D and DE[⌈L/D⌉] by E[L]+
+(D −1)/2, we ﬁnd that Eq. (5) is reduced to λ(E[L] + (D −
+1)/2) < 1. Meaning that the maximum stable OB arrival rate
+λmax ≈(E[L]+(D−1)/2)−1, an approximation that was also
+proposed in [9]. Later, we demonstrate that this approximation
+can be very poor in certain situations. In [10] it was shown that
+for D sufﬁciently small λmax is well approximated by (E[L]+
+D/2)−1 if the inter arrival times and lengths of incoming OBs
+are exponentially distributed. The reason for the D/2 term
+instead of (D −1)/2 is that due to the exponential IATs, the
+length of a void varies between 0 and D as a new incoming
+OB need not to arrive at a slot boundary (whereas in our setup
+it does; hence, a void has a length of at most D−1). Next, let
+us try to get a better understanding of Eq. (5) by considering
+a few special cases.
+B. Bernoulli Arrivals, Uncorrelated Burst Lengths
+Assume that a new OB arrival occurs in a slot with proba-
+bility p independently from slot to slot, that is, the IATs are
+independent and geometrically distributed (with mean 1/p).
+Also, assume that consecutive OB lengths are uncorrelated and
+follow a distribution L. Denote P[L mod D = k] as lk(D),
+for k = 1, . . . , D −1 and P[L mod D = 0] as lD(D). This
+particular scenario corresponds to the model introduced in [9].
+This setup can be studied using the general model by setting
+Bs = pP[L = s], for s > 0, and B0 = (1 −p) (thus, b = 1,
+λ = p and θ = 1). As such, we can rewrite Eq. (5) as
+E
+ L
+D
+
+< (1 −¯pD)−1
+D
+X
+j=1
+lj(D)¯pj−1,
+(6)
+where ¯p = 1 −p. Thus, the maximum input rate pmax(=
+λmax) for which Eq. (6) is met, is determined by D, E[L] and
+L mod D (because E[⌈L/D⌉] can be written as a function
+of E[L] and L mod D). This implies that many statistical
+properties, like for instance heavy tails, have no impact on
+the maximum achievable channel utilization, it is only the
+modulo D distribution of the OB length that matters. In order
+50
+100
+150
+200
+250
+300
+350
+400
+450
+500
+0.5
+0.55
+0.6
+0.65
+0.7
+0.75
+0.8
+0.85
+0.9
+0.95
+1
+granularity D
+Maximum channel utilization : ρmax
+Exact
+Approximated
+Ethernet trace 
+L1 
+L2 
+1/2 (L1+L2) 
+Fig. 2.
+Inﬂuence of the burst length distribution L on ρmax (Bernoulli
+arrivals and uncorrelated burst lengths).
+to numerically solve this equation we can make use of a simple
+bisection algorithm: the right hand side of Eq. (6) decreases
+as a function of p on (0, 1/E[L]].
+Recall, the approximation mentioned at the end of the
+previous subsection, reduces Eq. (6) to pmax ≈(E[L]+(D−
+1)/2)−1. Actually, if L is distributed uniformly between 1
+and UD, for all U > 0, this approximation can be shown
+to be exact (by noticing that lj(D) = 1/D for all j).
+Figure 2 illustrates the accuracy of the approximation pmax ≈
+(E[L] + (D −1)/2)−1 for four different distributions: L1 is
+deterministic with a mean of 192 slots, L2 is deterministic with
+a mean of 256 slots, L3 is distributed as (L1 + L2)/2 (thus,
+half of the bursts have a length of 192 and the other half of 256
+slots) and L4 is a burst length distribution of a typical Ethernet
+trace. ρmax is deﬁned as the maximum channel utilization and
+is calculated as pmaxE[L]. As opposed to the approximation,
+the exact values for ρmax are not a smooth function of D,
+but contain some (minor) ﬂuctuations. For the deterministic
+distributions L1 and L2 these occur at (E[L] −1)/n, for any
+natural number n. The curve for L3 contains both the peaks
+of L1 and L2, the magnitude of these peaks has however
+somewhat diminished. Additional numerical experiments have
+shown that the peaks of a general distribution L are found by
+
+superimposing the peaks of the deterministic distributions with
+means that correspond to the most frequently appearing burst
+lengths. Also, the more uniform the distribution L mod D, the
+more accurate the approximation for pmax seems to become,
+meaning that the magnitude of the peaks diminishes (which
+is in line with the fact that the approximation is exact if L is
+uniformly distributed between 1 and UD, for some U > 0).
+For instance, we included a typical packet length distribution
+obtained from an Ethernet trace3. This distribution is fairly
+uniform with packet lengths between 20 and 1500 bytes, but
+contains some very strong spikes (the most pronounced are
+found at 40, 576 and 1500 bytes). In Figure 2, we have set
+the time unit equal to 1µsec and assume that the outgoing
+channel has a rate of 1 Gbit/s. Looking carefully at the curve
+for ρmax we observe a peak at 300, 375 and 500, caused by
+the 1500 byte spike in L, all other peaks are too small to be
+visually noticed in Figure 2.
+C. Bernoulli Arrivals, Correlated Burst Lengths
+In this section, new burst arrivals still occur with a probabil-
+ity p independently from slot to slot, the lengths of consecutive
+bursts, however, are no longer independent. The correlation
+structure on the burst lengths is characterized by a set of
+l × l matrices (Lk)k≥1. If the state associated with burst n
+is i, then, with probability (Lk)i,j, burst n has a length k
+and the state associated with burst n + 1 equals j. Thus, the
+probability P[L = k] that an arbitrary burst has length k is
+found as αLk1l, where α is the left stochastic invariant vector
+of P
+k≥1 Lk. Next, we prove that the correlation structure on
+the burst lengths has no inﬂuence on the stability of the system.
+Therefore, we can simply compute the distribution of L from
+the matrices Lk and apply Eq. (6) to ﬁnd the maximum arrival
+rate λmax(= pmax) for which the FDL buffer is stable.
+This particular system can be dealt with by setting Bs =
+pLs, for s > 0, and B0 = (1−p)Il, where Ij is a unity matrix
+of dimension j (thus, b = l, λ = p and θ = α). Let ¯Lj =
+P
+k≥0 Lj+kD for j ∈{1, . . ., D}. The expression for π11l
+can be simpliﬁed by exploiting the structure of (B0)j−1 =
+(1 −p)j−1Il to ﬁnd
+π11l = p (1 −¯pD)−1
+D
+X
+j=1
+ α¯Lj1l
+
+¯pj−1.
+(7)
+By setting lk(D) = P[L mod D = k], for k = 1, . . . , D −1,
+and lD(D) = P[L mod D = 0], one ﬁnds that the stability
+condition for the FDL buffer is identical to Eq. (6).
+In conclusion, when new bursts arrive according to a
+Bernoulli process, the order in which the bursts arrive is
+irrelevant over any ﬁnite time scale as far as the stability of
+an FDL buffer is concerned. This result does not come as a
+surprise, because it is not difﬁcult to show (see [10, Lemma
+1]) that the length of a void between OB k and k + 1 is
+distributed according to (τk −lk) mod D, where τk represents
+3The Ethernet packet size distribution used, is based on real data traces from
+the Passive Network and Analysis (PNA) project conducted by the National
+Laboratory for Applied Network Research (NLANR).
+the IAT between these two OBs and lk the length of the k-th
+OB. Thus, by putting a correlation structure on the length of
+consecutive OBs (which is independent from the IATs), we do
+not inﬂuence the distribution of the void lengths. Now, if the
+mean void length is unaltered, then so is ρmax.
+D. Markovian Arrivals, Uncorrelated Burst Lengths
+In this section we assume that OB lengths are uncorrelated
+and follow a distribution L. The new incoming OBs no longer
+form a Bernoulli process, but a general Markovian arrival
+process (MAP). Such a MAP can be characterized by two
+d×d matrices D0 and D1. The (i, j)-th entry of D0, resp. D1,
+corresponds to the probability that the underlying chain makes
+a transition from state i to j, while there is no new burst arrival,
+resp. a new burst arrival. The arrival rate λ equals γD11d,
+where γ = γ(D0 + D1) and γ1d = 1.
+We can ﬁt this model into the general framework by setting
+Bs = D1P[L = s], for s > 0, and B0 = D0 (thus, b = d and
+θ = γ). As such Eq. (5) can be somewhat simpliﬁed to:
+λE
+ L
+D
+
+< γD1
+
+
+D
+X
+j=1
+lj(D)(D0)j−1
+
+(I −DD
+0 )−11d.
+(8)
+Unfortunately, there is no such thing as ‘a’ maximum stable
+arrival rate λmax for all MAPs in general, because one can
+easily ﬁnd two different MAPs, with rates λ1 and λ2, such that
+the FDL buffer is stable when fed by the MAP with the highest
+of the two rates, whereas the other MAP causes instability.
+This, somewhat counter intuitive result, can be explained by
+noticing that the void length distribution is inﬂuenced by the
+IAT distribution. A maximum stable input rate λmax can be
+deﬁned if we restrict ourselves to speciﬁc subclasses of the
+set of all MAPs, e.g., the Bernoulli arrival processes used in
+the previous two section, subclasses of interrupted Bernoulli
+processes (IBP) and many more.
+In order to demonstrate the interaction between correlation
+and the granularity parameter D, we make use of the IBP
+process. An IBP process consists of two states: while in state
+1 the IBP generates no trafﬁc, whereas while in state 2 a
+new OB arrives with probability p2. The sojourn time in
+state i = 1, 2 is geometrically distributed with a mean si
+(hence, λ = p2s2/(s1 + s2)). We ﬁx s1 = 10s2, meaning
+that an off period lasts 10 times as long as an on period
+(on average); hence, this trafﬁc is very bursty. The results
+for less bursty setups (e.g., s1 = s2) are similar though
+the impact of correlation is less pronounced. Four different
+values were chosen for s2, the mean length of the on period:
+1.25, 28.42, 807.79 and 652530.45 slots.
+Figure 3 shows the maximum channel utilization ρmax (that
+is, λmaxE[L]) for a deterministic distribution L with a mean
+E[L] of 256 (slots). For s2 = 1.25, meaning that there is
+hardly any correlation, we ﬁnd that ρmax is close to a smoothly
+decreasing function4 of D. As in Section II-C some very
+mild ﬂuctuations are observed at (E[L] −1)/n, with n a
+4Being the aforementioned approximation 1/(1 + (D −1)/(2E[L]))
+
+50
+100
+150
+200
+250
+300
+350
+400
+450
+500
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+mean off = 10 mean on
+granularity D
+Maximum channel utilization: ρmax
+mean on = 1.25
+mean on = 28.42
+mean on = 807.79
+mean on = 652530.45
+Fig. 3.
+Inﬂuence of correlation on ρmax for deterministic distribution with
+mean of 256 bytes (IBP arrivals, uncorrelated burst lengths).
+50
+100
+150
+200
+250
+300
+350
+400
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+mean on = 807.79, mean off  8077.9
+granularity D
+Maximum channel utilization: ρmax
+L1
+L2
+L3 = (L1 + L2)/2
+L4 = 0.9L1 + 0.1L2
+Fig. 4.
+Inﬂuence of the distribution L on the maximum channel utilization
+ρmax (IBP arrivals, uncorrelated burst lengths).
+natural number. As the correlation increases we observe a
+sharp increases of ρmax at the (E[B] −1)/n values, whereas
+a decrease occurs for granularities D that are located halfway
+between two such peaks. This can be understood by noticing
+that during the on period new bursts arrive fairly close to one
+another, thus if the OB length is a multiple of D the void in
+between two such bursts will be limited as well. Recall, the
+length of the k-th void is distributed as (τk−lk) mod D, thus,
+if lk is close to zero modulo D, the size of the void will be
+well approximated by the IAT. On the other hand if an OB
+has a size of (n+1/2)D slots for some natural number n, the
+length of the void in between bursts is often close to or above
+D/2. Another conclusion that can be drawn from Figure 3
+is that the correlation matters most over time scales that are
+in the order of D: there is hardly any difference between the
+s2 = 807.79 and s2 = 652530.45 scenario. Thus, long term
+correlation has no major impact on the results. Finally, the
+approximation pmax ≈(E[L]+(D−1)/2)−1 clearly becomes
+worse with increased correlation.
+In Figure 4 we have ﬁxed s2 = 807.79 slots and considered
+four OB length distributions L: L1 is deterministic with a
+mean of 192, L2 is deterministic with a mean of 256 (slots),
+L3 = (L1 + L1)/2 (half of the bursts have a length of 192,
+the other half a length of 256) and L4 = 9L1/10 + L2/10.
+The location of the peaks for the L3 and L4 distribution are
+found by superimposing the location of the peaks of L1 and
+L2. Moreover, the curves for L3 and L4 look very much like
+a weighted sum of the L1 and L2 curves (where the weights
+are related to the probability that a packet has length 192 or
+256 slots).
+It is easy to prove that the stability condition obtained in
+this section is still valid even when the burst lengths are
+correlated, as long as there is no cross-correlation between
+the burst lengths and the inter-arrival times. The details are
+omitted for brevity.
+III. LOSS RATE IN A FINITE FDL BUFFER
+In this section we assume that the FDL buffer has a ﬁnite
+size N, thus the maximum achievable delay is ND slots. OBs
+that see a horizon H > ND when arriving, are dropped. In
+this section we develop an analytical method to compute the
+loss rate of OBs. As in Section II we assume that new OBs
+arrive according to a general Markov process characterized by
+the matrices (Bs)s≥0.
+As before, the couple (Hn, Jn)n≥0 forms a discrete-time
+Markov chain (MC), the transition matrix of which we call
+PN. Recall, Hn is the value of the scheduling horizon at
+time slot n and Jn the state of the arrival process at time
+n (for all n ≥0). Clearly, transitions from a state of the
+form (h, j), with h ≤ND, are identical to the inﬁnite FDL
+system, meaning that the ﬁrst (ND + 1) block rows of PN
+are identical to P (see, Eq. (1)). If (Hn, Jn) = (h, j1), with
+h > ND, then Hn+1 = h −1, since any new incoming OB
+is dropped immediately. In this case, the state of the arrival
+process Jn+1 equals j2 with probability (B)j1,j2.
+Let πN = [πN
+0 πN
+1 . . . πN
+NDπN
+ND+1 . . .] be the stochastic
+steady state vector of PN, where πN
+i , for i ≥0, is a 1 × b
+vector. In order to compute πN
+i , for i = 0, . . . , ND, we start
+by censoring the MC PN on the set of states {(h, j)|h ≤
+ND}. Given the structure of PN it is not hard to check that
+the censored chain is characterized by the transition matrix
+˜PN (see [12, Restricted MCs]):
+˜PN =
+
+
+P ul
+ND
+P∞
+i=0 BND+1+i Bi
+P∞
+i=0 B(N−1)D+1+i Bi
+...
+P∞
+i=0 B(N−1)D+1+i Bi
+P∞
+i=0 B(N−2)D+1+i Bi
+...
+P∞
+i=0 B1+i Bi
+0
+0
+0
+0
+B0
+P∞
+i=0 B1+i Bi
+
+
+,
+where P ul
+ND represents the square matrix of dimension NDb
+found in the upper left corner of P. The transition matrix
+˜PN is skip-free in one direction (since H cannot decrease
+by more than one at a time). Therefore, we can make use
+of the Latouche-Jacobs-Gaver algorithm [13] to compute the
+
+0
+50
+100
+150
+200
+250
+300
+350
+400
+10
+−4
+10
+−3
+10
+−2
+10
+−1
+10
+0
+Granularity D
+Loss Probability
+L1
+L2
+L3 = (L1+L2)/2
+L4 = 0.9 L1 + 0.1 L2
+Fig. 5.
+Inﬂuence of the granularity D on the loss probability for Bernoulli
+trafﬁc with ρ = 0.5 and N = 15.
+stochastic steady state vector ˜πN = [˜πN
+0 . . . ˜πN
+ND], where
+˜πN
+i
+is a 1 × b vector, in a time and memory complexity of
+O(b3N 2D2) and O(b2ND), respectively. Moreover, ˜πN
+i c =
+πN
+i , for all i = 0, . . . , ND, and some constant c which equals
+the probability that the MC characterized by PN has a horizon
+H ≤ND. The constant c can be computed as
+1
+c = 1 + [˜πN
+0 . . . ˜πN
+ND]
+
+
+rN
+0
+...
+rN
+ND
+
+,
+where rN
+i
+is a b × 1 vector whose k-th element equals the
+expected number of visits that the MC characterized by PN
+makes in the set of states {(h, j)| h > ND} until the ﬁrst
+return to a state of the form (h, j), with h ≤ND, provided
+that the MC started in state (i, k). Looking at the structure of
+PN one ﬁnds that rN
+i
+can be computed as
+rN
+i =
+X
+s>ND−⌈i/D⌉D+1
+(s −ND + ⌈i/D⌉D −1)Bs1b.
+Having found the normalization constant c, we can compute
+the loss probability from the vectors πN
+i , for i = 0, . . . , ND
+as
+ploss = 1 −
+PND
+i=0 πN
+i
+
+(I −B0)1b
+λ
+,
+(9)
+since the loss rate can be found as one minus the ratio between
+the number of new incoming OBs that are not dropped divided
+by the total number of new incoming OBs during an arbitrary
+time slot. Let us now consider the loss in an FDL buffer fed
+by the same arrival processes as used in previous section.
+A. Bernoulli Arrivals
+Assume that a new OB arrival occurs in a slot with proba-
+bility p independently from slot to slot, that is, the IATs are
+independent and geometrically distributed (with mean 1/p).
+Also, assume that consecutive OB lengths are uncorrelated and
+follow a distribution L. In section II-B we demonstrated that
+some particular choices for the granularity D, which depend
+on the OB length distribution, allow an inﬁnite FDL buffer
+0
+50
+100
+150
+200
+250
+300
+350
+400
+10
+−8
+10
+−7
+10
+−6
+10
+−5
+10
+−4
+10
+−3
+10
+−2
+10
+−1
+10
+0
+Granularity D
+Loss Probability
+ρ = 0.55 
+ρ = 0.35 
+ρ = 0.2 
+Fig. 6.
+Inﬂuence of the load ρ on the loss probability for IBP trafﬁc with
+s2 = 28.42, s1 = 10s2 and N = 15.
+to support higher trafﬁc intensities. Figure 5 shows that these
+values are also good choices when considering the loss rate
+of a ﬁnite FDL buffer. The load ρ = pE[B] = 0.5 for each
+of the curves presented in Figure 5, whereas the number of
+FDLs is N = 15.
+As indicated in [8], [9], there exists a trade-off between
+increasing the time resolution of the FDL buffer - smaller
+values of D decrease the effect of reduced capacity due to the
+creation of voids - and maximum achievable delay - which,
+assuming N is ﬁxed, can increase only by increasing D.
+This trade-off leads to an optimal FDL granularity Dopt. For
+deterministic OB length distributions L, all our numerical
+experiments resulted in an optimum located at one of the
+values5 (E[L] −1)/n, for some integer n. Increasing the load
+ρ causes Dopt to decrease in jumps, for instance if all OBs
+have a length of 192 time units and ρ = 0.7, the optimal D
+is located at 96 (whereas for ρ = 0.5, Dopt is found at 191).
+More uniform OB length distributions L ( mod D), tend to
+smoothen the loss probability curves and make the optimum
+broader (as a result, the exact value of Dopt becomes more
+sensitive to and a smoother function of the offered load ρ).
+B. Markovian Arrivals
+In this section we assume that new incoming OBs arrive
+according to the IBP process deﬁned in Section II-D. The
+lengths of consecutive OBs are assumed to be independent and
+distributed according to some distribution L. Figure 6 and 7
+shows the inﬂuence of the offered load ρ and the number of
+FDLs N on the loss probability, respectively. In both ﬁgures
+the OB length distribution is chosen to be deterministic with
+a mean of 256 (time units). These ﬁgures illustrate that the
+optimal granularity Dopt can be rather narrow when either the
+offered load decreases or the number of FDLs increases. For
+instance, for ρ = 0.2, setting D = 225 instead of 255 causes
+a difference in the loss rate of a factor 1000. The location of
+this optimum seems less sensitive (though the sensitivity of the
+exact value of Dopt increases for more uniform distributions
+5That is, the integer nearest to (E[L] −1)/n.
+
+50
+100
+150
+200
+250
+300
+350
+400
+10
+−12
+10
+−10
+10
+−8
+10
+−6
+10
+−4
+10
+−2
+10
+0
+Granularity D
+Loss Probability
+N = 5 
+N = 15 
+N = 10 
+N = 20 
+N = 30 
+Fig. 7.
+Inﬂuence of the number of FDLs N on the loss probability for IBP
+trafﬁc with s2 = 28.42, s1 = 10s2 and ρ = 0.2.
+L). Although Dopt is always located at 255 in Figures 6 and 7,
+this is no longer the case if ρ is further increased. One should
+keep in mind that the IBP process considered in Figures 6 and
+7 is very bursty, because the mean length of the off period
+(= s1) is 10 times as long as the mean length of the on period
+(= s2). This implies that the offered load during the on period
+is 11 times as high as ρ. For less bursty arrival processes (e.g.,
+s1 = s2), we ﬁnd more regular loss curves.
+IV. CONCLUSIONS
+Within this paper we presented a detailed analysis of the
+maximum achievable channel utilization and loss rate in an
+optical FDL buffer. Using matrix analytic methods, we were
+able to study the inﬂuence of correlated inter arrival times
+and burst sizes, as well as cross-correlation between the two.
+Moreover, Eqn. (9) provided us with an exact expression for
+the loss probability, as opposed to earlier studies.
+With respect to the maximum achievable channel utiliza-
+tion (MACU) the following conclusions were drawn: (i) The
+MACU is only affected by the burst size distribution modulo
+D, with D the buffer granularity. This implies that many
+statistical properties, e.g., heavy tails, can be ignored. The
+optimal value for the granularity parameter D was shown to
+be closely related to the modulo D distribution of the burst
+sizes. (ii) Unless there is cross-correlation between the inter
+arrival times and the burst size distribution, the MACU is
+insensitive to possible correlation between consecutive burst
+sizes. (iii) Introducing correlation in the inter arrival times
+strongly affects the MACU and increases its sensitivity to the
+granularity D, especially when the burst size distribution is
+close to deterministic. However, correlation matters most over
+time scales that are in the order of the granularity D. (iv)
+As opposed to a classic inﬁnite RAM buffer, increasing the
+burstiness of the arrival process, while keeping the mean rate
+ﬁxed, can cause instability in an optical FDL buffer.
+We further demonstrated that granularity values D that
+resulted in a high MACU, are also good choices when trying
+to establish a low loss rate. Choosing a granularity D that
+deviates only 10% from the optimal, can, in some extreme
+cases, cause the loss rate to increase by several orders of
+magnitude. As the burst size distribution (modulo D) becomes
+more uniform, the loss probability curves tend to smoothen,
+creating a broader optimum D. Increased burstiness of the
+arrival process has the opposite effect. Additional numerical
+experiments, not reported here, further showed that (i) the
+value of the optimal granularity D is rather insensitive to the
+burstiness of the arrival process, as opposed to the broadness of
+the optimum which is strongly inﬂuenced by it. (ii) When we
+correlate the burst lengths with the temporary trafﬁc intensity,
+the OB length distributions related to the most intense periods
+matter most.
+In conclusion, selecting the granularity of an FDL buffer
+should not be taken lightly as this might severely inﬂuence
+the network performance.
+ACKNOWLEDGMENT
+The ﬁrst author is a post-doctoral fellow of the FWO-
+Flanders. This work was partly funded by the IWT-GBOU
+project 010058 “Optical Networking and Node Architectures”.
+REFERENCES
+[1] J. Turner, “Terabit burst switching,” Journal on High-Speed Networks,
+vol. 8, pp. 3–16, 1999.
+[2] J. Qiao and M. Yoo, “Optical burst switching: A new paradigm for an
+optical Internet,” Journal on High-Speed Networks, vol. 8, pp. 69–84,
+1999.
+[3] Y. Xiong, M. Vandenhoute, and H. Chankaya, “Control architecture
+in optical burst-switched WDM-networks,” IEEE Journal on Selected
+Areas in Communications, vol. 18, pp. 1838–1851, 2000.
+[4] D. Hunter and I. Andonovic, “Approaches to optical Internet packet
+switching,” IEEE Communications Magazine, vol. 38, no. 9, pp. 116–
+120, Sept. 2000.
+[5] Z. Haas, “The staggering switch: An electronically controlled optical
+packet switch,” Journal on Lightwave Technology, vol. 11, pp. 925–936,
+May/June 1993.
+[6] C. et al., “CORD: Contention resolution by delay lines,” IEEE Journal
+on Selected Areas in Communications, vol. 14, pp. 1014–1029, June
+1996.
+[7] D. Hunter, W. Cornwell, T. Gilfedder, A. Franzen, and I. Andonovic,
+“SLOB: A switch with large optical buffers for packet switching,”
+IEEE/OSA Journal on Lightwave Technology, vol. 16, pp. 1725–1736,
+Oct. 1998.
+[8] F. Callegati, “Optical buffers for variable length packet switching,” IEEE
+Communications Letters, vol. 4, pp. 292–294, 2002.
+[9] K. Laevens and H. Bruneel, “Analysis of a single wavelength optical
+buffer,” in Proceedings of Infocom, San Francisco, April 2003.
+[10] D. Hong, F. Poppe, J. Reynier, F. Bacelli, and G. Petit, “The impact of
+burstiﬁcation on TCP throughput in optical burst switching networks,”
+in Proc. of the 18th International Teletrafﬁc Congress (ITC), Berlin
+(Germany), Sept. 2003.
+[11] M. Neuts, Structured Stochastic Matrices of M/G/1 type and their
+applications.
+New York and Basel: Marcel Dekker, Inc., 1989.
+[12] G. Latouche and V. Ramaswami, Introduction to Matrix Analytic Meth-
+ods and stochastic modeling.
+Philadelphia: SIAM, 1999.
+[13] G. Latouche, P. Jacobs, and D. Gaver, “Finite markov chain models
+skip-free in one direction,” Naval Research Logistics Quarterly, vol. 31,
+pp. 571–588, 1984.

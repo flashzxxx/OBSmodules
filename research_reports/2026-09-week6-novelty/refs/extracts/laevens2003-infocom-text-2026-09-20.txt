@@ -1,0 +1,1383 @@
+Analysis of a Single-Wavelength Optical Buffer 
+K. Laevens and H. Bruneel 
+SMACS Research Group 
+Ghent University 
+Ghent, Belgium 
+{kl,hb}@telin.rug.ac.be 
+ 
+ 
+Abstract— We present a detailed analysis of the loss 
+performance in an optical buffer having access to a single 
+outgoing channel.  Such a system  - consisting of a number of 
+fiber delay lines - differs significantly from a conventional 
+electronic buffer, in that only a discrete set of delays can be 
+realized 
+for 
+contention 
+resolution. 
+ 
+This 
+leads 
+to 
+an 
+underutilization of the channel capacity, which reduces overall 
+performance.  Our analysis does not require any special 
+assumptions about the burst- or packet-size distribution, which 
+allows us to study the impact this distribution has on 
+performance.  For the important special case of fixed-sized 
+bursts, it reveals, amongst others, that matching fiber delay line 
+length with burst duration is not necessarily the optimal solution 
+in terms of loss performance.  It further reveals that, in general, 
+this optimal solution is function not only of burst-size 
+characteristics, but of the offered load as well, making the buffer 
+design process a delicate task. 
+Keywords — burst switching; fiber delay lines; loss probability; 
+optical buffers 
+I. 
+INTRODUCTION 
+As advances in Dense Wavelength Division Multiplexing 
+(DWDM) push fiber transmission capacities well beyond the 
+Tbit/s, electronic switches and routers are becoming the 
+bottlenecks of the backbone network.  All-optical packet 
+switching (OPS) could alleviate the problem, but the 
+technology is expected to be still a few years away [1].  As 
+intermediate solution, optical burst switching (OBS) has been 
+proposed by some [2]-[4].  Both solutions, however, confront 
+switch designers with several major challenges, of which the 
+lack of optical RAM is but one.  Fiber delay lines (FDLs) 
+partially fill that gap, and several architectures based thereon 
+have already been studied [5]-[7]. 
+Few analytic results concerning the loss and queueing 
+behavior of such buffer systems have been published so far 
+[8], and to the best of the authors’ knowledge the approach 
+followed here is new.  Our main result is the derivation of the 
+probability generating function of the scheduling horizon in a 
+buffer of infinite size, as seen by arrivals.  This scheduling 
+horizon can be thought of as being the analogue of the 
+unfinished work or virtual waiting time in classical queueing 
+theory.  From that result - the detailed derivation of which we 
+choose to present as Appendix - several measures of interest 
+are then derived, such as the system capacity and the loss 
+probability in a finite system.  Although the analysis can easily 
+be extended to yield results concerning e.g. sojourn times, we 
+primarily focus on loss probability here, given that this figure 
+will be the determining factor for the system's overall 
+performance. 
+II. 
+MODEL 
+We focus on a single WDM channel and assume 
+contention for it is resolved by means of an FDL buffer, which 
+can delay, if necessary, optical bursts (or packets) until the 
+channel becomes available again.  Unlike conventional 
+buffers, however, it can not delay bursts for an arbitrary period 
+of time, but only for multiples of a basic unit D, called the 
+granularity of the FDLs [8].  Each burst is thus either delayed 
+n⋅D time units, for some n=0,1,…N, or is dropped.   Hereby, N 
+is the size of the FDL buffer, the maximum achievable delay 
+being N⋅D. 
+We assume time is slotted and we will use the duration of a 
+single slot as the unit of time.  A natural choice for the slot 
+length would be the clock cycle in a synchronous system.  By 
+making the length of a slot sufficiently small, however, and 
+scaling everything accordingly, results for an asynchronous 
+system can be retrieved as well. 
+Thus, for instance, the granularity D would be expressed as 
+an integer number of slots.  Note that when D equals one 
+(slot), the optical buffer functions as a conventional time-
+slotted one, i.e., it is no longer degenerate, since then any 
+delay in the range 0 to N can be realized. 
+The sizes of consecutive bursts will be denoted by Bk  
+(k=1,2,…), expressed as number of slots needed for their 
+transmission.  We assume the Bk form a sequence of iid 
+(independent and identically distributed) random variables 
+(rv's), distributed according to some common distribution 
+Pr[Bk=n], with mean E[B] and probability generating function 
+(pgf) 
+ 
+.]
+n
+B
+Pr[
+z
+]
+z
+[
+E
+)z(
+B
+1
+n
+k
+n
+k
+B
+∑
+∞
+=
+=
+=
+=
+ 
+(1) 
+Note that no further specific assumptions are needed in the 
+remainder of the analysis. 
+The first author would like to acknowledge the Flemish Government for 
+support of his research through the IWT-GBOU project “Optical Networking 
+and Node Architectures”. 
+0-7803-7753-2/03/$17.00 (C) 2003 IEEE
+IEEE INFOCOM 2003
+
+As for the arrival process, we assume that at most one new 
+burst can arrive during each slot, which happens with 
+probability p independently from slot to slot.  That is, we 
+assume Bernoulli arrivals, the counterpart of the Poisson 
+process in continuous-time models.  Burst interarrival times, 
+denoted τk, are then iid rv’s as well, with mean 1/p and a 
+geometric distribution 
+ 
+.)
+,1
+n
+(
+p
+p
+]
+n
+Pr[
+1
+n
+k
+K
+=
+⋅
+=
+=
+τ
+−
+ 
+(2) 
+(We hereby adopted the standard convention of denoting 1-p 
+by p .)  This geometric distribution can be shown to be 
+memoryless, in accordance with the Bernoulli arrival process. 
+III. 
+ANALYSIS 
+A. Main result 
+Let us assume the buffer is of infinite size, so that no loss 
+occurs.  Denote by Hk the scheduling horizon as seen by the k-
+th arrival.  It is, by definition, the earliest time (measured in 
+slots) by which all previously arrived bursts will have left the 
+system, and is thus, as mentioned before, the equivalent of the 
+virtual waiting time in conventional queues. 
+In Fig. 1, the relation between Hk and Hk+1 is illustrated.  
+With that figure at hand, it is rather straightforward to 
+establish that 
+ 
+.
+D
+H
+D
+B
+H
+k
+k
+k
+1
+k
++
++
+
+
+
+
+
+
+τ
+−
+
+
+
+
+⋅
++
+=
+ 
+(3) 
+Hereby, x is the so-called ceil of x, the smallest integer 
+greater than or equal to x.  The standard notation [x]+ is 
+shorthand for max(0,x). 
+When the k-th burst sees a scheduling horizon Hk upon 
+arrival, it will have to be delayed by at least that amount to 
+avoid contention.  Since the buffer is degenerate, however, this 
+delay can not be realized exactly, the closest match being 
+given by D⋅Hk/D.  (Note that Hk/D represents the index of 
+the FDL the k-th burst must traverse.)  Delaying and 
+transmitting this burst pushes the scheduling horizon (just after 
+arrival) to 
+ 
+.
+D
+H
+D
+B
+k
+k
+
+
+
+
+⋅
++
+ 
+(4) 
+Taking then into account the burst interarrival time τk 
+immediately gives (3). 
+When the system is stable, i.e., when it can reach 
+stochastic equilibrium, the distributions of the Hk converge, 
+for k→∞, to a unique equilibrium distribution, which does not 
+depend on the initial condition of the system.  Associated with 
+this distribution is a common pgf, denoted H(z), whose exact 
+form is derived in Appendix. 
+B. System Capacity 
+The finite granularity of the FDLs leads to voids, as 
+illustrated in Fig. 1, reducing channel utilization and lowering 
+the system's overall capacity. 
+A system with an infinite (optical) buffer does not reach 
+steady-state when overloaded, but grows unbounded, reflected 
+in e.g. the fact that 
+ 
+.
+0
+]
+0
+H
+Pr[
+lim
+k
+k
+=
+=
+∞
+→
+ 
+(5) 
+Based on this, one can define a maximum tolerable arrival 
+intensity pmax.  From the results in Appendix, it follows that 
+pmax is solution of  
+ 
+.
+p
+)
+(
+B
+p
+1
+1
+2
+1
+D
+]
+B
+[
+E
+p
+1
+1
+D
+1
+k
+max
+k
+k
+max
+k
+max
+−
+−
+=
+
+
+
+
+
+
+
+
+−
+ε
+ε
+−
+ε
++
+−
++
+=
+∑
+ 
+(6) 
+(The symbols εk represent the D different complex Dth roots of 
+unity, see Appendix.)  The solution is thus function of the 
+FDL granularity D and the (complete) burst-size pgf B(z), or, 
+equivalently, the (complete) burst-size distribution.   
+A sufficiently close approximation, function of  D and the 
+mean burst size E[B] only, is given by 
+ 
+,
+2
+1
+D
+]
+B
+[
+E
+p
+1
+max
+−
+
+
+
+
+
+
+−
++
+≈
+ 
+(7) 
+consistent with the observation made in e.g. [8], that each 
+burst creates a void on the channel of  size, on average, about 
+D/2. 
+With this maximum tolerable arrival intensity corresponds 
+a maximum tolerable load, given by 
+D
+D
+Hk
+Hk+1
+τk
+kth arrival
+(k+1)st arrival
+Bk
+void
+ 
+Fig. 1.  Evolution of the scheduling horizon H from one arrival to the next.  
+For notation, please refer to the text. 
+0-7803-7753-2/03/$17.00 (C) 2003 IEEE
+IEEE INFOCOM 2003
+
+ 
+,
+]
+B
+[
+E
+2
+1
+D
+1
+]
+B
+[
+E
+p
+1
+max
+max
+−
+
+
+
+
+
+
+⋅
+−
++
+≈
+⋅
+=
+ρ
+ 
+(8) 
+which is thus, in general, less than unity. 
+C. Loss Probability 
+Estimates for the loss probability (LP) in an (optical) 
+buffer of finite size can be derived from the distribution of the 
+unfinished work in a system of infinite size, which quantity we 
+will denote by Hinf from now on.  Given the maximum 
+achievable delay in the finite system is N⋅D, one can use the 
+heuristic 
+ 
+,
+]
+D
+N
+H
+Pr[
+1
+]
+D
+N
+H
+Pr[
+)
+1(
+LP
+inf
+inf
+eq
+⋅
+>
+−
+⋅
+>
+ρ
+−
+≈
+ 
+(9) 
+where ρeq is defined as 
+ 
+.
+p
+)
+(
+pB
+1
+1
+2
+1
+D
+]
+B
+[
+E
+p
+1
+D
+1
+k
+k
+k
+k
+eq
+
+
+
+
+
+
+
+
+−
+ε
+ε
+−
+ε
++
+−
++
+⋅
+=
+ρ
+∑
+−
+=
+ 
+(10) 
+This quantity can be considered as an equivalent load, in 
+which the effect of the voids, and thus the finite granularity of 
+the FDLs, is already incorporated.   (Note that ρeq=1 when 
+p=pmax.) 
+The heuristic derives from the fact that the (steady-state) 
+balance equations for Pr[H=n], in both the finite and the 
+infinite system case, have exactly the same structure for small 
+values of n.  Up to a scaling factor they will thus also have the 
+same solution.  That scaling factor follows easily from the 
+normalization condition for probability distributions.  Some 
+further calculations then lead to 
+ 
+.
+]
+D
+N
+H
+Pr[
+1
+]
+D
+N
+H
+Pr[
+)
+1(
+LP
+inf
+inf
+eq
+eq
+⋅
+>
+−
+⋅
+>
+⋅
+ρ
+ρ
+−
+≈
+ 
+(11) 
+The relation only holds approximately, since the equivalence 
+between the balance equations in the finite and infinite case 
+breaks down at the boundary where n is in the neighborhood 
+of N⋅D. 
+Extensive simulations learned, however, that the heuristic 
+(9) is far more accurate than (11) for small loss probabilities, 
+while the opposite holds true for large loss probabilities.  
+(Unfortunately, a mathematical argument that substantiates 
+this observation still has to be found.)  Given the former case 
+is of more interest to us here, (9) will be used in the remainder 
+of this paper. 
+The tail probabilities Pr[Hinf > N⋅D] that appear in (9) can 
+easily be approximated by inversion of the pgf H(z), by 
+retaining only the dominant poles of that function. It can be 
+shown that 
+ 
+,
+z
+Cst
+]
+D
+N
+H
+Pr[
+1
+D
+N
+0
+inf
++
+⋅
+≈
+⋅
+>
+ 
+(12) 
+whereby z0 is the dominant pole along the positive real axis.  
+Its value can easily be determined by means of a simple 
+bisection algorithm.  The constant follows from the 
+application of residue theory and is, in its final form, given by  
+ 
+.
+)z
+z
+)(
+z(
+F
+lim
+1
+z
+D
+Cst
+0
+0
+z
+z
+D
+0
+
+
+
+
+
+
+−
+⋅
+−
+=
+→
+ 
+(13) 
+The limit in the above can easily be calculated explicitly, its 
+numerical evaluation requires but a few lines of code. 
+(The function F(z) is related to H(z), see Appendix.  Both 
+functions have the same dominant poles.  There are D of them, 
+of the form |z0|⋅εk with k=0,…D-1.  The occurrence of multiple 
+dominant poles complicates matters somewhat, as compared to 
+the case of a single one, but only so to a limited extent.  For a 
+more detailed explanation, see eg. [9], pp. 147-148, and 
+references therein.) 
+The accuracy of the above approximation is illustrated in 
+Fig. 2.  Shown there is the loss probability LP as function of 
+the load ρ, for various FDL buffer sizes.  Burst lengths were 
+assumed to be geometrically distributed, with mean E[B]=100 
+(slots), the FDL granularity D=100 (slots).  The simulations 
+recorded 108 burst arrivals. 
+Clearly, the accuracy of the approximation is extremely 
+high, even for high loads and small buffer sizes.  Note that, for 
+the parameters values used in Fig. 2, the maximum tolerable 
+load ρmax is about 0.66.  For higher loads, the infinite system 
+becomes unstable, and, as such, the function H(z) loses its 
+meaning as probability generating function.  However, it is 
+possible to "extrapolate" the loss formula for loads above ρmax, 
+1E-6
+1E-5
+1E-4
+1E-3
+1E-2
+1E-1
+1E+0
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+load
+Loss Probability
+simulation
+analysis
+N=5
+25
+N=10
+N=15
+20
+ 
+Fig. 2.  Loss probability as function of the load, for various FDL buffer sizes 
+N.  Burst sizes are geometrically distributed with mean E[B]=100 (slots).  The 
+FDL granularity D=100 (slots). 
+0-7803-7753-2/03/$17.00 (C) 2003 IEEE
+IEEE INFOCOM 2003
+
+as illustrated in Fig. 2.  (For these higher loads, the dominant 
+pole z0 lies within the unit circle, i.e., in the interval (0,1).  
+Further, the constant in the approximation (12) becomes 
+negative, but this is compensated by the fact that 1-ρeq 
+becomes negative too, so that still a positive loss probability is 
+found.) 
+D. Fiber Delay Line Dimensioning 
+With the above results at hand, we can now easily study 
+the influence of various design and traffic parameters.  We 
+will present two examples, illustrating the sensitivity of the 
+loss performance with respect to the FDL granularity D and 
+with respect to the burst size distribution. 
+In Fig. 3, the loss probability LP is shown as function of D, 
+for geometrically distributed burst sizes, with mean E[B]=100 
+(slots).  The size of the buffer was set to N=20.  As was 
+already remarked by Callegati [8], there is a trade-off between 
+increasing time resolution of the FDL buffer - smaller values 
+of D decrease the effect of reduced capacity due to the 
+creation of voids - and maximum achievable delay - which, 
+assuming N is fixed, can increase only by increasing D.  This 
+trade-off leads to an optimal FDL granularity Dopt.  The 
+optimum is broad and not very sensitive to the value of N, see 
+also [8].  However, as Fig. 3 clearly illustrates, it is rather 
+sensitive to the offered load.  It gradually decreases with 
+increasing load.  (For the three load levels shown, the 
+optimum is to be found at Dopt=135, 99 and 74 respectively.) 
+Fig. 4 shows the same curves as Fig. 3, but for 
+deterministic, i.e., fixed burst sizes.  The loss probability is 
+about two orders of magnitude smaller than it is for 
+geometrically distributed burst sizes, at a same load level.  
+Again the optimal FDL granularity is function of the load, but 
+now it no longer gradually decreases as the latter increases.  
+For example, when the load increases above 0.59, the 
+optimum moves from Dopt=99 to Dopt=50.  If the load further 
+increases, above 0.77, Dopt becomes 33, and so on.   The same 
+behavior occurs (at about the same loads) for different values 
+of the buffer size N, and for different values of the fixed burst 
+size (in which case, however,  Dopt scales accordingly). 
+IV. 
+CONCLUSION 
+The transform-based analysis of the dynamics of a single-
+channel optical buffer, as presented above, yields relatively 
+simple formulas for various measures of interest, whose 
+computational burden is close to negligible. 
+Our study reveals that determining the optimal FDL 
+granularity is a delicate task, whereby one should carefully 
+take into account the parameters of the traffic being offered to 
+the system.  A mismatch can seriously degrade the overall 
+performance. 
+Extensions of the analysis that would allow for more 
+general arrival processes are certainly within reach of the 
+method discussed here, given this extension is, from a 
+mathematical point of view, more or less decoupled from the 
+problems induced by the finite FDL granularity.  Similar, but 
+more challenging, is the extension that would allow for 
+multiple channels serving a shared FDL buffer.  Evidently, 
+that analysis would run into the same mathematical problems 
+as those of conventional multi-server queues. 
+APPENDIX 
+Deriving H(z), the equilibrium pgf of the scheduling 
+horizon H as seen by arrivals - the evolution of which is 
+described by (3) - basically involves two steps. 
+The first relates to what probably is the most basic problem 
+encountered in queueing theory: given two random variables, 
+say G and τ, determine the distribution of a third, say H, that 
+satisfies the relation 
+ 
+[
+] .
+G
+H
++
+τ
+−
+=
+ 
+(14) 
+1E-5
+1E-4
+1E-3
+1E-2
+1E-1
+1E+0
+0
+50
+100
+150
+granularity D
+Loss Probability
+simulation
+analysis
+ρ=0.4
+ρ=0.5
+ρ=0.6
+ 
+Fig. 3.  Loss probability as function of the FDL granularity D (slots), for 
+various load levels, in a buffer of size N=20.  Burst sizes are geometrically 
+distributed, with mean E[B]=100 (slots). 
+1E-8
+1E-6
+1E-4
+1E-2
+1E+0
+0
+50
+100
+150
+granularity D
+Loss Probability
+simulation
+analysis
+ρ=0.6
+ρ=0.5
+ρ=0.4
+ 
+Fig. 4.  Loss probability as function of the FDL granularity D (slots), for 
+various load levels, in a buffer of size N=20.  Burst sizes are fixed, of length 
+100 (slots). 
+0-7803-7753-2/03/$17.00 (C) 2003 IEEE
+IEEE INFOCOM 2003
+
+The complexity of a transform-based solution depends 
+critically on the exact form of the distribution, or equivalently, 
+the pgf of τ, as discussed in e.g. [9].  Here, τ represents a 
+generic burst interarrival time, and, as mentioned in Section 2, 
+these interarrival times are geometrically distributed here. This 
+leads to the simplest instance of the above problem, and one 
+can easily show that H(z), the pgf of H, is related to G(z), that 
+of G, as 
+ 
+.
+K
+p
+z
+1
+z
+)z(
+G
+p
+z
+p
+)z(
+H
+−
+−
++
+−
+=
+ 
+(15) 
+In the above, K is a constant that will be determined at the end 
+of our  analysis. 
+The second step in the derivation of H(z)  is related to the 
+finite granularity of the FDLs: given the pgf of H, determine 
+the pgf of  F, related to H through 
+ 
+.
+D
+H
+D
+F
+
+
+
+
+⋅
+=
+ 
+(16) 
+Using the identity 
+ 
+,
+otherwise
+:
+0
+integer)
+ 
+(i
+D
+i
+m
+:
+1
+D
+1
+1
+D
+0
+k
+m
+k
+
+
+
+⋅
+=
+=
+ε
+∑
+−
+=
+ 
+(17) 
+whereby, for notational convenience, we introduced the 
+symbols 
+ 
+,
+D
+/
+k
+2j
+e
+k
+π
+=
+ε
+ 
+(18) 
+(i.e., the D different complex Dth roots of unity) one can show 
+that 
+ 
+.)
+z(
+H
+1
+)
+z(
+1
+)
+z(
+D
+1
+)z(
+F
+1
+D
+0
+k
+k
+k
+D
+k
+∑
+−
+=
+ε
+−
+ε
+−
+ε
+⋅
+=
+ 
+(19) 
+Basically, identity (18) allows one to selectively map the 
+probabilities Pr[H=n⋅D+m] (for n ≥ 0 and m=1,…,D) to the 
+corresponding probabilities Pr[F=(n+1)⋅D], as follows from 
+(16).  (The case Pr[H=0] directly maps to Pr[F=0].)  In the 
+transform domain, this leads to (19) in a quite straightforward 
+manner.  Note also that F(zεk)=F(z), reflecting the fact that the 
+random variable F takes on only values that are integer 
+multiples of D. 
+Combining the above two results, also taking into account 
+the contribution of B in (3), one obtains 
+ 
+.
+K
+p
+z
+1
+z
+)z(
+F
+)z(
+B
+p
+z
+p
+)z(
+H
+−
+−
++
+−
+=
+ 
+(20) 
+Observe that, in light of the remark above, 
+ 
+.
+K
+p
+)
+z(
+1
+)
+z(
+)z(
+F
+)
+z(
+B
+p
+)
+z(
+p
+K
+p
+)
+z(
+1
+)
+z(
+)
+z(
+F
+)
+z(
+B
+p
+)
+z(
+p
+)
+z(
+H
+k
+k
+k
+k
+k
+k
+k
+k
+k
+k
+−
+ε
+−
+ε
++
+ε
+−
+ε
+=
+−
+ε
+−
+ε
++
+ε
+ε
+−
+ε
+=
+ε
+ 
+(21) 
+Taking the sum over k=0…D-1, with appropriate weights, one 
+may thus write 
+ 
+,
+K
+p
+)
+z(
+1
+)
+z(
+1
+)
+z(
+1
+)
+z(
+D
+1
+)z(
+F
+p
+)
+z(
+)
+z(
+pB
+1
+)
+z(
+1
+)
+z(
+D
+1
+)
+z(
+H
+1
+)
+z(
+1
+)
+z(
+D
+1
+)z(
+F
+1
+D
+0
+k
+k
+k
+k
+D
+k
+1
+D
+0
+k
+k
+k
+k
+D
+k
+1
+D
+0
+k
+k
+k
+D
+k
+
+
+
+
+
+
+
+
+−
+ε
+−
+ε
+−
+ε
+−
+ε
+⋅
++
+
+
+
+
+
+
+
+
+−
+ε
+ε
+−
+ε
+−
+ε
+⋅
+=
+ε
+−
+ε
+−
+ε
+⋅
+=
+∑
+∑
+∑
+−
+=
+−
+=
+−
+=
+ 
+(22) 
+from which F(z) can then be obtained explicitly.  Using the 
+identity 
+ 
+∑
+−
+=
+−
+−
+ε
+⋅
+=
+−
+1
+D
+0
+k
+k
+D
+D
+1
+D
+x
+)
+z(
+1
+D
+1
+x
+z
+x
+ 
+(23) 
+to simplify the above expression to some extent, the final 
+result reads 
+ 
+.
+p
+)
+z
+(
+)
+z
+(
+pB
+1
+)
+z
+(
+1
+)
+z
+(
+D
+1
+1
+p
+z
+)1
+z(
+p
+K
+)
+z(
+F
+1
+D
+0
+k
+k
+k
+k
+D
+k
+D
+D
+D
+1
+D
+
+
+
+
+
+
+
+
+−
+ε
+ε
+−
+ε
+−
+ε
+⋅
+−
+
+
+
+
+
+
+
+
+−
+−
+⋅
+=
+∑
+−
+=
+−
+ 
+(24) 
+ 
+Remains the task of determining the constant K.  The 
+function F(z) is a proper pgf, and is thus normalized, i.e., 
+F(1)=1. Assuming z=1 in (24) leads to the indeterminate form 
+0/0, which can, however, be resolved using the rules of de 
+l’Hopital.  One finds 
+ 
+.
+p
+1
+p
+D
+p
+)
+(
+pB
+1
+1
+2
+1
+D
+)1('
+B
+p
+1
+K
+D
+1
+D
+1
+D
+1
+k
+k
+k
+k
+
+
+
+
+
+
+−
+
+
+
+
+
+
+
+
+−
+ε
+ε
+−
+ε
+−
+−
+−
+−
+=
+−
+−
+=∑
+ 
+(25) 
+0-7803-7753-2/03/$17.00 (C) 2003 IEEE
+IEEE INFOCOM 2003
+
+ 
+Herewith, the pgf H(z) of H has been completely 
+determined.  As a final remark, note that the constant K is 
+related to the probability of finding the system empty upon 
+arrival, 
+ 
+.
+K
+p
+1
+]
+0
+H
+Pr[
+lim
+)
+0
+(
+H
+k
+k
+=
+=
+=
+∞
+→
+ 
+(26) 
+This then allows one to determine the maximum tolerable 
+arrival intensity pmax , as explained in the text. 
+REFERENCES 
+[1] 
+C. Guillemot et al., "Transparent Optical Packet Switching: the 
+European ACTS KEOPS Project Approach", Journal on Lightwave 
+Technology, vol. 16, pp. 2117-2134, Dec. 1998. 
+[2] 
+J. Turner, "Terabit Burst Switching", Journal on High-Speed Networks, 
+vol. 8, pp. 3-16, 1999. 
+[3] 
+C. Qiao and M. Yoo, "Optical Burst Switching – A New Paradigm for an 
+Optical Internet", Journal on High-Speed Networks, vol. 8, pp. 69-84, 
+1999. 
+[4] 
+Y. Xiong, M. Vandenhoute and H. Cankaya, "Control Architecture in 
+Optical Burst-Switched WDM Networks", IEEE Journal on Selected 
+Areas in Communications, vol. 18, pp 1838-1851, Oct. 2000. 
+[5] 
+Z. Haas, "The 'Staggering Switch': An Electronically Controlled Optical 
+Packet Switch", Journal on Lightwave Technology, vol. 11, pp. 925-936, 
+May/June 1993. 
+[6] 
+I. Chlamtac et al., "CORD: Contention Resolution by Delay Lines", 
+IEEE Journal on Selected Areas in Communications, vol. 14, pp. 1014-
+1029, June 1996. 
+[7] 
+D. Hunter et al., "SLOB: A Switch with Large Optical Buffers for 
+Packet Switching", Journal on Lightwave Technology, vol. 16, pp. 1725-
+1736, Oct. 1998. 
+[8] 
+F. Callegati, "Optical Buffers for Variable Length Packets", IEEE 
+Communications Letters, vol. 4, pp. 292-294, Sept. 2000. 
+[9] H. Bruneel and B.G. Kim, Discrete-Time Models for Communication 
+Systems Including ATM., Boston: Kluwer Academic Publishers, 1993. 
+0-7803-7753-2/03/$17.00 (C) 2003 IEEE
+IEEE INFOCOM 2003
