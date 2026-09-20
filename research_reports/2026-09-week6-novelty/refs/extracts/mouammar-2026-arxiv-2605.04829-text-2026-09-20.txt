@@ -1,0 +1,859 @@
+
+===== page 1 =====
+Traffic Chunk Sizing vs. Optical Switching Speed
+in Future All-Optical Satellite Networks
+Sleman Mouammar, Thomas R¨othig, Soheil Hosseini, ´Italo Brasileiro, and Admela Jukan
+Technische Universit¨at Braunschweig, Germany
+Abstract—In a transparent all-optically switched satellite net-
+works, various switching paradigms can be considered, including
+packet, burst, or circuit. To determine the switching fabric design,
+the traffic assembly and path computations at the ground stations
+play a key role. Traffic can be buffered and assembled in chunks
+at the ground stations and forwarded over the pre-computed
+optical paths in space, following the principles known from
+terrestrial networks, like optical burst switching or fast circuit
+switching. Regardless of the paradigm chosen, the switching
+fabric is required to meet the latency requirements. This paper
+studies the traffic chunk sizing in future all-optical satellite
+networks as a function of the latency performance of optical
+switching fabrics. We consider various optical switching technolo-
+gies, including MEMS- and integrated photonic-based solutions,
+their switching speed, power consumption, and insertion losses.
+Simulation results indicate that ns-switching speeds (e.g. SOA-
+based) enable larger chunk sizes of up to 500MB, than ms-
+order switches (e.g., MEMS) which enable up to 100 MB, when
+constrained by a typical maximum end-to-end latency of 60 ms.
+Index Terms—All-optical switching, satellite communication,
+chunk size, switching fabrics
+I. INTRODUCTION
+Modern satellite constellations, such as Starlink and Telesat,
+reportedly employ laser inter-satellite links (LISLs) together
+with packet-based electronically switched traffic [1]. As trans-
+mission rates scale to hundreds of Gb/s, all-optical switching
+is expected to emerge enabling high-capacity all-optical net-
+working in space. Akin to what is well-established in terrestrial
+networks, optical satellite networks can deploy either optical
+burst switching (OBS), optical packet switching (OPS), or
+optical circuit switching (OCS) [2]. While different switching
+paradigms result in different networking performance, the
+switching fabric in an optical satellite node plays a key role
+in the end-to-end latency performance. Parameters such as the
+number of orbital planes and satellites, constellation layout,
+and orbital altitude also contribute to end-to-end latency.
+Fig. 1 illustrates the latency challenge. Let us assume that
+the traffic from an Internet service provider (ISP) needs to
+be assembled in traffic chunks at the ground stations to be
+sent over a satellite network. For every traffic chunk to be
+transmitted, in case that no immediate transmission is feasible,
+the traffic transmission needs to be scheduled over a path with
+an allocated wavelength. In a wavelength division multiplexing
+(WDM) system, one of the wavelengths can be allocated for
+data, whereas a control channel is implemented out of band.
+The end-to-end (e2e) latency is governed by three main delay
+components: propagation τprop, transmission τtr and switching
+Fig. 1: Traffic chunk sizing and onboard optical switching in
+next-generation all-optical satellite networks.
+τsw. The propagation delay depends on the speed of light in
+vacuum/atmosphere and the distance. Switching delay depends
+on the switch device technology, while the transmission delay,
+defined as the time when the transmission commences and
+ends, depends on both the achievable data rate and the chunk
+size. To guarantee the end-to-end latency withing limits of
+what is acceptable, the transmission and switching delays need
+to be balanced, while maintaining high link utilization.
+In this paper, we study the maximum size of the traffic
+chunk to be transmitted over the all-optical satellite network,
+for a given e2e delay constraint. We model the optical satellite
+switching mechanism similar to OBS, whereby the transmis-
+sion chunk is sent after a control message which ahead of
+the data transmission configures the switches along the path.
+We evaluate the impact of transmitting different data chunks
+in different scenarios of onboard optical switching devices,
+and analyze the performance in terms of chunk feasibility
+ratio and energy efficiency, subject to the e2e delay constraint.
+The paper considers three representative LEO constellations:
+Telesat, Amazon LEO Shell 1, and Starlink Phase 1. The
+results show that the maximum feasible data chunk for devices
+with ns-level switching delay is around 600MB in the evalu-
+ated constellations, whereas for ms-level switch, the maximum
+chunk size is 100 MB under 60 ms maximum e2e latency.
+The rest of the paper is organized as follows. Section II
+arXiv:2605.04829v3  [cs.NI]  8 Sep 2026
+
+
+===== page 2 =====
+provides related work. In Section III, we present a reference
+architecture. Section IV presents the simulation setup and per-
+formance evaluation. Finally, Section V concludes the paper.
+II. RELATED WORK
+Although optical switching paradigms have been exten-
+sively investigated in terrestrial networks, their adoption in
+satellite systems remains relatively limited. To the best of
+our knowledge, none of the related work assess the impact
+of different data chunk sizes on e2e latency defined by a
+realistic threshold of maximum delay as observed in real-
+world satellite constellations. Recent work examines other
+important mechanisms. Wang et al. [3] introduce a quality of
+service (QoS)-adaptive burst assembly algorithm for space-
+based OBS networks, reducing assembly delay for high-
+priority traffic by up to 14.68%. Similarly, [4] proposes an
+optical switched satellite backbone network combining time-
+division multiplexing with OBS to enable QoS-aware resource
+allocation, achieving low latency and near-zero packet loss
+under specific system configurations.
+The work in [5] designs and evaluates the impact of
+SOA-based ultrafast OPS switches that operates with ns-level
+switching and channel capacity of 100 Gb/s, under a multi-
+granular dynamic traffic scenario. The work evaluates perfor-
+mance in terms of throughput, packet loss and contention, and
+propose a new scheduling algorithm to support OPS and TDM
+in satellite constellations. The latency evaluation is limited
+to the delay added by the specific OPS switching device,
+which we also consider but as part of the e2e latency. As the
+switching delay is one of the key components of the e2e delay
+in satellite networks, we evaluate the e2e latency performance,
+not only of SOA optical switches but also of other switching
+technology, to gain insights of the impact of optical switching
+technology and hardware choice on satellites.
+Optical switching technologies such as Micro-Electro-
+Mechanical Systems (MEMS) and integrated photonic plat-
+forms offer distinct trade-offs in switching speed, power
+consumption, insertion loss, and system complexity [6]. While
+modern optical switches can achieve sub-microsecond to
+nanosecond reconfiguration times with reduced power con-
+sumption, prior work focused on device-level performance,
+without evaluating the impact added to the system in terms
+of e2e delay, which in satellite network plays a critical role.
+Experimental efforts have started to address this gap, such as
+the work in [7] which validates an OBS-based satellite payload
+using an arrayed waveguide grating router, demonstrating
+transparent optical switching with wavelength conversion ca-
+pabilities. However, their system is limited by a reconfigura-
+tion interval of 11.9 µs and relies on wavelength conversion,
+which creates ”electronic bottlenecks” in the network and
+leads to high power consumption and latency [5].
+The overall e2e latency in all-optical satellite constellations
+also depends on the adopted traffic switching and forwarding
+paradigm, which in turn impacts the application performance.
+While OPS and OBS technologies are not technologically
+mature due to the need for optical buffering, OCS and its vari-
+ations, like fast circuit switching, enable transparent switching
+once the path is reserved [2], [8]. In this paper, we consider
+resource allocation mechanisms similar to either fast OCS, or
+OBS with path reservation (no contention resolution at nodes)
+in which a control message pre-reserve a channel for a given
+period to a specific chunk transmission or circuit duration.
+III. REFERENCE ARCHITECTURE
+Fig. 2 illustrates the reference architecture, which contains
+three important subsystems: Constellation and traffic setup,
+Control plane algorithms, including routing, resource reserva-
+tion, and scheduling; and Data plane launching, including the
+transmission of data chuck after the control message.
+A. Constellations and traffic setup
+The first setup component to consider is the constella-
+tion configuration (A). The Constellation Three-Line Element
+(TLE) file is commonly adopted by applications and datasets
+to represent satellite nodes. It typically represents mean orbital
+Fig. 2: Reference architecture
+
+
+===== page 3 =====
+elements derived from tracking data and is formatted for com-
+patibility with propagation models. Although satellites move,
+the topology at any time window can be captured and fixed in
+a TLE file or a snapshot. The TLE file describes topological
+aspects of satellite nodes such as altitude, density, epoch,
+satellite ids, and others that serve as input for simulations,
+propagation models and constellation snapshots.
+In Fig. 2, a traffic generator (B) is placed in every of the
+four optical ground stations (OGSs), which here exemplify
+traffic sources that generate data chunks, and are added to the
+OGS processing queue. In this work, we consider that every
+OGS is a possible source or destination of a traffic chunk, and
+traffic generators are placed in all ground nodes. Each data
+chunk have an associated control message, which provides in-
+formation such as the destination OGS and other transmission
+requirements. This same control message is updated before
+transmission with added information on scheduling, path, and
+spectral resources to allocate.
+Specific constellation layouts, such as the Grid+ are consid-
+ered to have fixed and stable inter-satellite links. But the uplink
+and downlink connections are still dynamically established
+based on line-of-sight and OGS placement, thus are checked
+periodically in order to verify availability.
+B. Control plane algorithms
+As illustrated in Fig. 2, a channel estimator (D) uses
+information such as link distance, SNR from up-, down, and
+LISLs, and associated interferences to estimate the feasible
+transmission bitrate. Based on this information, a path compu-
+tation component (E) at the OGS runs routing and wavelength
+reservation algorithms to select appropriate lambdas (e.g.,
+from λ1 to λ2) in the optical up- and downlink for chunk
+transmission. When route and spectral resources are decided,
+a scheduler (F) runs an algorithmic solution to determine the
+best time for launching that chunk. The channel capacity (D)
+for each of the LISLs, as well as the up- and downlink, is
+estimated based on the following channel model. The up- and
+downlink data rates are expressed as a function of the signal-
+to-noise ratio (SNR) and the bandwidth B as:
+C = B log2(1 + SNR)
+(1)
+The SNR is determined by the received power PR and the
+system noise power N0, and is given by
+SNR = PR
+N0
+.
+(2)
+The received power is obtained from the link-budget formu-
+lation, based on [9], [10]:
+PR = PT
+Nch
+GT ηT GRηRLFSOLatmLfcLp,
+(3)
+where GT and GR denote the transmitter and receiver gains,
+respectively, while ηT and ηR represent their corresponding
+optical efficiencies. Furthermore, LFSO denotes the free-space
+optical path loss, Latm accounts for atmospheric effects,
+including scintillation-induced beam wander and turbulence,
+and Lp represents the pointing-error loss. The term Lfc denotes
+the additional coupling or channel-related loss considered in
+the link budget. Each loss component is briefly described
+below. During propagation from the OGS to the satellite, the
+signal is attenuated by several factors, starting with the free-
+space path loss (FSPL), which depends on the slant range
+R(ϑel), elevation angle ϑel, and wavelength λ:
+LFSO =
+
+λ
+4πR(ϑel)
+2
+(4)
+The signal also experiences atmospheric attenuation caused
+by scattering from particles along the propagation path. Using
+Kim’s model, this loss depends on the geometrical scattering
+attenuation coefficient αscatt(V, λ), where V is the meteo-
+rological visibility expressed in km, and the Mie scattering
+defined based on the extinction ratio ρ and elevation angle
+ϑel. It is given by [9], [11]:
+Latm,att = αscatt(V, λ)R(ϑel) + exp(−
+ρ
+sin(ϑel))
+(5)
+Finally, in the uplink, atmospheric turbulence can cause
+scintillation-induced beam wander, leading to misalignment
+loss [10]. This loss is characterized using the Gamma-Gamma
+distribution, where α and β denote the small- and large-scale
+turbulence parameters, respectively [9]. The received optical
+intensity is denoted by I, while Γ(·) and K(·) represent the
+Gamma function and the modified Bessel function, respec-
+tively [9].
+fGG(I) = 2(αβ)(α+β)/2
+Γ(α)Γ(β)
+I
+α+β
+2
+−1Kα−β(2
+p
+αβI)
+(6)
+For the uplink, the atmospheric loss is modeled as the com-
+bination of atmospheric attenuation and scintillation-induced
+beam-wander loss, i.e.,
+Latm = Latm,att + Lsc
+(7)
+In contrast, for the downlink, only atmospheric attenuation is
+considered [10], yielding
+Latm = Latm,att
+(8)
+Pointing error losses for LISLs and up- and downlink are cal-
+culated based on the Irradiance displacement model from [12]:
+fhP E(h) = γ2A−γ2
+0
+hγ2−1,
+0 < h ≤A0.
+(9)
+with A0 = [erf(v)]2 and v =
+√πwd
+√
+2wz , γ =
+weq
+2σp and
+w2
+zeq = w2
+z
+√πerfc(v)
+2v exp(−v2). In which ωd is the receiving aperture
+radius, ωzeq is the equivalent beam width, and σp is the jitter
+standard deviation. Using the pointing loss generated from
+the channel model described by the distribution in Eq. 9, the
+received power for the LISL is given by:
+PR = PT
+Nch
+GT GRηT ηRLF SOLfcLp
+(10)
+Since LISLs establish direct optical communication between
+satellites, the transmitted signal does not propagate through the
+
+
+===== page 4 =====
+Earth’s atmosphere. Therefore, atmospheric attenuation is not
+considered in the LISL when calculating capacity. Thus, the
+capacity can be obtained from Eq. 1, using the SNR defined
+in Eq. 2. The received power varies for feeder links and LISL
+based on Eqs. 3 and 10 respectively.
+Fig. 2 depicts a dedicated and out-of-band control wave-
+length λC for control messages (G). The wavelengths λ1 and
+λ2 are used in the data plane. Control messages are transmitted
+ahead of the corresponding data traffic (after offset time τoff
+has passed, represented by the chunks in (H)) and contain
+information on scheduling and resources to reserve. Control
+messages undergo optical-to-electrical (OE) conversion τOE,
+electrical processing, and electrical-to-optical (EO) conversion
+τEO at each satellite node, and setup the optical switch fabric
+for a proper switching of its corresponding data chunk. Since
+the estimated capacity limits the data rate possible over an e2e
+path, it is utilized as lower bound to calculate the transmission
+delay based on the chunk size to be transmitted.
+C. Data plane launching
+When the data is ready to launch, a control message (G)
+is sent over λC and reserves the computed resources obtained
+from (E). Afterwards, the transmission initiates (H), for which
+we then measure the resulting e2e latency, i.e., the time
+between data transmission and data reception at the destina-
+tion. The e2e latency considers three main delay components:
+propagation, transmission, and switching delays. Since the
+processing delay of the control message is considered constant
+it is added as offset delay to the e2e delay.
+The transmission delay τtr corresponds to the time required
+to inject a data payload onto the physical medium. Thus, larger
+payloads or lower-data-rate links contribute to this delay.
+The switching delay τsw represents the reconfiguration
+time of the optical switching fabric. This parameter varies
+significantly with underlying hardware, ranging from millisec-
+onds for MEMS to nanoseconds for SOAs. The subsequent
+analysis in this paper quantifies the impact of multiple device-
+dependent switching delays on overall system performance.
+The propagation delay τprop is determined by the speed of
+light across uplink, downlink, and LISLs, and scales with
+orbital altitude, constellation density, and inter-satellite dis-
+tances. Finally, the processing delay τproc is defined as the
+time required to process and execute control-plane signaling.
+The e2e delay performance of all-optical satellite networks
+depends greatly on the optical switching fabric deployed
+and the chunk size transmitted, and presents a fundamental
+design trade-off. Whereas larger data chunks occupy network
+resources for longer times and can increase the network load,
+smaller chunks may lead to poor link utilization with non-
+negligible switching time, and e2e latency becomes dominated
+by switching times rather than data transmission time. Thus,
+the chunk size plays a key role in determining the trade-
+off between switching speed and e2e latency. To study this
+trade-off for various switching fabrics, we analyze the chunk
+feasibility ratio metric against e2e latency. The chunk feasi-
+bility ratio (CFR) is defined as the percentage of chunks that
+can be successfully allocated and are not dropped due to link
+unavailability, out of the total number of generated chunks, i.e.,
+CFR = (1 −NDropped
+NTotal
+) ∗100%
+(11)
+As previously mentioned, e2e latency (L) is the sum of the
+following delay components on an optical path, i.e., transmis-
+sion delay τtr at the bottleneck link, propagation delay τprop,
+and onboard satellite delays, including processing and optical
+switching, i.e.,
+L = τtr +
+X
+Hops
+τprop +
+X
+Sats
+(τproc + τswitch)
+(12)
+The presented CFR in Eq. 11 and e2e latency (Eq. 12)
+metrics allow analyzing how the different chunk sizes affect
+the resource availability and allocation, as bigger data chunks
+imply higher transmission delays, longer channel reservation,
+and increased competition for free resources.
+IV. NUMERICAL RESULTS
+To define a benchmark for a realistic e2e latency thresh-
+old in today’s constellations, we use the Ookla and Human
+Settlement Proxy datasets, which show latency measurements
+that varies roughly between 30 to 60 ms for the five starlink
+markets with lowest latency in the third quarter of 2025 [13].
+We use this range as the latency constraint. Table I shows
+the constellations studied, with one high-altitude constellation
+with fewer satellites (Telesat), which can be assumed to
+offering longer uplinks and downlinks transmission windows,
+and higher propagation delays. Two denser constellations, i.e.,
+Amazon Leo shell 1 and Starlink phase 1, are also studied.
+In all constellations, we assume that each satellite node is
+equipped with four optical terminals for communication with
+neighboring satellites, arranged in a Grid+ topology, along
+with an additional port for OGS connectivity. Four OGSs
+covering Europe are considered [14], including Maspalomas
+(27.76◦,-15.59◦), Athens (37.98◦,23.72◦), Milan (45.4642◦,
+9.1900◦), and Bilbao (43.2630◦, -2.9350◦).
+TABLE I: Constellations configuration.
+Constellation
+Starlink Phase 1
+Telesat
+Amazon Leo Shell 1
+Satellites
+1584
+220
+784
+Orbital Planes
+72
+20
+28
+Inc. (◦)
+53.00
+50.88
+33.00
+Alt. (km)
+550
+1325
+590
+Average hop count
+2.85
+1.46
+2.56
+Event-driven simulations are carried out using OMNeT++
+v6.3.0. and the simulation results are reported with a 95%
+confidence interval. Traffic chunk arrivals are simulated based
+on negative Poisson distribution with holding times approxi-
+mated to match the chunk size transmission. The holding time
+of each chunk corresponds to the time taken to transmit the
+chunk across its e2e path. For each simulation, we randomly
+generate chunks, all with a fixed chunk size B, for a source-
+destination OGS pair. In order to have comparable network
+loads for different chunk sizes, we normalize the inter-arrival
+
+
+===== page 5 =====
+50
+100
+200
+300
+350
+400
+500
+550
+600 1000
+Chunk size (MB)
+90
+99
+100
+Chunk Feasibility Ratio %
+Beam-steering
+MEMS
+Electro-optic
+Inp-based
+(a) Telesat
+50
+100
+200
+300
+350
+400
+500
+550
+600 1000
+Chunk size (MB)
+90
+99
+100
+Chunk Feasibility Ratio %
+Beam-steering
+MEMS
+Electro-optic
+Inp-based
+(b) Amazon Leo shell 1
+50
+100
+200
+300
+350
+400
+500
+550
+600 1000
+Chunk size (MB)
+90
+99
+100
+Chunk Feasibility Ratio %
+Beam-steering
+MEMS
+Electro-optic
+Inp-based
+(c) Starlink phase 1
+Fig. 3: Chunk feasibility ratio for different chunk sizes vs. switching fabrics for various constellations
+50
+100
+200
+300
+350
+400
+500
+550
+600 1000
+Chunk size (MB)
+0
+20
+40
+60
+80
+100
+End-to-end Latency (ms)
+Propagation
+Transmission
+Switching
+Telesat
+Amazon Leo
+Starlink
+(a) Electro-optic and Inp-based switches
+50
+100
+200
+300
+350
+400
+500
+550
+600 1000
+Chunk size (MB)
+0
+20
+40
+60
+80
+100
+120
+End-to-end Latency (ms)
+Propagation
+Transmission
+Switching
+Telesat
+Amazon Leo
+Starlink
+(b) MEMS
+50
+100
+200
+300
+350
+400
+500
+550
+600 1000
+Chunk size (MB)
+0
+25
+50
+75
+100
+125
+150
+End-to-end Latency (ms)
+Propagation
+Transmission
+Switching
+Telesat
+Amazon Leo
+Starlink
+(c) Beam-steering-based switch
+Fig. 4: e2e latency breakdown for different chunk sizes, switching technologies, and constellations.
+rate proportional to the chunk size B. This is done to maintain
+a similar load over all simulations with different chunk sizes.
+Table II shows the parameters of the switching devices
+studied [15]–[18]. From a technological perspective, beam-
+steering and MEMS-based switches are mature, but exhibit
+comparably slower switching times (ms range) and larger
+physical dimension. Mature electro-optic and experimental
+SOA integrated photonic (InP) switches enable µs and ns-
+scale reconfiguration and compact integration, making them
+attractive for size- and weight-constrained satellite nodes.
+TABLE II: Selected optical switching fabrics and parameters.
+Feature
+Beam-steering
+MEMS
+Electro-optic
+InP-based
+Ref.
+[17]
+[15]
+[16]
+[18]
+Speed
+25 ms
+8 ms
+0.1 µs
+5.2 ns
+Power Cons.
+5 W
+1.25 W
+10 W
+0.58 W
+Insertion Loss
+1 dB
+2.6 dB
+3.5 dB
+0 dB
+Readiness
+Commercial
+Commercial
+Commercial
+Experimental
+OMNeT++ v6.3.0 offers the OS3 library which is employed
+to generate satellite constellations shown in Table I, including
+their propagation models based on TLE data obtained via [19].
+We implement first-fit as the wavelength assignment policy
+(λ1 −λ4); the channel estimator is used as as described in
+Sec. III-B. For routing, we adopt a k-shortest path algorithm
+(K = 5), where the physical link length is used as edge
+weight. The scheduler is assumed to use the offset time τoff
+as the time limit for buffering a chunk when no channel is
+available, and the chunk is dropped when reaching this limit.
+A guard time is required between different control messages
+when transmitted over the same link and control channel λC,
+and a fixed offset time τoff is added between the launching of
+a control message and its corresponding chunk. The remaining
+simulation parameters are summarized in Table III.
+TABLE III: Simulation parameters.
+Parameter
+Value
+Central wavelength
+1550 nm (C-band)
+WDM channel spacing
+100 GHz
+OGS gain
+125 dBi
+OGS aperture size
+0.8 m
+Satellite power
+0.7 dBW
+Satellite gain
+120 dBi
+Visibility
+60 km (clear sky)
+Nr. of wavelengths
+5 per port (4 data + 1 control)
+Nr. of ports per node
+4 (ISL) + 1 (OGS), bidirectional
+Guard time
+100 ns
+Offset time
+400 ns
+Processing delay
+10 ns
+Chunk size
+50 - 1000 MB
+Minimum elevation angle
+30◦
+TABLE IV: Evaluation of the maximum feasible burst size
+across different constellations and switching devices.
+Switch type
+Const.
+Traffic CFR (%) E2E L (ms) EE (Gbits/W)
+InP
+Telesat
+500MB
+99.02
+59.91
+4.55
+Amazon 600MB
+99.32
+60.68
+3.22
+Starlink 600MB
+99.17
+60.47
+2.89
+Electro-optic
+Telesat
+500MB
+99.02
+59.91
+0.26
+Amazon 600MB
+99.32
+60.68
+0.18
+Starlink 600MB
+99.18
+60.47
+0.16
+MEMS
+Telesat
+350MB
+98.84
+58.04
+1.48
+Amazon 350MB
+98.99
+60.65
+0.87
+Starlink 300MB
+98.67
+58.70
+0.66
+Beam-steering Telesat
+100MB
+97.60
+59.03
+0.11
+Fig. 3 presents the CRF (Eq. 11) on a logarithmic scale for
+
+
+===== page 6 =====
+simulations with different bust sizes B, in which B is fixed
+for each simulation, and varies from 50 MB to 1 GB across
+different simulations. The beam-steering-based switch yields
+the lowest CFR in the experiment, with values lower than 98%
+for chunk sizes up to 400MB in all constellations due to the
+slower switching mechanism. The same behavior occurs for
+the MEMS-based switch, up to a chunk size of 50 MB in
+Telesat (Fig. 3a), and 200 MB in Amazon LEO (Fig. 3b) and
+Starlink (Fig. 3c). This early convergence with Telesat happens
+due to its broader coverage and the lower number of hops
+crossed, which reduces the use of switches and consequently
+the switching delay. On the other hand, µs- and ns-switches
+show similar CFR values, above 99% across different chunk
+sizes, as these devices add negligible switching delay.
+Fig. 4 illustrates the latency breakdown for different switch-
+ing fabrics. The Telesat constellation has the highest altitude
+and the highest propagation delay, followed by Amazon LEO
+and Starlink, respectively. For Inp- and electro-optic-based
+switches (Fig. 4a), the maximum feasible traffic chunk sizes
+under the 60ms threshold are 600 MB (Amazon LEO and
+Starlink, with CFR values of 99.32% and 99.17%, respec-
+tively) and 500 MB (Telesat, with CRF of 99.02%). There-
+fore, Amazon Leo with 600 MB demonstrates 0.15% lower
+feasibility and 0.21 ms higher e2e latency than Starlink. For
+the ms-scale switches, the adoption of MEMS-based switches
+(Fig. 4b) causes a maximum chunk size of 350 MB for Telesat
+and Amazon LEO, and 300 MB for Starlink. The increased
+switching delay reduces the time available for transmission
+and pushes for smaller chunk sizes.
+Finally, beam-steering-based switches (Fig. 4c) only reach
+the e2e latency threshold in Telesat for chunks up to 100 MB
+size, due to the high added switching delay, while for the
+other constellations, chunk sizes of 50 MB already exceed the
+60 ms e2e delay threshold. For beam-steering switches, the
+transmission delay only becomes dominant for bigger chunks
+(1 GB). Reduced chunk sizes are dominated by switching
+delay and have often optical channels in an idle state.
+We further study the impact of energy efficiency (EE)
+enabled by the resource allocation solution in the different
+scenarios, defined as the total number of successfully deliv-
+ered bits divided by the total power consumption of optical
+switching hardware, normalized by the chunk losses, i.e.,
+EE (bits/W) =
+P
+chunksBitsreceived
+P
+sats Pswitch
+∗CFR
+(13)
+Based on the results, the maximum feasible chunk sizes for
+each switch and constellation were selected and summarized
+in terms of feasibility (CFR), latency (E2E L), and energy
+efficiency (EE) in Table IV. The Inp-based switch achieves
+the best performance in all evaluated metrics. Among the other
+solutions, MEMS-based switches deployed in Telesat has the
+highest energy efficiency for 350 MB chunk sizes.
+V. CONCLUSION
+We investigated the performance of chunk size variation
+applied to satellite constellations, based on different scenarios
+of all-optical switching devices. The results show that ms-scale
+switches incur lower feasibility for small chunks and require
+large chunks to meet the 30-60 ms latency. In contrast, µs- and
+ns-switches achieve a feasible chunk size of 500MB for Telesat
+and 600 MB for Amazon Leo and Starlink, while maintaining
+the 60 ms latency threshold and chunk feasibility ratio > 99%.
+ACKNOWLEDGMENT
+This work was partly funded by the European Space Agency
+(ESA) in the framework of the project NEXON (activity
+number 1000042074).
+REFERENCES
+[1] S. Ma and et. al., “Network characteristics of leo satellite constellations:
+A starlink-based measurement from end users,” in IEEE INFOCOM
+2023 - IEEE Conf. on Computer Communications, 2023, pp. 1–10.
+[2] F. Li and et. al., “A review on all-optical switching in intersatellite laser
+communication,” Adv. Devices & Instrumentation, vol. 6, p. 0097, 2025.
+[3] Y. Wang and et. al., “Space-based optical burst switching assembly
+algorithm based on qos adaption,” in International Conference on
+Communication Software and Networks (ICCSN).
+IEEE, 2019.
+[4] C. Wang and et. al., “Osbn: architecture and control mechanism of
+optical switched satellite backbone network,” Photonic Network Com-
+munications, vol. 43, p. 165–176, 2022.
+[5] Z. Li and et. al., “100 gb/s per channel dynamic adaptive granularity-
+aware onboard optical switching,” IEEE Internet of Things Journal,
+vol. 13, no. 1, 2026.
+[6] Q. Cheng and et. al., “Photonic switching in high performance datacen-
+ters [invited],” Optics Express, vol. 26, no. 12, 2018.
+[7] H. Zhai and et. al., “Design and implementation of the hardware platform
+of satellite optical switching node,” in 2021 19th International Conf. on
+Optical Comm. and Networks (ICOCN).
+IEEE, 2021, pp. 01–03.
+[8] Z. Zhao and et. al., “Feasibility analysis and design of multi-mode op-
+tical switching,” in Sixth Symposium on Novel Optoelectronic Detection
+Technology and Applications, vol. 11455.
+SPIE, 2020, pp. 778–784.
+[9] V. Spirito and et. al., “E2e physical layer and link analysis for high-
+throughput satellite optical communication,” IEEE Journal on Selected
+Areas in Communications, vol. 43, no. 5, pp. 1660–1675, 2025.
+[10] C. Cantore and et. al., “Link budget analysis of bi-directional leo and
+geo optical feeder links advancing the beam wander model’s accuracy,”
+Scientific Reports, vol. 14, no. 1, p. 8579, 2024.
+[11] E. Erdogan and et. al., “Site diversity in downlink optical satellite
+networks through ground station selection,” IEEE Access, vol. 9, pp.
+31 179–31 190, 2021.
+[12] B. Shang, , and et. al., “Channel modeling and rate analysis of optical
+inter-satellite link (oisl),” IEEE Transactions on Vehicular Technology,
+vol. 74, no. 7, pp. 11 650–11 655, 2025.
+[13] M. Dano. (2026, Feb.) 2025 global satellite broadband performance
+report. Ookla. Accessed: 2026-04-11. [Online]. Available: https://www.
+ookla.com/articles/2025-global-satellite-broadband-performance-report
+[14] O. Farley and J. Osborn, “Optimising optical ground station locations for
+satellite communications through atmospheric turbulence with adaptive
+optics mitigation,” in ECOC 2024; 50th European Conference on
+Optical Communication, 2024, pp. 398–401.
+[15] Guilin GLsun Science and Tech Group Co., LTD, “4x4 cascade
+optical switch,” 2025. [Online]. Available: https://www.glsun.com/
+product-v59-4x4-cascade-optical-switch.html
+[16] Agiltron
+Inc.,
+“2×4,
+4×4
+high
+speed
+fiber
+optical
+switch
+system,”
+2024.
+[Online].
+Available:
+https://agiltron.com/product/
+4x4-high-speed-optical-switch-nanospeed/
+[17] HUBER+SUHNER Polatis, “Polatis series 6000s optical matrix switch,”
+2024.
+[Online].
+Available:
+https://www.hubersuhner.com/en/shop/
+product/other-systems/optical-switches/rack-mount-circuit-switches/
+85222533/polatis-6000s-optical-circuit-switch
+[18] D. W. Feyisa and et. al., “Compact 8×8 soa-based optical wdm space
+switch in generic inp technology,” Journal of Lightwave Technology,
+vol. 40, no. 19, 2022.
+[19] “Bulk
+TLE
+Generator
+—
+tle-generator.starlitter.info,”
+https:
+//tle-generator.starlitter.info/, [Accessed 18-04-2026].

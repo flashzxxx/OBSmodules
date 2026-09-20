@@ -149,8 +149,50 @@
   eprint       = {2605.04829},
   archivePrefix = {arXiv},
   url          = {https://arxiv.org/abs/2605.04829},
-  urldate      = {2026-09-14},
-  note         = {已存 PDF：refs/pdf/mouammar-2026-arxiv-2605.04829.pdf。D1 默认开关表来源}
+  urldate      = {2026-09-20},
+  note         = {已存 PDF：refs/pdf/mouammar-2026-arxiv-2605.04829.pdf。2026-09-20 全文文本提取入库：refs/extracts/mouammar-2026-arxiv-2605.04829-text-2026-09-20.txt（PyMuPDF，6 页）。**本文 TABLE II 是本项目器件参数的来源**，其脚注 [15]-[18] 指向下面四条原始出处。关键可引句（p.3，原文）："While OPS and OBS technologies are not technologically mature due to the need for optical buffering... we consider... OBS with path reservation (no contention resolution at nodes)" —— 为论文 2.2「卫星 OBS 回避星上缓存」提供原文依据；全文未出现 FDL / fibre delay line}
+}
+
+% --- Mouammar TABLE II 的原始器件出处（论文表 1 / 图 2 / 图 6 的引用来源）---
+
+@misc{polatis6000s2024,
+  author       = {{HUBER+SUHNER Polatis}},
+  title        = {Polatis Series 6000s Optical Matrix Switch},
+  year         = {2024},
+  howpublished = {Product page},
+  url          = {https://www.hubersuhner.com/en/shop/product/other-systems/optical-switches/rack-mount-circuit-switches/85222533/polatis-6000s-optical-circuit-switch},
+  urldate      = {2026-09-20},
+  note         = {光束转向式光矩阵开关。切换 25 ms、功耗 5 W、插损 1 dB、商用。经 Mouammar arXiv:2605.04829 TABLE II 转引（其文献 [17]）；本轮未直接访问厂商页，参数以转引为准}
+}
+
+@misc{glsun4x4switch2025,
+  author       = {{Guilin GLsun Science and Tech Group Co., Ltd.}},
+  title        = {4x4 Cascade Optical Switch},
+  year         = {2025},
+  howpublished = {Product page},
+  url          = {https://www.glsun.com/product-v59-4x4-cascade-optical-switch.html},
+  urldate      = {2026-09-20},
+  note         = {MEMS 光开关。切换 8 ms、功耗 1.25 W、插损 2.6 dB、商用。经 Mouammar arXiv:2605.04829 TABLE II 转引（其文献 [15]）。本项目据此**定量排除 MEMS**：τ ≥ 8 ms 等价于 τ/T_burst ≈ 2.3×10³，而实测最优在 τ/T_burst = 1}
+}
+
+@misc{agiltron4x4nanospeed2024,
+  author       = {{Agiltron Inc.}},
+  title        = {2x4, 4x4 High Speed Fiber Optical Switch System},
+  year         = {2024},
+  howpublished = {Product page},
+  url          = {https://agiltron.com/product/4x4-high-speed-optical-switch-nanospeed/},
+  urldate      = {2026-09-20},
+  note         = {电光式高速光开关。切换 0.1 µs、功耗 10 W、**插损 3.5 dB/级**、商用。经 Mouammar arXiv:2605.04829 TABLE II 转引（其文献 [16]）。本项目默认快开关候选；3.5 dB/级 使 τ/T_burst=1 的三级延迟器总插损达 10.64 dB，是链路预算的关键开销}
+}
+
+@article{feyisa2022soaswitch,
+  author  = {D. W. Feyisa and others},
+  title   = {Compact 8x8 {SOA}-Based Optical {WDM} Space Switch in Generic {InP} Technology},
+  journal = {Journal of Lightwave Technology},
+  volume  = {40},
+  number  = {19},
+  year    = {2022},
+  note    = {InP SOA 集成光子开关。切换 5.2 ns、功耗 0.58 W、**插损 0 dB**（SOA 增益补偿）、成熟度为实验阶段。经 Mouammar arXiv:2605.04829 TABLE II 转引（其文献 [18]）。引用时须说明：这是**器件级插损参数**的借用，该文器件是 8×8 WDM 空间开关，与可调延迟线并非同构。作者名单与卷期页未在本轮核实，待补}
 }
 
 @inproceedings{zhai2021hardware,
