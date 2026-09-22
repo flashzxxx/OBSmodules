@@ -480,3 +480,50 @@ Horizon 存标量 `horizon = A0 + D0 + 3g/4`，最后一条预约窗口右端 `=
 改：`fdl_experiments.ini`（异步臂 5 档 τ + 模式化目录 + 场景 B）、`research_status.md`、`AGENTS.md`、
 `codex_phase2_tasks.md`、`walkthrough.md`。
 本地未入库：`tools/audit_runs.py`、`tools/plot_grid_freeze.py`、`tools/analyze_async_vf.py`、`results/ExpA-*-release/`。
+
+---
+
+## 十七、第 11 周：批量与图 3–5 初版（2026-09-22）
+
+### 做了什么
+
+1. **按冻结表跑批量**：异步臂 repeat 2→5、热点 1→5；新增同步臂的 release 重跑配置（`ExpA-TauSweep-release`、`ExpA-NoFDL-release`，
+   写进新目录，第 8 周目录保持不动）与轻负载无恢复参考 `ExpA-NoFDL-Light`；`ExpR-Retransmit` 目录加模式后缀。
+   四个后台作业并行（32 核），合计 **225 run 全部 exit 0**。
+2. **每批审计**：`tools/audit_runs.py <目录> --repeat 5`，8 个目录全部格齐、无重复、无跨批文件。
+3. **判定第 8 周模式**：新增 `tools/compare_dirs.py`（按 `iterationvars2` 配对，因为文件名带配置名），
+   50/50 与 10/10 格全部有末位差异（平均 181 / 135 条/文件）⇒ **第 8 周是 debug 构建**；release 重跑复现
+   12.88 / 18.71 / 6.78 / 13.51 **逐位一致** ⇒ 模式差异对结论无影响。
+4. **图 3–5 与逐格表**：新脚本 `tools/plot_paper_figs.py`（一个脚本出三张图 + `--csv` 汇总，避免图文两条代码路径分叉）。
+5. **实验 R 修复与边界查清**：见下。
+
+### 实验 R 的两个发现（一个建模假象、一条真实边界）
+
+**假象**：`minSizeWithPadding = 500B` 把 64 B 的确认包填充成 4 µs 的交换机占用（本应 0.8 µs，放大约 2.4 倍）。
+未修时该臂**不收敛**：活动消息 1.5 s 内 47k → 729k（延迟线各臂稳定 16–19k），32 位进程 T=1.49 s 以 0xC0000005 静默退出。
+已在 `ExpR-Retransmit` 内覆盖为 64 B。
+
+**边界**：修掉后 79.8 µs 稳定（活动消息 31k 平坦），35.6 µs 仍无界增长（188k–980k，60/120 ms 两个超时值皆然）。
+⇒ 开环重传的可用区间比单级回环窄（新发 ρ≈0.2 对 0.8）；进高负载区必须加重传窗口，属独立设计变更。
+另：60 ms 超时对最坏路径（5 跳 × 5 ms 每程）偏紧，实测平均完成时延 69 ms > 超时 ⇒ 大量误触发；并列跑了 120 ms 版本，
+两者送达比例相近（80.2% 对 81.6%），说明 79.8 µs 下重传主要是真丢包。
+
+**新工具**：`tools/check_sim_stability.py`（从 Cmdenv 的 `present:` 计数判断批次是否会因积压耗尽内存，可作闸门）。
+
+### 结果
+
+| 指标 | 值 |
+|---|---|
+| 同步 τ 最优点 | τ/T=1：6.78%（ρ≈0.40）、13.51%（ρ≈0.59） |
+| 异步 τ 最优点 | τ/T=2：15.29% / 23.22%（Horizon）；VF 曲线更平更低（14.33–15.47%） |
+| 端到端送达载荷（同步，τ/T=1） | 2520 / 3349 Mbit/s，相对无 FDL **+23% / +21%** |
+| 异步 VF 的贡献 | 相对 Horizon **+32% / +40%**（大于延迟线本身） |
+| 热点 ρ≈0.81 | 丢包 34.8–35.4%（τ 无关），送达载荷 ~1396 Mbit/s；FDL 使用率 15–22%、在飞占用 0.7–2.1 |
+| 无缓存重传（同实测负载） | 送达载荷 **1145 / 1126 Mbit/s**，约为回环臂一半；`retx/fresh ≈ 1.0`，线上有用率 ~61% |
+
+### 改动文件
+
+新增：`research_reports/2026-09-week11/{分析.md,周会材料.md}`、`research_reports/figures/{fig3_loss_vs_tau.png,fig4_fdl_usage.png,fig5_loopback_vs_retransmit.png,batch_summary.csv}`。
+改：`fdl_experiments.ini`（异步臂 repeat 5、模式化目录、同步 release 重跑、轻负载参考、ExpR 填充覆盖与稳定负载、120 ms 变体、场景 B repeat 5）、
+`fdl_tests.ini`（`Test-ExpR-Diag-Smoke`）、`research_status.md`、`AGENTS.md`、`codex_phase2_tasks.md`、`walkthrough.md`。
+本地未入库：`tools/{audit_runs,compare_dirs,check_sim_stability,plot_paper_figs,plot_grid_freeze,analyze_async_vf}.py`、`results/ExpA-*-release/`、`results/ExpR-*-release/`、`results/_pilot-week10/`、`results/_crash-2026-09-22/`。
