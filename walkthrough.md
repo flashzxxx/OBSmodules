@@ -597,7 +597,7 @@ Horizon 存标量 `horizon = A0 + D0 + 3g/4`，最后一条预约窗口右端 `=
 ### 主要发现：一个核心计数器看不见的恒定丢弃，以及据此对第 7 周的更正
 
 Static 在全部 3 档负载、FDL 开与关下恒定丢弃 **14.21–14.27%**（波动 ≤0.06 pp），Dynamic 恒为
-**0.00%**。这部分发生在接入侧 Dispatcher 的队列阈值上、在成束之前，**核心任何计数器都看不到**。
+**0.00%**。这部分发生在接入侧 Dispatcher 的队列阈值上、在成束之前，**核心任何计数器都看不到**。**0.00%**。这部分发生在成束之前，**核心任何计数器都看不到**。**第 14 周研究日 A 已定量更正**：该机制不是「队列阈值」，而是 `(targetLabel - 1) % numQueues` 在「10 目的地、8 队列」下的混叠；队列数提到 10 后丢弃精确归零，端到端落到 Dynamic 水平。**14.2% 是配置伪影，不是 Static 的性质。** 证据：`research_reports/2026-09-week14/研究日A-运行记录.md` 第五节 5.1。
 
 因此第 7 周 Task 1.3 的结论必须更正：当时按核心 burst loss 读得「Static 比 Dynamic 好约
 1.1 pp」（21.3 µs：17.18% vs 18.71%），端到端口径反过来，Dynamic 好 5.0–12.6 pp。
@@ -610,7 +610,7 @@ Static 在全部 3 档负载、FDL 开与关下恒定丢弃 **14.21–14.27%**�
 
 机理可从计数器直接读出：Static 的 burst 更少更大（79.8 µs 下 206,793 束 vs Dynamic 244,255
 束），故核心看到的失败束数更少；Dynamic 的抢占会冲掉部分正在成束的包，反而抬高核心 burst
-loss。**教训：核心 burst loss 只能当核心内部诊断量，评价边缘或联合效果必须看端到端送达。**
+loss。**教训：核心 burst loss 只能当核心内部诊断量，评价边缘或联合效果必须看端到端送达。****教训：核心 burst loss 只能当核心内部诊断量，评价边缘或联合效果必须看端到端送达。****第 14 周研究日 A 更正**：上述「端到端与核心方向相反」的两个方向出自同一个混叠伪影，队列数升到 10 后两模式在核心与端到端两侧都一致——「Dynamic 端到端更优」不成立。仍然成立的是：核心 burst loss 与端到端不可互换，评价「谁更好」必须看端到端送达，但引用这些数字须带 8 队列对 10 目的地的配置前提。
 
 ### 副产物：端到端 pp 收益为什么是核心读数的 1.9–2.9 倍
 
@@ -650,3 +650,91 @@ loss。**教训：核心 burst loss 只能当核心内部诊断量，评价边�
 改：`fdl_experiments.ini`（`ExpB-Joint`、`ExpR-EdgePair`）、`research_status.md`、`AGENTS.md`、
 `codex_phase2_tasks.md`、`论文骨架.md`（5.4 与图表映射）、`walkthrough.md`。
 本地未入库：`tools/{plot_fig7_expB,plot_paper_figs}.py`、`results/ExpB-Joint-release/`、`results/ExpR-EdgePair-release/`。
+
+---
+
+## 二十、第 14 周研究日 A：三个敏感性臂（2026-09-22）
+
+### 做了什么
+
+1. **S1 边缘队列数敏感性**：`ExpS-EdgeQueues`，`numPacketBurstifiers` ∈ {8, 10} ×
+   `dispatchMode` ∈ {Static, Dynamic} × 3 档负载 × repeat 5 = **60 run**。
+2. **S2 突发长度敏感性**：`ExpS-BurstLen`（`numPackets` ∈ {1, 3, 6} × τ/T 比 ∈ {0.5, 0.85, 1, 2} ×
+   2 档负载 × repeat 5 = **120 run**）与 `ExpS-BurstLen-NoFDL`（同三档粒度各自的无 FDL 参考线，
+   **30 run**）。
+3. **S3 热点 τ 网格两端**：`ExpA-HotspotGrid`，补 τ/T = 0.25（8.6 µs）与 4（137.4 µs），
+   **20 run**。
+4. 合计 **230 run**，release、repeat 5，四臂并行约 29 min，全部 exit 0；`audit_runs.py` 四个目录
+   46 个 cell 全部满 5 重复、0 MISSING / 0 DUPLICATE / 0 STALE。
+5. **先冒烟再批量**（`Test-Smoke-EdgeQueues/BurstLen/HotspotGrid`，均 0.2 s），并在冒烟发现的异常上
+   追加两个机制探针（偏置预算、NoPreemption）。
+6. 新工具（本地不入库）：`tools/analyze_w14_sensitivity.py`（三臂聚合）、`tools/check_w14_smoke.py`
+   （冒烟裁决：队列数是否生效、实测 burst 长度、τ 是否可追溯）。
+
+### 机制更正：第 13 周的 14.2% 与「方向相反」都是配置伪影
+
+第 13 周把 Static 的恒定丢弃写成「接入侧 Dispatcher 队列阈值」，并据此得出「核心 burst loss 读得
+Static 好 0.66–1.52 pp，端到端反而 Dynamic 好 5.01–12.59 pp，所以核心计数器不可作评价依据」。读
+`src/EdgeNode/OBS_PacketDispatcher.cc` 的 mode 3 分支可以看到真实判据：
+
+```cpp
+int fixedQueue = (targetLabel - 1) % numQueues;   // label 1-10 -> queue 0-7
+// 该队列忙且 label 不一致时：丢弃（selectedQueue 保持 -1）
+```
+
+10 个目的地只用 8 个队列时 label 1/9 共用队列 0、2/10 共用队列 1，于是恒定丢 14.2%。
+`numQueues` 在 `OBS_BurstAssembler.ned` 里被绑成 `numQueues = numPacketBurstifiers`，dispatcher 输
+出门数、burstifier 数组与 sender 输入数组都由它定尺寸，所以**把队列数提到 10 只需 ini 参数，没改
+`src/EdgeNode/` 任何源码**（`params.ini` 的 8 仍是基线，只有本实验要求 10）。
+
+| `numPacketBurstifiers` | `dispatchMode` | 丢弃率（3 档负载合计） | 端到端丢包 79.8/35.6/21.3 µs |
+|---|---|---|---|
+| 8 | Static | **14.212%**（逐值复现第 13 周） | 29.43 / 42.10 / 52.20% |
+| 10 | Static | **0.000%** | 19.62 / 34.97 / 47.17% |
+| 8 | Dynamic | 0.000% | 19.55 / 35.07 / 47.22% |
+| 10 | Dynamic | 0.000% | 19.44 / 35.00 / 47.17% |
+
+核心 burst loss 同步回到 Dynamic 水平（10 队列 Static 18.66/12.89/6.68 对 Dynamic
+18.66/12.90/6.62）。**因此 14.2% 与「端到端反向」都是「10 目的地挤 8 队列」的伪影**，第 7 周 Task
+1.3 的原读数也没有被推翻——两者是同一伪影的两个符号。仍然成立的是「核心 burst loss 与端到端不可
+互换」（一 burst ≈ n 包）。第 13 周的分析、周会材料、本节 §十九、`research_status.md`、`AGENTS.md`
+与论文骨架 §5.4 已按此收窄，第 13 周的原始数字保留为实测记录。
+
+### 结果
+
+| 臂 | 关键读数 |
+|---|---|
+| S1 | 见上表；队列数 ≥ 目的地数后 Static ≡ Dynamic（两侧都在 ±0.2 pp 内） |
+| S2 | 三种粒度最优都在 τ/T_burst ≈ 1：实测归一 n=1 为 1.00（8.16% / 14.93%）、n=3 为 1.02（6.80% / 13.50%）、n=6 在 0.99–1.17 持平（6.68–7.04% / 13.53–13.58%）；无 FDL 参考线只随粒度动 0.5 pp（12.84–13.37% / 18.57–19.13%）；FDL 端到端收益随粒度增大（ρ≈0.40 时 12.6 / 15.1 / 15.1 pp）⇒ **5.3 的有用区不被粒度推翻** |
+| S2 交叉核对 | n=3、ratio=1 即 τ=34.36 µs：实测 6.80% / 13.50% 对第 11 周最优 cell 的 6.78% / 13.51%（差 0.02 pp）⇒ τ 推导式求值正确（τ 本身不是 `.sca` 标量，只能这样核对） |
+| S3 | τ/T=0.25 收益 +0.55 pp、τ/T=4 为 0.00 pp；与第 11 周 0.5/1/2 的 +0.61/+0.37/+0.04 pp 连成单调衰减，`fdlUsageCount` 在 τ/T=4 反而升到 160,891 ⇒「饱和瓶颈上多等一个 τ 没用」在网格两端都成立 |
+
+### 附带查明：Dynamic 的抢占会截断长 burst
+
+冒烟发现 `numPackets = 6` 的实测 burst 只有 **7322–7361 B（5.12–5.15 包）**，而名义值是 8582 B。
+两个探针（0.2 s、单种子、`results/_diag`，只作机制判断）：
+
+| 探针 | 改动 | n=6 实测 | 结论 |
+|---|---|---|---|
+| `Test-Smoke-BurstLenOffset` | `minOffset/maxOffset` 放宽到 2 ms / 4 ms | 7321.4–7361.1 B（与基准差 ≤2 B） | 偏置预算**不是**原因 |
+| `Test-Smoke-BurstLenNoPreempt` | `dispatchMode = 1`（NoPreemption） | **8582.0 B（恰好 6.00 包）**，n=1/3 也精确为 1437.0 / 4295.0 B | 截断来自抢占：mode 0 为腾出队列执行 `forceFlush()`，正在组帧的 burst 被提前发走 |
+
+对主网格无影响（Dynamic + n=3，实测 4211 B 对名义 4295 B，差 2.0%），但 S2 的 τ 轴必须按**实测**
+T_burst 归一——n=6 的实测 T_burst 是 58.7 µs 而非 68.66 µs，所以比值列表里加了 0.85，让 n=6 也拿到
+一个落在实测比 ≈1.0 的点。若 5.5 要把它写成可交付结论，需把它从 0.2 s 探针升格为 2 s × repeat 5
+的小臂（列入研究日 B）。
+
+### 改动文件
+
+新增：`research_reports/2026-09-week14/研究日A-运行记录.md`。
+改：`fdl_experiments.ini`（`ExpS-EdgeQueues`、`ExpS-BurstLen`、`ExpS-BurstLen-NoFDL`、
+`ExpA-HotspotGrid`）、`fdl_tests.ini`（3 个冒烟 + 2 个机制探针）、`research_reports/2026-09-week13/{分析.md,周会材料.md}`
+（机制与结论收窄）、`research_status.md`、`AGENTS.md`、`codex_phase2_tasks.md`、论文骨架 §5.4、
+`walkthrough.md`。
+本地未入库：`tools/{analyze_w14_sensitivity,check_w14_smoke}.py`、`results/ExpS-*-release/`、
+`results/ExpA-HotspotGrid-release/`、`results/_logs/`、`results/_diag/`。
+
+**两个环境坑**：① 本机默认执行策略下 `& .\tools\run-sim.ps1` 会被拒（`UnauthorizedAccess`），须
+经 `powershell -ExecutionPolicy Bypass -File` 或以进程级 Bypass 调用；② `params.ini` 把 Cmdenv 文本
+日志固定在 `results/simulation_log.txt`，四臂并行必须逐作业覆盖 `--cmdenv-output-file`，否则抢写同
+一份日志。
