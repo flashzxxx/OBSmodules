@@ -566,3 +566,87 @@ Horizon 存标量 `horizon = A0 + D0 + 3g/4`，最后一条预约窗口右端 `=
 新增：`research_reports/2026-09-week12/{分析.md,周会材料.md,ratecheck-output.txt}`、`research_reports/figures/fig6_feasibility.png`。
 改：`fdl_experiments.ini`（`FDL-RateCheckRef` + 窗口说明）、`research_status.md`、`AGENTS.md`、`codex_phase2_tasks.md`、`论文骨架.md`（5.3 与图表映射）、`walkthrough.md`。
 本地未入库：`tools/{plot_fig6_feasibility,compare_ratecheck}.py`、`results/FDL-RateCheck*/`。
+
+---
+
+## 十九、第 13 周：实验 B 联合 2×2 与「边缘是否移动交叉点」（2026-09-22）
+
+### 做了什么
+
+1. **实验 B 联合 2×2**：边缘 `dispatchMode` ∈ {Static=3, Dynamic=0} × 核心 FDL ∈ {关, 开}，
+   79.8 / 35.6 / 21.3 µs 三档负载，repeat 5，共 **60 run**（`results/ExpB-Joint-release`，release）。
+2. **重传 × 边缘配对臂**（新配置 `ExpR-EdgePair`）：host 侧无缓存重传 × 两种边缘模式，79.8 µs
+   请求间隔、重传超时 120 ms、重传上限 3 次；对照建立在**同一实测信道负载**（ρ≈0.40–0.42）而非同一等待时长上，共 **10 run**（`results/ExpR-EdgePair-release`）。
+   两批审计 0 MISSING / 0 DUPLICATE / 0 STALE，退出码均 0。
+3. **图 7**（`tools/plot_fig7_expB.py` → `figures/fig7_edge_core_2x2.png`）：三面板——2×2 端到端
+   丢包、FDL 端到端收益、两种边缘模式下的交叉点；同时打印三张表（2×2 全量、逐臂 FDL 收益、
+   重传对照）。
+4. **回答第 12 周留下的 5.4 节问题**：交叉点是否移动。
+
+### 结果：交叉点不移动
+
+| 边缘    | 回环（35.6 µs 负载点；τ = 34.4 µs，τ/T_burst ≈ 1.00） | 重传（79.8 µs 请求间隔，超时 120 ms，上限 3 次） | 比值 |
+|---|---|---|---|
+| Static  | 2241.2 Mbit/s @ ρ=0.4114 | 961.9 Mbit/s @ ρ=0.4019 | 2.33 |
+| Dynamic | 2519.7 Mbit/s @ ρ=0.4571 | 1125.7 Mbit/s @ ρ=0.4150 | 2.24 |
+
+重传把 ρ 堆到同一水平（0.40–0.42）靠的是 24–33 万次重传副本（请求 24.4 万；Static 另有 15.75%
+边缘丢弃、端到端丢 31.47%，Dynamic 边缘 0%、端到端丢 19.81%），有效载荷只有回环的 43% / 45%。
+**两种边缘模式下回环都远高于重传 ⇒ 交叉点不移动**；边缘模式只平移绝对损失水平（最高 12.6 pp）。
+
+### 主要发现：一个核心计数器看不见的恒定丢弃，以及据此对第 7 周的更正
+
+Static 在全部 3 档负载、FDL 开与关下恒定丢弃 **14.21–14.27%**（波动 ≤0.06 pp），Dynamic 恒为
+**0.00%**。这部分发生在接入侧 Dispatcher 的队列阈值上、在成束之前，**核心任何计数器都看不到**。
+
+因此第 7 周 Task 1.3 的结论必须更正：当时按核心 burst loss 读得「Static 比 Dynamic 好约
+1.1 pp」（21.3 µs：17.18% vs 18.71%），端到端口径反过来，Dynamic 好 5.0–12.6 pp。
+
+| 负载 | 核心 burst loss（Static / Dynamic） | 端到端丢包（Static / Dynamic） |
+|---|---|---|
+| 79.8 µs | 6.00% / 6.66%（Static 好 0.66 pp） | 29.43% / 19.56%（Dynamic 好 9.87 pp） |
+| 35.6 µs | 11.81% / 12.93%（Static 好 1.12 pp） | 42.10% / 35.05%（Dynamic 好 7.05 pp） |
+| 21.3 µs | 17.17% / 18.69%（Static 好 1.52 pp） | 52.20% / 47.19%（Dynamic 好 5.01 pp） |
+
+机理可从计数器直接读出：Static 的 burst 更少更大（79.8 µs 下 206,793 束 vs Dynamic 244,255
+束），故核心看到的失败束数更少；Dynamic 的抢占会冲掉部分正在成束的包，反而抬高核心 burst
+loss。**教训：核心 burst loss 只能当核心内部诊断量，评价边缘或联合效果必须看端到端送达。**
+
+### 副产物：端到端 pp 收益为什么是核心读数的 1.9–2.9 倍
+
+两层换算，六组全部核验：
+
+- 一个 burst 约 3 个包（4295/1400=3.07、4207/1400=3.00）⇒ 核心 burst 丢失率每 1 pp 在端到端
+  上约值 3 pp；
+- 边缘恒定丢弃给收益打折：`端到端 = 边缘丢弃 + (1−边缘丢弃) × 网络丢弃` ⇒ FDL 的端到端收益 =
+  `(1−边缘丢弃) × Δ(网络丢弃)`，Static 乘 0.858、Dynamic 乘 1。
+
+| 边缘 | 负载 | 核心 Δ | 端到端 Δ | 比值 | `(1−边缘丢弃)×Δ网络` 复核 |
+|---|---|---|---|---|---|
+| Static | 79.8 µs | 4.54 pp | 11.24 pp | 2.48 | 11.29 pp（实测 11.24） |
+| Static | 35.6 µs | 6.11 pp | 13.31 pp | 2.18 | 13.34 pp（实测 13.31） |
+| Static | 21.3 µs | 5.46 pp | 10.26 pp | 1.88 | 10.27 pp（实测 10.26） |
+| Dynamic | 79.8 µs | 4.87 pp | 13.95 pp | 2.86 | 13.96 pp（实测 13.95） |
+| Dynamic | 35.6 µs | 6.16 pp | 15.13 pp | 2.46 | 15.14 pp（实测 15.13） |
+| Dynamic | 21.3 µs | 5.21 pp | 10.88 pp | 2.09 | 10.88 pp（实测 10.88） |
+
+「Δ网络 ≈ Δ核心 burst 丢失 × 每 burst 包数」这一近似在 ρ≈0.20 吻合到 ≤0.7 pp，但在 ρ≈0.59
+系统性高估 3.6–9.0 pp ⇒ 高负载下被丢的 burst 平均短于总体均值，该换算不是与负载无关的常数。
+
+**burst 长度公平性**（四臂先报）：Static 恒 4295.0 B（`minSizeWithPadding` 下限），Dynamic
+4206.5–4210.3 B，最大差 2.1%，不足以解释 5.0–12.6 pp 的端到端差距。
+
+### 本周修掉的一个会静默出错图的问题
+
+`plot_paper_figs.parse_run` 按空白切分 `.sca`。`.sca` 的真实布局是 `scalar <module> \t<name>
+\t<value>`，**名字含空格时会被引号包起来**（如 Dispatcher 的 `"Dropped Packets"`），空白切分
+把模块名和名字都切错，导致图 7 新增的 `edgeDrop%` 整列算不出来（`nan`）。改为按三个字段做正则
+匹配后，14.2% 的常数才显形。已用第 11 周全部图形复核，同步 12.88/6.78、异步 23.22/15.29、热点
+35.4/34.8 **逐值不变**，确认此前结论未受影响。
+
+### 改动文件
+
+新增：`research_reports/2026-09-week13/{分析.md,周会材料.md}`、`research_reports/figures/fig7_edge_core_2x2.png`。
+改：`fdl_experiments.ini`（`ExpB-Joint`、`ExpR-EdgePair`）、`research_status.md`、`AGENTS.md`、
+`codex_phase2_tasks.md`、`论文骨架.md`（5.4 与图表映射）、`walkthrough.md`。
+本地未入库：`tools/{plot_fig7_expB,plot_paper_figs}.py`、`results/ExpB-Joint-release/`、`results/ExpR-EdgePair-release/`。
