@@ -527,3 +527,42 @@ Horizon 存标量 `horizon = A0 + D0 + 3g/4`，最后一条预约窗口右端 `=
 改：`fdl_experiments.ini`（异步臂 repeat 5、模式化目录、同步 release 重跑、轻负载参考、ExpR 填充覆盖与稳定负载、120 ms 变体、场景 B repeat 5）、
 `fdl_tests.ini`（`Test-ExpR-Diag-Smoke`）、`research_status.md`、`AGENTS.md`、`codex_phase2_tasks.md`、`walkthrough.md`。
 本地未入库：`tools/{audit_runs,compare_dirs,check_sim_stability,plot_paper_figs,plot_grid_freeze,analyze_async_vf}.py`、`results/ExpA-*-release/`、`results/ExpR-*-release/`、`results/_pilot-week10/`、`results/_crash-2026-09-22/`。
+
+---
+
+## 十八、第 12 周：图 6 可行性图与 D2 关闭（2026-09-22）
+
+### 做了什么
+
+1. **图 6 载荷可行性三区图**（脚本 `tools/plot_fig6_feasibility.py`）：面板 A 用第 11 周冻结网格的实测 τ 曲线 + 有用区/无增益区；面板 B 用第 8 周器件表的级联档位模型（**直接 import `fdl_design.py`**，不重算）画电光与 SOA 的累计插损、级数与假设边界。性能轴与器件轴来自同一脚本，避免图文两条路径分叉。
+2. **D2 判定**：新增 `FDL-RateCheckRef`（1 Gbps 孪生点，五项无量纲比值与 10 Gbps 的 `FDL-RateCheck` 一一对应），跑 3+3 run，按 **2026-09-14 预登记**的四项判据比对（脚本 `tools/compare_ratecheck.py`）。
+3. **一处口径更正**：`FDL-RateCheckRef` 的注释最初写成"两者都是 0.2 s"，实际参考点跑 2 s；已按真实窗口关系改写。
+
+### 图 6 结果
+
+| 区域 | τ/T_burst | 依据 |
+|---|---|---|
+| 有用 | 0.5 – 2（峰值 1） | 收益 +3.8～+6.1 pp（ρ≈0.40）、+2.3～+5.2 pp（ρ≈0.59） |
+| 无增益 | < 0.5 或 > 2 | 收益衰减；ρ≈0.59 下 τ/T=4 为 **−0.9 pp**（比不加更差） |
+| 物理不可行 | MEMS 需 τ/T ≥ 2328、光束转向 ≥ 7276 | 不等式一；比实测最优高 3 个数量级 |
+
+器件代价（τ/T=1）：电光 **3 级 = 10.64 dB**（光纤仅 0.14 dB）对 InP SOA **0.14 dB**；假设链路余量 10 dB（敏感性 6/10/14）、级数上限 6（敏感性 4/6/8）、步进 0.5 µs。**结论：对成熟电光器件，"有用"与"付得起"不重叠**——问题不是能不能装，而是成熟度 vs 链路预算。步进取 0.1 µs 时电光插损升到 21.14 dB（级数 6），比质量体积更硬。
+
+### D2 结果（GO）
+
+| 量 | 10 Gbps | 1 Gbps | 原始偏差 | 按 T_burst 归一 | 判定 |
+|---|---|---|---|---|---|
+| maxChannelUtilization | 0.392468 | 0.391643 | 0.21% | 0.21% | PASS |
+| fdlUsageCount | 38,512.3 | 50,037.3 | 23.03% | **0.06%** | PASS |
+| carriedBursts | 340,764 | 442,972 | 23.07% | **0.00%** | PASS |
+| burstLossRate | 0.0514225 | 0.0513696 | 0.10% | 0.10% | PASS（绝对差 0.0053 pp） |
+
+**两个计数量为什么会先"失败"**：两运行时长差 10 倍（无量纲点相同 ⇒ 时长按速率缩放），但 **warmup 不能缩放**——它排除的是每跳 5 ms 的填路瞬态，是真实秒。于是测量窗口为 43,655 vs 56,752 T_burst，**比值 1.3000**，与 23% 的原始偏差完全吻合；按 T_burst 归一后差 0.06% / 0.00%。判据在计数类量上只有归一化后才有内容，工具同时打印原始与归一化两列，不隐藏原始结果。
+
+**范围限制**：只覆盖 τ/T=1、sendInterval/T=1.24 一个点；ρ 不可跨 0.2 s 与 2 s 的配置比较。
+
+### 改动文件
+
+新增：`research_reports/2026-09-week12/{分析.md,周会材料.md,ratecheck-output.txt}`、`research_reports/figures/fig6_feasibility.png`。
+改：`fdl_experiments.ini`（`FDL-RateCheckRef` + 窗口说明）、`research_status.md`、`AGENTS.md`、`codex_phase2_tasks.md`、`论文骨架.md`（5.3 与图表映射）、`walkthrough.md`。
+本地未入库：`tools/{plot_fig6_feasibility,compare_ratecheck}.py`、`results/FDL-RateCheck*/`。
