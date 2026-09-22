@@ -135,8 +135,8 @@ OMNeT++ 只能建模时序，不能证明光标签读取器件的存在性。论
 | **第 7 周** | **Task 1.3：第一阶段实验干净重跑** | **用户跑 `Test-FDL-Basic/TooShort/Off` 过 M1；补 FDL 排队论检索** | **四模式对照图；M1 标量；排队论缺口表** | **中** | **实验 B 基线可信；M1 过；排队论读后登记 refs.bib** |
 | 第 8 周 | 热点流量矩阵（`FDL-Hotspot`），确认瓶颈 ρ≥0.8 | 复标定；确认 D1 已发出（冻结日 2026-09-28） | 热点利用率表；种子差异 | 中 | 瓶颈链路实测 ρ≥0.8 且种子有差异 |
 | 第 9 周 | 实现 VF 调度器选项（默认关） | 实现 host 侧重传基线（默认关）；两者的确定性用例 | 新用例 `.sca`；`useFDL=false` 回归 | 高 | **已完成（2026-09-20）**：`useFDL=false` 回归逐标量全同（1701/1701、1697/1697）；新用例 6 个全部按预期通过；另得负面结论（同步偏移下 VF 补 0 个 burst，附证明） |
-| 第 10 周 | ExpA pilot：3 负载 × 2 调度器 × 5 τ | 冻结网格与重复次数；载荷延迟器不等式写成文档 | 参数表；pilot 曲线 | 中 | 参数表冻结；D1 已用回复或默认值。**2026-09-20 更新**：D4 已裁决 A+B——主网格 `ExpA-TauSweep`/`ExpA-NoFDL` 保持第 8 周同步偏移 + Horizon 口径不变，VF 走"同步结构性结论 + 异步偏移臂（`ExpA-AsyncTauSweep`/`ExpA-AsyncNoFDL`）"两条线；冻结项改为异步臂最终 repeat 与是否并入 ρ≈0.81 热点矩阵（需"流量形态"维度） |
-| 第 11 周 | 批量运行 `ExpA-TauSweep` / `ExpA-NoFDL` | 批量 `ExpR-Retransmit` | 图 3–5 初版 | 中 | 回环工作区间与重传交叉点可画 |
+| 第 10 周 | ExpA pilot：负载 × 调度器 × τ | 冻结网格与重复次数；载荷延迟器不等式写成文档 | 参数表；pilot 曲线 | 中 | **已完成（2026-09-22）**：参数表冻结（`research_reports/2026-09-week10/网格冻结.md`）；异步臂 54 run exit 0；pilot 曲线 `research_reports/figures/pilot_grid_freeze.png`。pilot 结论：τ 最优点随偏移模型移动（同步 τ/T=1、异步 Horizon τ/T=2）；异步下 VF 收益 7.4–8.9 pp ≥ FDL 收益 4.9–6.4 pp；偏移模型自身效应约 8 pp；热点 ρ≈0.81 上 FDL 只买到 0.1–0.6 pp |
+| 第 11 周 | 批量：`ExpA-AsyncTauSweep`/`ExpA-AsyncNoFDL`/`ExpA-HotspotPoint` + 用**同一构建模式**重跑 `ExpA-TauSweep`/`ExpA-NoFDL` | 批量 `ExpR-Retransmit`（2 s） | 图 3–5 初版 | 中 | 按冻结表 210 run（repeat 5）；每批前后 `tools/audit_runs.py <目录> --repeat 5`；回环工作区间与重传交叉点可画 |
 | 第 12 周 | 可行性图（`fdl_design.py` 接开关表） | 运行 `FDL-RateCheck` | 图 6；归一化表 | 中 | 图 6 三区可画；D2 关闭 |
 | 第 13 周 | 批量运行 `ExpB-Joint` | 分析：联合是否移动交叉点 | 图 7；burst 长度公平性表 | 中 | 只回答交叉点是否移动，不把边缘当主贡献 |
 | 第 14 周 | 敏感性（突发长度、热点） | 论文第 3–5 章初稿 | 图 8；初稿 | 中 | 敏感性不推翻 5.2/5.3 |

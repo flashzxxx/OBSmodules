@@ -426,3 +426,57 @@ Horizon 存标量 `horizon = A0 + D0 + 3g/4`，最后一条预约窗口右端 `=
 
 未提交（本地工具，按 09-20 决定不入库）：`tools/compare_sca.py`、`tools/run-week9-regression.ps1`、
 `results/_regression-baseline-week9/`、`results/_week9-logs/`、`results/_week9-release-new/`。
+
+---
+
+## 十六、第 10 周：ExpA 网格冻结（2026-09-22）
+
+### 做了什么
+
+1. **配置冻结**：异步臂 τ 由 3 档扩到 5 档（τ/T = 0.25 / 0.5 / 1 / 2 / 4），结果目录改为带构建模式
+   （`results/ExpA-AsyncTauSweep-release`、`ExpA-AsyncNoFDL-release`）；新增场景 B `ExpA-HotspotPoint`
+   （热点 ρ≈0.81、FDL on/off × 3 τ、目录同样带模式）。主网格 `ExpA-TauSweep` / `ExpA-NoFDL` **未改**，
+   只把"VF 维为何不开"的注释换成 D4 裁决的说明。
+2. **pilot**：`ExpA-AsyncTauSweep` 40 + `ExpA-AsyncNoFDL` 8 + `ExpA-HotspotPoint` 6 = 54 run，release，全部 exit 0。
+3. **交付**：`research_reports/2026-09-week10/网格冻结.md`（参数表 + pilot 曲线 + 第 11 周批量清单 + 不得声称清单）、
+   `周会材料.md`、`research_reports/figures/pilot_grid_freeze.png`。
+4. **新增本地工具**：`tools/audit_runs.py`（结果目录清单 + MISSING/DUPLICATE/STALE 检查）、`tools/plot_grid_freeze.py`。
+
+### 结果（丢包率 %，全网汇总）
+
+| 负载 | 偏移 | 调度器 | 无 FDL | 0.25 | 0.5 | 1 | 2 | 4 |
+|---|---|---|---|---|---|---|---|---|
+| ρ≈0.40 | 同步 | Horizon | 12.88 | 10.79 | 9.09 | **6.78** | 8.35 | 11.74 |
+| ρ≈0.59 | 同步 | Horizon | 18.71 | 16.32 | 14.76 | **13.51** | 16.38 | 19.61 |
+| ρ≈0.40 | 异步 | Horizon | 20.76 | 19.75 | 18.95 | 17.42 | **15.28** | 16.46 |
+| ρ≈0.59 | 异步 | Horizon | 28.07 | 26.99 | 26.11 | 24.58 | **23.22** | 25.86 |
+| ρ≈0.40 | 异步 | +VF | 13.40 | 12.06 | 11.04 | 9.44 | **7.26** | 7.04 |
+| ρ≈0.59 | 异步 | +VF | 19.48 | 17.90 | 16.87 | 15.47 | **14.32** | 14.56 |
+| ρ≈0.81 热点 | 同步 | Horizon | 35.42 | — | 34.80 | 35.03 | 35.36 | — |
+
+**四条结论**：① τ 最优点随偏移模型移动（同步 1、异步 Horizon 2，转折点都在网格内）；
+② 异步下 VF 收益 7.4–8.9 pp ≥ FDL 收益 4.9–6.4 pp；③ 偏移模型自身效应约 8 pp（同步 12.88% → 异步 20.76%），
+大于主角的边际效应，故"τ/T≈1 最优"不是无条件结论；④ 热点上 FDL 被使用 11–16 万次却只买到 0.1–0.6 pp
+（`fdlInFlightOccupancy` 最高 2.13，已打满）——饱和瓶颈上多等一个 τ 解决不了问题。
+
+### 本周修掉的两个"会静默出错图"的问题
+
+1. **参考线被并进曲线**：`plot_grid_freeze.py` 第一版按迭代变量分组，而 `useFDL` 是配置里写死的、不在迭代变量中，
+   于是 `ExpA-NoFDL` 的参考 run 与 FDL 开的曲线被合并平均——ρ≈0.40 的参考线算成 9.94%，真值 12.88%
+   （第 8 周记录一致）。改为**按目录划分 family**，教训写进脚本头注释。
+2. **`$repetition` 读不到**：OMNeT++ 4.6 把它放在 `attr iterationvars2`，`audit_runs.py` 第一版因此把每个 cell
+   都报成"缺全部重复"。已同时修正两处解析。
+
+**教训**：能画出图 ≠ 口径正确。第 11 周批量前后都要 `python tools/audit_runs.py <目录> --repeat 5`。
+
+### 第 11 周批量清单（冻结表）
+
+异步臂 100 + 异步参考线 20 + 热点 30 + 同步臂重跑 60（须与本批**同一构建模式**，第 8 周目录未记录模式）= 210 run。
+
+### 改动文件
+
+新增：`research_reports/2026-09-week10/{网格冻结.md,周会材料.md}`（`分析-pilot与网格冻结建议.md` 已于上一提交入库）、
+`research_reports/figures/pilot_grid_freeze.png`。
+改：`fdl_experiments.ini`（异步臂 5 档 τ + 模式化目录 + 场景 B）、`research_status.md`、`AGENTS.md`、
+`codex_phase2_tasks.md`、`walkthrough.md`。
+本地未入库：`tools/audit_runs.py`、`tools/plot_grid_freeze.py`、`tools/analyze_async_vf.py`、`results/ExpA-*-release/`。
