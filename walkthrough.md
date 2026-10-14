@@ -813,3 +813,47 @@ git fetch origin && git branch -f master origin/master
 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File` 调用（与研究日 A 记录的两条坑同类）。
 
 **清理**：删除上一轮会话遗留的探测文件 `research_reports/figures/_probe_fs.txt`（未跟踪，非入库内容）。
+
+## 二十二、代码/文档分仓（2026-10-14）
+
+**背景**：用户要求 `OBSmodules` 只作代码项目，方案、架构图、研究报告移到别处。此前工作树 19.4 MB / 571 文件里
+代码只占约 1 MB，其余是报告、图、文献 PDF（8.9 MB，含出版商 PDF）与原始数据，全部挂在 public 仓库上。
+
+**终态**（两个新仓库 + 一个私有存档）：
+
+| 仓库 | 可见性 | 内容 | 历史 |
+|---|---|---|---|
+| `OBSmodules` | public | 仅代码：`src/`、`Examples/`、`test/`、`utils/`、`Makefile`、`AGENTS.md`、`.agents/`、`walkthrough.md` | **全新**，单一初始提交 |
+| `OBSmodules-docs` | private | `research_reports/`、`.doc/`、`.docs/`、`.仿真原始数据/`、`research_status.md`、`research_guide.md`、`tools/`、选刊名录 | **全新**，单一初始提交 |
+| `OBSmodules-archive`（原 `OBSmodules` 改名） | private | 迁移前全部内容与历史 | 原样保留 |
+
+本地布局：`D:\01work\project\OBSmodules`（代码）、`OBSmodules-docs`（文档）、
+`OBSmodules-history-2026-10-14`（存档：`git bundle --all` 16.7 MB + 旧 `.git` 目录）。pre-FDL 链接工作树
+`OBSmodules-pre-fdl` 的 `.git` 指针已改指存档里的 `gitdir/worktrees/`，实测 `log`/`status` 正常。
+
+**搬移**（物理移动，非删除）：非代码内容 218 个已跟踪文件 / 18.7 MB 移入 docs；
+`Examples/RingFdlOBS/tools/` 的 23 个分析绘图脚本移入 `docs/tools/`，3 个仿真 runner
+（`run-sim.ps1`/`.cmd`、`run-week9-regression.ps1`）留在本仓库。
+
+**代码内容零改动验证**：新仓库初始提交 `6a9129f` 与旧 `1d7ba60` 逐文件比较——**347 个文件 blob 哈希完全相同**，
+仅 6 个文件有差异（`AGENTS.md`、`.gitignore`、`README`、`.agents/.../SKILL.md`、
+`Examples/RingFdlOBS/README.md`、`Examples/RingFdlOBS/fdl_experiments.ini`，都是本次刻意改的引用/说明），
+218 个文件移出，**0 个新增夹带**。
+
+**引用与规则更新**：
+
+- `fdl_experiments.ini:403`、`Examples/RingFdlOBS/README.md:186` 两处注释改为 `../OBSmodules-docs/...`。
+- `.gitignore`：删掉 docs 专属规则，换为「文档在 `../OBSmodules-docs`」+ 防手滑忽略旧路径，并新增 `.vscode/`。
+- `AGENTS.md` 瘦身：研究叙事交给文档库 `research_status.md`，新增「仓库划分」表与跨库引用约定。
+- `.agents/skills/obs-satellite-project/SKILL.md` 同步路径；其 `references/research_guide.md` 迁至
+  `docs/research_guide.md`（`references/` 目录随之删除）。
+- `Makefile` 未改：`opp_makemake` 生成的 `-Xresearch_reports -Xdoc ...` 排除项在目录移出后失效但无害。
+- 脚本路径共 12 处：`FIGDIR` → `../research_reports/figures`；`RESULTS`/`DIAG` →
+  `../../OBSmodules/Examples/RingFdlOBS/results[/_diag]`；`config_dir` → 代码库 `config/`；
+  23 个脚本全部通过 `python -m py_compile`。
+
+**文档库杂质拦截**：docs 首次导入曾误收 122 个 deck 构建沙箱文件（`2026-08-direction-review/_working/`
+在旧仓库本就是整目录忽略），已按整目录忽略并修订提交；复核「旧仓库已跟踪集合 − 代码库 + docs 新增」的差集为 0。
+
+**未做**：GitHub 侧的改名/建库/推送（需用户操作）；两个新仓库的 `origin` 已预置 URL，待仓库创建后推送。
+文档库侧记录见 `../OBSmodules-docs/MIGRATION-2026-10-14.md`。
