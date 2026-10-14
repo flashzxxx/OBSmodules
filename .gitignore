@@ -1,0 +1,61 @@
+# ==========================================
+# OMNeT++ OBS Modules Project .gitignore
+# ==========================================
+
+# --- OMNeT++ / GCC Build Artifacts ---
+# Exclude build output directory
+/out/
+# Exclude object files and dependency files
+*.o
+*.d
+# Exclude compiled libraries and executables
+*.so
+*.dll
+*.exe
+/obsmodules
+/obsmodules.cmd
+
+# --- IDE Config Files ---
+# Exclude OMNeT++ Eclipse configuration
+.oppbuildspec
+.settings/
+# Editor config stays local (was an empty settings.json in the old history)
+.vscode/
+
+# --- Simulation Outputs ---
+# Raw result sets are not versioned: only the .gitkeep placeholders are kept.
+# Whole-directory rule on purpose - the former per-extension list missed
+# everything nested in a subdirectory of results/.
+**/results/*
+# Exclude simulation runtime logs and pdf charts in Examples
+*.log
+.tkenvlog
+.tkenvrc
+Rplots.pdf
+
+# --- Documentation lives in ../OBSmodules-docs (2026-10-14) ---
+# Reports, plans, architecture diagrams, literature and raw data moved to the
+# sibling private repository OBSmodules-docs. These rules only stop them from
+# creeping back into the code repository.
+/research_reports/
+/.doc/
+/.docs/
+/.仿真原始数据/
+/仿真原始数据/
+/research_status.md
+/journal_list_full.txt
+/conference_list_full.txt
+
+# --- Local-only Artifacts ---
+# Simulation runners stay on the workstation; the analysis and plotting scripts
+# now live in ../OBSmodules-docs/tools/.
+/Examples/RingFdlOBS/tools/
+# Agent session scratch space.
+/.dsh-uploads/
+/.dsh-vision-toolkit/
+# Editor/skill backups.
+*.bak-*
+
+# --- Keep Results Directories ---
+# Do not ignore .gitkeep files so results/ dirs are tracked by Git
+!**/results/.gitkeep

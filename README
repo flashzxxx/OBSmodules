@@ -1,0 +1,9 @@
+OBS Modules for OMNeT++ and OMNEST
+------------------------------------
+
+OBSmodules is a set of modules to simulate Optical Burst Switching networks in the OMNeT++ framework
+
+This repository holds **code only** (`src/`, `Examples/`, `test/`, `utils/`).
+Research reports, plans, architecture diagrams, literature and raw simulation
+data live in the sibling private repository `../OBSmodules-docs`; the research
+state of record is `../OBSmodules-docs/research_status.md`.

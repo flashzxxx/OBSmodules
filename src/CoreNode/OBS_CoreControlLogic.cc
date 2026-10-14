@@ -1,0 +1,700 @@
+//
+// Copyright (C) 2010-2012 Javier Armendariz Silva, Naiara Garcia Royo
+// Copyright (C) 2010-2012 Universidad Publica de Navarra
+//
+// This file is part of OBSModules.
+//
+// OBSModules is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// OBSModules is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with OBSModules.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+#include "OBS_CoreControlLogic.h"
+
+Define_Module(OBS_CoreControlLogic);
+
+OBS_CoreControlLogic::OBS_CoreControlLogic(){
+   // initialize() validates tau / fdlOffsetMode / switchReconfigTime before it
+   // allocates these counters, so an opp_error there would otherwise reach the
+   // destructor with uninitialized pointers. free(NULL) is a no-op.
+   recvBurstCounter = NULL;
+   schedBurstCounter = NULL;
+   portBusyTime = NULL;
+   portCarriedBytes = NULL;
+}
+
+OBS_CoreControlLogic::~OBS_CoreControlLogic(){
+	   free(recvBurstCounter);
+	   free(schedBurstCounter);
+	   free(portBusyTime);
+	   free(portCarriedBytes);
+}
+
+void OBS_CoreControlLogic::initialize(){
+   dropCounter = 0;
+   WATCH(dropCounter);
+
+   guardTime = par("guardTime");
+   processingTime = par("BCPProcessingDelay");
+   cModule *parent = getParentModule();
+   dataRate = par("dataRate");
+
+   if (strcmp(par("reportFile"), "") == 0) {
+      data_f = NULL;
+   }
+   else {
+      data_f = fopen(par("reportFile"),"w");
+   }
+
+   //IMPORTANT: USE check_and_cast WHEN LINKING WITH ANOTHER SUBMODULE. OTHERWISE WE WILL GET A NULL POINTER ERROR
+
+   //TODO: Module names should not be hard-coded. Modify this when possible.
+   // One possible way to do this consist in a loop that searches for all neighbor modules and assigns the object reference depending on the module type (check if the module belongs to OBS_RoutingTable,
+   // if not check if it belongs to Horizon Table type, etc...)
+   // As long as there are no module arrays, it shouldn't give any problem.
+   routingTable = check_and_cast<OBS_CoreRoutingTable*>(parent->getSubmodule("RoutingTable"));
+   gatesHorizon = check_and_cast<OBS_CoreOutputHorizon*>(parent->getSubmodule("GatesHorizon"));
+   coreInput = check_and_cast<OBS_CoreInput*>((parent->getParentModule())->getSubmodule("Input"));
+   coreOutput = check_and_cast<OBS_CoreOutput*>((parent->getParentModule())->getSubmodule("Output"));
+   oxc = check_and_cast<OBS_OpticalCrossConnect*>((parent->getParentModule())->getSubmodule("OXC"));
+
+   // Read FDL parameters from CoreNode
+   cModule *coreNode = getParentModule()->getParentModule();
+   useFDL = coreNode->par("useFDL").boolValue();
+   tau = coreNode->par("fdlDelayTime");
+   switchReconfigTime = coreNode->par("switchReconfigTime");
+   maxFdlLoopsPerBurst = coreNode->par("maxFdlLoopsPerBurst");
+
+   // Horizon + void filling scheduler option, read from the CoreNode exactly like useFDL so
+   // the ini pattern is **.sat*.coreSwitch.enableVoidFilling. It is a comparison arm of
+   // experiment A and independent of useFDL: with the option off nothing below changes.
+   enableVoidFilling = coreNode->par("enableVoidFilling").boolValue();
+
+   // OBS_CoreNode.ned binds this submodule parameter as `delayTime = fdlDelayTime`,
+   // and an ini entry cannot override a NED submodule-block assignment. The two
+   // values are therefore equal by construction: this is an invariant assertion
+   // that would catch a future NED edit breaking that binding, not a user-input
+   // validation. It is deliberately so - a single source of truth for tau avoids
+   // the "two knobs that must be kept in sync" footgun. Consequence: no ini
+   // config can exercise this branch, so there is no expected-fail test for it.
+   cModule *fdlMod = coreNode->getSubmodule("fdl");
+   if(fdlMod == NULL) opp_error("CoreNode is missing the fdl submodule");
+   simtime_t fdlModuleDelay = fdlMod->par("delayTime");
+   if(fdlModuleDelay != tau){
+      opp_error("fdlDelayTime (%s) disagrees with fdl.delayTime (%s); check the fdl submodule delayTime binding in OBS_CoreNode.ned", tau.str().c_str(), fdlModuleDelay.str().c_str());
+   }
+
+   const char *offsetMode = coreNode->par("fdlOffsetMode").stringValue();
+   if(strcmp(offsetMode, "DO") == 0){
+      fdlOffsetIsSO = false;
+   }else if(strcmp(offsetMode, "SO") == 0){
+      fdlOffsetIsSO = true;
+   }else{
+      opp_error("fdlOffsetMode must be \"DO\" or \"SO\", got \"%s\"", offsetMode);
+   }
+
+   if(useFDL){
+      if(tau <= 0) opp_error("useFDL=true requires fdlDelayTime > 0 (got %s)", tau.str().c_str());
+      if(tau < switchReconfigTime){
+         opp_error("useFDL=true: fdlDelayTime %s is shorter than switchReconfigTime %s",
+                   tau.str().c_str(), switchReconfigTime.str().c_str());
+      }
+   }
+
+   warmupPeriod = simulation.getWarmupPeriod();
+
+   // Initialize FDL statistics
+   numPorts = coreOutput->par("numPorts");
+   fdlUsageCountCounter = 0;
+   voidFilledBursts = 0;
+   busyTime = 0.0;
+   busyTimeInFlight = 0.0;
+   burstLossContentionCounter = 0;
+   burstLossNoLoopbackTriedCounter = 0;
+   burstLossWaitTooLongCounter = 0;
+   burstLossFdlBusyCounter = 0;
+   burstsLoopedOnceCounter = 0;
+   burstsLoopedMultipleCounter = 0;
+   outgoingOffsetSum = 0.0;
+   outgoingOffsetSamples = 0;
+   outgoingOffsetMin = -1;
+
+   WATCH(useFDL);
+   WATCH(enableVoidFilling);
+   WATCH(tau);
+   WATCH(numPorts);
+   WATCH(fdlUsageCountCounter);
+   WATCH(busyTime);
+   WATCH(burstLossContentionCounter);
+
+   // Register signals
+   fdlUsageCountSignal = registerSignal("fdlUsageCount");
+   fdlUtilizationSignal = registerSignal("fdlUtilization");
+   burstLossContentionSignal = registerSignal("burstLossContention");
+   burstLossNoLoopbackTriedSignal = registerSignal("burstLossNoLoopbackTried");
+   burstLossWaitTooLongSignal = registerSignal("burstLossWaitTooLong");
+   burstLossFdlBusySignal = registerSignal("burstLossFdlBusy");
+   burstLossTotalSignal = registerSignal("burstLossTotal");
+   burstNodeDelaySignal = registerSignal("burstNodeDelay");
+
+   //Initialize all statistics
+   numInPorts = coreInput->par("numPorts");
+   numOutPorts = coreOutput->par("numPorts");
+   recvBurstCounter= (int*)calloc(numInPorts,sizeof(int));
+   schedBurstCounter = (int*)calloc(numOutPorts,sizeof(int));
+   portBusyTime = (simtime_t*)calloc(numOutPorts,sizeof(simtime_t));
+   portCarriedBytes = (double*)calloc(numOutPorts,sizeof(double));
+
+   // The void filling calendar is sized here and never touched again unless the option is on,
+   // so a run with enableVoidFilling=false allocates nothing and behaves exactly as before.
+   //
+   // The channel counts come from the lambdasPerOutPort parameter, NOT from
+   // gatesHorizon->getPortLambdas(): GatesHorizon is declared after ControlLogic in
+   // OBS_CoreControlUnit.ned, so its initialize() has not run yet and its arrays are still
+   // empty. Sizing the calendar from there produced zero-channel calendars, which made every
+   // admission query read out of bounds and every burst get dropped - found on Test-VF-On,
+   // 2026-09-20, and the reason OBS_ChannelCalendar now rejects a malformed size loudly.
+   if(enableVoidFilling){
+      std::vector<int> lambdasPerPort;
+      cStringTokenizer tokenizer(coreOutput->par("lambdasPerPort").stringValue());
+      while(tokenizer.hasMoreTokens()) lambdasPerPort.push_back(atoi(tokenizer.nextToken()));
+      if((int)lambdasPerPort.size() != numOutPorts){
+         opp_error("enableVoidFilling: lambdasPerOutPort has %d tokens but the core node has %d output ports; the void filling calendar cannot be sized",
+                   (int)lambdasPerPort.size(), numOutPorts);
+      }
+      calendar.setChannelCounts(numOutPorts,lambdasPerPort);
+      // Front pruning is only safe with a margin the query window can never reach back past
+      // (see OBS_ChannelCalendar.h); guardTime is comfortably above the required guardTime/2.
+      calendar.setPruneMargin(guardTime);
+   }
+
+   int i=0;
+   for(i=0;i<numInPorts;i++){
+      recvBurstCounter[i] = 0;
+      WATCH(recvBurstCounter[i]);
+   }
+   for(i=0;i<numOutPorts;i++){
+      schedBurstCounter[i] = 0;
+      portBusyTime[i] = 0;
+      portCarriedBytes[i] = 0.0;
+      WATCH(schedBurstCounter[i]);
+      WATCH(portBusyTime[i]);
+   }
+}
+
+// Is (port,lambda) able to take a burst arriving at burstArrival?
+//
+// With the void filling option off this is the historical horizon test, unchanged:
+// the channel is usable when it has become free again at or before the burst arrives.
+// With the option on, the calendar is asked whether the burst's OXC window overlaps an
+// existing reservation. The two are equivalent whenever the channel has no hole (the
+// derivation is in OBS_ChannelCalendar.cc), so enabling the option can only ever admit
+// bursts the horizon rule had to refuse, never refuse one it would have admitted.
+bool OBS_CoreControlLogic::channelAccepts(int port,int lambda,simtime_t burstArrival,simtime_t burstDuration){
+   if(enableVoidFilling){
+      return calendar.fits(port,lambda,windowStart(burstArrival),windowEnd(burstArrival,burstDuration));
+   }
+   return gatesHorizon->getHorizon(port,lambda) <= burstArrival;
+}
+
+// Channel selection for the "*" routing case: nearest horizon, or the first channel whose
+// calendar has room. Under W=1 (the red line of this project) both degenerate to the single
+// data channel of the port, so the multi-channel ordering below is not part of any result.
+int OBS_CoreControlLogic::selectLambda(int port,simtime_t burstArrival,simtime_t burstDuration){
+   if(enableVoidFilling){
+      return calendar.findFittingLambda(port,windowStart(burstArrival),windowEnd(burstArrival,burstDuration));
+   }
+   return gatesHorizon->findNearestLambda(port,burstArrival);
+}
+
+// Book burstDuration on (port,lambda) for a burst arriving at burstArrival. The horizon is
+// always updated; the calendar only exists when the option is on. Both reservations of a
+// loopback go through here, so the FDL pseudo-channel is calendar-managed as well and the
+// FDL itself can be void-filled like any output channel.
+void OBS_CoreControlLogic::reserveChannel(int port,int lambda,simtime_t burstArrival,simtime_t burstDuration,simtime_t newHorizon){
+   gatesHorizon->updateHorizon(port,lambda,newHorizon);
+   if(enableVoidFilling){
+      calendar.reserve(port,lambda,windowStart(burstArrival),windowEnd(burstArrival,burstDuration));
+   }
+}
+
+// Assume this module input is connected to the OE Converter, so we only receive electrical BCPs
+void OBS_CoreControlLogic::handleMessage(cMessage *msg){
+   //OXC Programming automessage. If msg has kind = OBS_SCHEDULE_OXC
+   if(msg->getKind() == OBS_SCHEDULE_OXC){
+      OBS_ControlUnitInfo *info = check_and_cast <OBS_ControlUnitInfo*>(msg);
+      oxc->setGate(info->getInGate(),info->getOutGate());
+      delete msg; 
+      return;
+   }
+   else if(msg->getKind() == OBS_UNSCHEDULE_OXC){ //OXC Unscheduling auto message
+      OBS_ControlUnitInfo *info = check_and_cast <OBS_ControlUnitInfo*>(msg);
+      oxc->unsetGate(info->getInGate());
+      delete msg;
+      return;
+   }
+   //Step 1 - BCP received
+   OBS_BurstControlPacket *bcp = check_and_cast <OBS_BurstControlPacket*>(msg);
+
+   //extract BCP control info
+   OBS_BCPControlInfo *info = (OBS_BCPControlInfo*)bcp->getControlInfo();
+
+   //Step 2 - Extract all necessary BCP info
+   int burstColour = bcp->getBurstColour(); //Burst colour
+   int arrivalPort = info->getPort(); //Arrival port
+   simtime_t arrivalDelta = bcp->getBurstArrivalDelta(); //Time offset between BCP and Burst
+   int burstLength = bcp->getBurstSize(); //Burst length
+   int destLabel = bcp->getLabel(); //Burst destination label
+
+   int burstifierId = bcp->getBurstifierId();
+   int numSeq = bcp->getNumSeq();
+
+   int inGate = coreInput->getOXCGate(arrivalPort, coreInput->getLambdaByColour(arrivalPort,burstColour)); //Request OXC input gate for incoming burst
+
+   EV << "[CoreControl] Received BCP: inPort=" << arrivalPort 
+      << ", label=" << destLabel 
+      << ", burstColour=" << burstColour 
+      << ", burstSize=" << burstLength << "B"
+      << ", offset=" << arrivalDelta << endl;
+
+   simtime_t burstArrival = simTime() + arrivalDelta;
+   // Measurement window follows burst arrival, not BCP arrival (offset later).
+   bool countStats = (burstArrival >= warmupPeriod);
+
+   if(countStats){
+      recvBurstCounter[arrivalPort]++;
+   }
+
+   // Check if burst is scheduled to arrive in the future. If everything works OK burst should behave this way. But, it's possible that BCP and burst offset was very small and in some point of the path, burst enters the Core Node before it's BCP. In this case, discard this message (Burst was discarded already)
+   if(burstArrival < simTime()){
+	//BCP discarded. Burst was here and discarded too.
+	delete msg;
+	if(countStats){
+	   dropCounter++;
+	   emit(burstLossTotalSignal, 1);
+	}
+
+    //Burst dropped (case 1)
+    if (data_f != NULL){
+    	fprintf(data_f,"%d %d %s %s 1 1\n", burstifierId, numSeq, simTime().str().c_str(), burstArrival.str().c_str());
+    }
+
+	return;
+   }
+
+   int burstLengthInBits = burstLength*8; //Burst length in bits
+   simtime_t burstDuration = (double)burstLengthInBits / dataRate;
+
+   //Query Core Node routing table asking for output port,colour and label
+   OBS_CoreRoutingTableEntry *result = routingTable->getEntry(arrivalPort,burstColour,destLabel);
+   if(result == NULL) opp_error("Error in routing table query (Control Unit id: %d)",getId());
+
+   int outPort = result->getOutPort();
+   int outColour = result->getOutColour();
+   int outLabel = result->getOutLabel();
+
+   EV << "[CoreControl] Routing lookup: inPort=" << arrivalPort 
+            << ", label=" << destLabel 
+            << " -> outPort=" << outPort 
+            << ", outColour=" << outColour 
+            << ", outLabel=" << outLabel << endl;
+
+   delete result; //Once the query data is stored, I must clean it.
+
+   int lambda = -1;
+   bool scheduled = false;
+   bool usedFDLForThisBurst = false;
+
+   // Why the burst is dropped when it is. Initialised to the "no loopback was attempted" case,
+   // which is what a burst that fails the direct attempt and then cannot loop - FDL disabled, or
+   // its loop budget already spent upstream - actually is.
+   OBS_DropReason dropReason = OBS_DROP_NO_LOOPBACK_TRIED;
+
+   bool fdlAllowed = useFDL;
+   if(fdlAllowed && maxFdlLoopsPerBurst >= 0 && bcp->getFdlLoopCount() >= maxFdlLoopsPerBurst){
+      fdlAllowed = false;
+   }
+
+   if(outColour == -9){ // * option. Choose the lambda with closest horizon
+      	// Choose the best channel
+        lambda = selectLambda(outPort,burstArrival,burstDuration);        
+
+	if(lambda != -1){
+            scheduled = true;
+	} else if (fdlAllowed) {
+            // Scenario B: FDL Loopback. The two reasons a loopback can fail are recorded
+            // separately: an occupied FDL entry means no wait was possible at all, whereas a
+            // channel still busy after tau means the wait was not long enough. The decision
+            // itself is unchanged - the guard and the selection still have to pass in this
+            // order for the burst to be scheduled.
+            if (!channelAccepts(numPorts, 0, burstArrival, burstDuration)) {
+                dropReason = OBS_DROP_FDL_BUSY;
+            } else {
+                // Look for free lambda at burstArrival + tau
+                lambda = selectLambda(outPort, burstArrival + tau, burstDuration);
+                if (lambda != -1) {
+                    scheduled = true;
+                    usedFDLForThisBurst = true;
+                } else {
+                    dropReason = OBS_DROP_WAIT_TOO_LONG;
+                }
+            }
+        }
+
+        if (!scheduled) {
+            delete msg;
+            if(countStats){
+               dropCounter++;
+               burstLossContentionCounter++;
+               if(dropReason == OBS_DROP_FDL_BUSY){
+                  burstLossFdlBusyCounter++;
+                  emit(burstLossFdlBusySignal, 1);
+               } else if(dropReason == OBS_DROP_WAIT_TOO_LONG){
+                  burstLossWaitTooLongCounter++;
+                  emit(burstLossWaitTooLongSignal, 1);
+               } else {
+                  // No loopback was attempted. With the delay line ON this is reached only when
+                  // the burst already spent its loop budget upstream (maxFdlLoopsPerBurst), so
+                  // this counter carries the network-level cost of the single-loopback red line.
+                  burstLossNoLoopbackTriedCounter++;
+                  emit(burstLossNoLoopbackTriedSignal, 1);
+               }
+               emit(burstLossTotalSignal, 1);
+               emit(burstLossContentionSignal, 1);
+            }
+
+            //Burst dropped (case 2)
+            if (data_f != NULL){
+            	fprintf(data_f,"%d %d %s %s 1 2\n", burstifierId, numSeq, simTime().str().c_str(), burstArrival.str().c_str());
+            }
+
+         	return;
+        }
+   }else{//Not *. Use the assigned channel
+	    //Check if channel is free at the burst arrival moment. (outColour is actually a colour, that's why I convert it using getLambdaByColour method)
+      	lambda = coreOutput->getLambdaByColour(outPort,outColour);
+
+	if(channelAccepts(outPort,lambda,burstArrival,burstDuration)){
+            scheduled = true;
+	} else if (fdlAllowed) {
+            // Scenario B: FDL Loopback. Split so the drop cause is known: an occupied FDL
+            // entry (no wait possible) is a different regime from a channel that is still
+            // busy after tau (wait too short). Same compound decision as before - both
+            // channelAccepts calls must pass - only the attribution is new.
+            if (!channelAccepts(numPorts, 0, burstArrival, burstDuration)) {
+                dropReason = OBS_DROP_FDL_BUSY;
+            } else if (!channelAccepts(outPort, lambda, burstArrival + tau, burstDuration)) {
+                dropReason = OBS_DROP_WAIT_TOO_LONG;
+            } else {
+                scheduled = true;
+                usedFDLForThisBurst = true;
+            }
+        }
+
+        if (!scheduled) {
+            //Drop this BCP if the channel is not available at the time of Burst arrival
+            delete msg;
+            if(countStats){
+               dropCounter++;
+               burstLossContentionCounter++;
+               if(dropReason == OBS_DROP_FDL_BUSY){
+                  burstLossFdlBusyCounter++;
+                  emit(burstLossFdlBusySignal, 1);
+               } else if(dropReason == OBS_DROP_WAIT_TOO_LONG){
+                  burstLossWaitTooLongCounter++;
+                  emit(burstLossWaitTooLongSignal, 1);
+               } else {
+                  // No loopback was attempted. With the delay line ON this is reached only when
+                  // the burst already spent its loop budget upstream (maxFdlLoopsPerBurst), so
+                  // this counter carries the network-level cost of the single-loopback red line.
+                  burstLossNoLoopbackTriedCounter++;
+                  emit(burstLossNoLoopbackTriedSignal, 1);
+               }
+               emit(burstLossTotalSignal, 1);
+               emit(burstLossContentionSignal, 1);
+            }
+
+            //Burst dropped (case 3)
+            if (data_f != NULL){
+            	fprintf(data_f,"%d %d %s %s 1 3\n", burstifierId, numSeq, simTime().str().c_str(), burstArrival.str().c_str());
+            }
+            
+            return;
+        }
+   }
+
+   simtime_t bcpFwdDelay = processingTime;
+
+   if (!usedFDLForThisBurst) {
+      // Scenario A: Direct Forwarding
+      simtime_t OXCConnectTime = burstArrival - guardTime/2;
+      simtime_t OXCDisconnectTime = burstArrival + burstDuration + guardTime/4;
+      simtime_t newHorizon = burstArrival + burstDuration + (3*guardTime)/4;
+
+      if(countStats){
+         schedBurstCounter[outPort]++;
+         // Admitted into a hole: the append-only horizon rule would have had to refuse
+         // this burst, because the channel is not free again until after its arrival.
+         if(enableVoidFilling && burstArrival < gatesHorizon->getHorizon(outPort,lambda)) voidFilledBursts++;
+      }
+
+      //Update horizon array (and the void filling calendar, when enabled)
+      reserveChannel(outPort,lambda,burstArrival,burstDuration, newHorizon);
+
+      OBS_ControlUnitInfo *controlInfo = new OBS_ControlUnitInfo();
+      OBS_ControlUnitInfo *controlInfo1 = new OBS_ControlUnitInfo();
+
+      // Schedule OXC Programming (set an automessage)
+      controlInfo->setInGate(inGate);
+      controlInfo->setOutGate(coreOutput->getOXCGate(outPort,lambda));
+      controlInfo->setKind(OBS_SCHEDULE_OXC);
+      controlInfo->setSchedulingPriority(2);
+
+      scheduleAt(OXCConnectTime,controlInfo);
+
+      // Schedule OXC Unprogramming (set an automessage)
+      controlInfo1->setInGate(inGate);
+      controlInfo1->setKind(OBS_UNSCHEDULE_OXC);
+      controlInfo1->setSchedulingPriority(1);
+
+      scheduleAt(OXCDisconnectTime,controlInfo1);
+
+      EV << "[CoreControl] OXC Reserved (Direct): inGate=" << inGate
+         << " -> outPort=" << outPort << ", lambda=" << lambda
+         << ", connectTime=" << OXCConnectTime
+         << ", disconnectTime=" << OXCDisconnectTime << endl;
+
+      // Update BCP
+      info->setPort(outPort);
+
+      bcp->setBurstColour(coreOutput->getColourByLambda(outPort,lambda));
+      bcp->setBurstArrivalDelta(arrivalDelta - processingTime);
+
+      if(countStats){
+         emit(burstNodeDelaySignal, 0.0);
+      }
+   } else {
+      // Scenario B: FDL Loopback
+      int fdlOutGate = oxc->gateSize("out") - 1;
+      int fdlInGate = oxc->gateSize("in") - 1;
+
+      int newLoopCount = bcp->getFdlLoopCount() + 1;
+      bcp->setFdlLoopCount(newLoopCount);
+
+      // 1st OXC reservation: inGate -> fdlOutGate
+      simtime_t fdlConnectTime = burstArrival - guardTime/2;
+      simtime_t fdlDisconnectTime = burstArrival + burstDuration + guardTime/4;
+      simtime_t newFDLHorizon = burstArrival + burstDuration + (3*guardTime)/4;
+
+      reserveChannel(numPorts,0,burstArrival,burstDuration, newFDLHorizon);
+
+      OBS_ControlUnitInfo *fdlControlInfo = new OBS_ControlUnitInfo();
+      OBS_ControlUnitInfo *fdlControlInfo1 = new OBS_ControlUnitInfo();
+
+      fdlControlInfo->setInGate(inGate);
+      fdlControlInfo->setOutGate(fdlOutGate);
+      fdlControlInfo->setKind(OBS_SCHEDULE_OXC);
+      fdlControlInfo->setSchedulingPriority(2);
+      scheduleAt(fdlConnectTime, fdlControlInfo);
+
+      fdlControlInfo1->setInGate(inGate);
+      fdlControlInfo1->setKind(OBS_UNSCHEDULE_OXC);
+      fdlControlInfo1->setSchedulingPriority(1);
+      scheduleAt(fdlDisconnectTime, fdlControlInfo1);
+
+      // 2nd OXC reservation: fdlInGate -> dest
+      simtime_t delayedArrival = burstArrival + tau;
+      simtime_t destConnectTime = delayedArrival - guardTime/2;
+      simtime_t destDisconnectTime = delayedArrival + burstDuration + guardTime/4;
+      simtime_t newDestHorizon = delayedArrival + burstDuration + (3*guardTime)/4;
+
+      if(countStats){
+         schedBurstCounter[outPort]++;
+      }
+
+      reserveChannel(outPort,lambda,delayedArrival,burstDuration, newDestHorizon);
+
+      OBS_ControlUnitInfo *destControlInfo = new OBS_ControlUnitInfo();
+      OBS_ControlUnitInfo *destControlInfo1 = new OBS_ControlUnitInfo();
+
+      destControlInfo->setInGate(fdlInGate);
+      destControlInfo->setOutGate(coreOutput->getOXCGate(outPort, lambda));
+      destControlInfo->setKind(OBS_SCHEDULE_OXC);
+      destControlInfo->setSchedulingPriority(2);
+      scheduleAt(destConnectTime, destControlInfo);
+
+      destControlInfo1->setInGate(fdlInGate);
+      destControlInfo1->setKind(OBS_UNSCHEDULE_OXC);
+      destControlInfo1->setSchedulingPriority(1);
+      scheduleAt(destDisconnectTime, destControlInfo1);
+
+      EV << "[CoreControl] OXC Reserved (FDL): 1st " << inGate << "->" << fdlOutGate
+         << " (conn=" << fdlConnectTime << ", disconn=" << fdlDisconnectTime << "); 2nd "
+         << fdlInGate << "->" << coreOutput->getOXCGate(outPort, lambda)
+         << " (conn=" << destConnectTime << ", disconn=" << destDisconnectTime << ")" << endl;
+
+      if(countStats){
+         fdlUsageCountCounter++;
+         emit(fdlUsageCountSignal, 1);
+         busyTime += burstDuration;
+         busyTimeInFlight += burstDuration + tau;
+         emit(burstNodeDelaySignal, SIMTIME_DBL(tau));
+         if(newLoopCount == 1) burstsLoopedOnceCounter++;
+         else burstsLoopedMultipleCounter++;
+      }
+
+      // Update BCP
+      info->setPort(outPort);
+
+      bcp->setBurstColour(coreOutput->getColourByLambda(outPort, lambda));
+      if(fdlOffsetIsSO){
+         bcp->setBurstArrivalDelta(arrivalDelta - processingTime);
+         bcpFwdDelay = processingTime + tau;
+      }else{
+         bcp->setBurstArrivalDelta(arrivalDelta + tau - processingTime);
+      }
+   }
+
+   // Both the direct and the FDL branch end up reserving burstDuration on (outPort,lambda), so the
+   // channel occupancy is accumulated once here for either path.
+   if(countStats){
+      portBusyTime[outPort] += burstDuration;
+      portCarriedBytes[outPort] += (double)burstLength;
+      simtime_t outDelta = bcp->getBurstArrivalDelta();
+      outgoingOffsetSum += SIMTIME_DBL(outDelta);
+      outgoingOffsetSamples++;
+      if(outgoingOffsetMin < 0 || outDelta < outgoingOffsetMin) outgoingOffsetMin = outDelta;
+   }
+
+   if(outLabel == -9) bcp->setLabel(destLabel);
+   else bcp->setLabel(outLabel);
+   
+   // Wait the Control Logic processing time (and tau in Stay-Offset loopback) and then forward this message
+   sendDelayed(bcp,bcpFwdDelay,"out");
+
+   //Burst sent
+   if (data_f != NULL){
+	   fprintf(data_f,"%d %d %s %s 0 0\n", burstifierId, numSeq, simTime().str().c_str(), burstArrival.str().c_str());
+   }
+}
+
+void OBS_CoreControlLogic::finish(){
+   // Register dropped Bursts
+   recordScalar("Burst dropped in Core Node",dropCounter);
+
+   simtime_t window = simTime() - warmupPeriod;
+   if(window <= 0){
+      EV << "[CoreControl] measurement window is not positive (simTime=" << simTime()
+         << ", warmup=" << warmupPeriod << ")" << endl;
+      window = 0;
+   }
+
+   double utilization = 0.0;
+   double inFlightOccupancy = 0.0;
+   if (window > 0) {
+       utilization = SIMTIME_DBL(busyTime) / SIMTIME_DBL(window);
+       inFlightOccupancy = SIMTIME_DBL(busyTimeInFlight) / SIMTIME_DBL(window);
+   }
+   emit(fdlUtilizationSignal, utilization);
+
+   recordScalar("fdlUsageCount", fdlUsageCountCounter);
+   recordScalar("fdlUtilization", utilization);
+   recordScalar("fdlEntryOccupancy", utilization);
+   recordScalar("fdlInFlightOccupancy", inFlightOccupancy);
+   recordScalar("burstLossContention", burstLossContentionCounter);
+   // Rejection-reason breakdown (paper figure 4). These three must sum to burstLossContention;
+   // an analysis script asserts it per cell. They are zero when countStats is off, exactly
+   // like burstLossContention itself.
+   //
+   // READ THE FIRST ONE CAREFULLY. In a useFDL=true cell it is NOT "the channel was busy": the
+   // label records only that no loopback was attempted, which with the delay line ON happens
+   // when the burst's loop budget was already spent upstream. The red-line config sets
+   // maxFdlLoopsPerBurst = 1, so this scalar IS the single-loopback limit's network-level cost.
+   // With useFDL = false it degenerates to "the delay line is disabled" and the three reasons
+   // collapse to two. Figure 4's legend must say so.
+   recordScalar("burstLossNoLoopbackTried", burstLossNoLoopbackTriedCounter);
+   recordScalar("burstLossWaitTooLong", burstLossWaitTooLongCounter);
+   recordScalar("burstLossFdlBusy", burstLossFdlBusyCounter);
+   recordScalar("burstLossTotal", dropCounter);
+   recordScalar("burstsLoopedOnce", burstsLoopedOnceCounter);
+   recordScalar("burstsLoopedMultiple", burstsLoopedMultipleCounter);
+   recordScalar("warmupPeriod", warmupPeriod);
+   recordScalar("measurementWindow", window);
+
+   if(outgoingOffsetSamples > 0){
+      recordScalar("outgoingOffsetMean", outgoingOffsetSum / (double)outgoingOffsetSamples);
+      recordScalar("outgoingOffsetMin", outgoingOffsetMin);
+   }
+
+   // Offered vs carried bursts. burstLossRate is the primary metric of experiments A and B; recording it
+   // here avoids every analysis script having to re-derive it from raw counters.
+   int i;
+   long recvTotal = 0;
+   long schedTotal = 0;
+   for(i=0;i<numInPorts;i++) recvTotal += recvBurstCounter[i];
+   for(i=0;i<numOutPorts;i++) schedTotal += schedBurstCounter[i];
+
+   recordScalar("burstsReceived", recvTotal);
+   recordScalar("burstsScheduled", schedTotal);
+   if(recvTotal > 0) recordScalar("burstLossRate", (double)dropCounter / (double)recvTotal);
+
+   // Measured load of every output fiber. This is the ground truth the offered-load calibration is
+   // checked against: the target rho of an experiment must match maxChannelUtilization of the busiest
+   // core-to-core fiber, not the nominal rate configured in the ini file.
+   double maxUtilization = 0.0;
+   double maxIslUtilization = 0.0;
+   int maxIslUtilPort = -1;
+   char scalarName[64];
+   for(i=0;i<numOutPorts;i++){
+      int lambdas = gatesHorizon->getPortLambdas(i);
+      double portUtilization = 0.0;
+      if(lambdas > 0 && window > 0){
+         portUtilization = SIMTIME_DBL(portBusyTime[i]) / (SIMTIME_DBL(window) * (double)lambdas);
+      }
+      if(portUtilization > maxUtilization) maxUtilization = portUtilization;
+      if(i > 0 && portUtilization > maxIslUtilization){
+         maxIslUtilization = portUtilization;
+         maxIslUtilPort = i;
+      }
+
+      sprintf(scalarName,"channelUtilization[%d]",i);
+      recordScalar(scalarName, portUtilization);
+      // Number of data wavelengths on this output fibre. Experiments A/B require W=1;
+      // recording it lets the calibration script reject a run that inherited
+      // params.ini's lambdasCore1to2=3 instead of the FDL-Scenario freeze.
+      sprintf(scalarName,"portLambdas[%d]",i);
+      recordScalar(scalarName, lambdas);
+      sprintf(scalarName,"carriedBursts[%d]",i);
+      recordScalar(scalarName, schedBurstCounter[i]);
+      sprintf(scalarName,"carriedBytes[%d]",i);
+      recordScalar(scalarName, portCarriedBytes[i]);
+   }
+   recordScalar("maxChannelUtilization", maxUtilization);
+   recordScalar("maxIslChannelUtilization", maxIslUtilization);
+   recordScalar("maxIslUtilPort", maxIslUtilPort);
+
+   // Void filling arm only. These are deliberately absent when the option is off: a default
+   // run must produce the same .sca as before this feature existed, which is what makes the
+   // "useFDL=false is unchanged" regression check byte-for-byte rather than approximate.
+   // calendarScanCount is the LAUC-VF cost proxy (interval comparisons) and
+   // calendarMaxReservations the largest number of live reservations on one channel, i.e. how
+   // many voids W=1 actually has to look at. Both feed the compute-budget red line.
+   if(enableVoidFilling){
+      recordScalar("voidFilledBursts", voidFilledBursts);
+      recordScalar("calendarScanCount", calendar.getScanCount());
+      recordScalar("calendarMaxReservations", calendar.getMaxReservationCount());
+   }
+
+   if (data_f != NULL){
+      fclose(data_f);
+   }
+}

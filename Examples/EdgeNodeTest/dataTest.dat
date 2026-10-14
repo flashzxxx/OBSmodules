@@ -1,0 +1,7 @@
+vector 1 "OBS_OpticalMonitor id:4" "Received Burst info" 1
+vector 2 "OBS_OpticalMonitor id:4" "Received BCP info" 1
+2 0 39 0 0
+1 1.15 39 0 1750000
+2 1.4000001 39 1 0
+1 2.5500001 39 1 1750000
+2 2.8000002 39 2 0

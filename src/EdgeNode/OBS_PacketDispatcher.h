@@ -1,0 +1,56 @@
+//
+// Copyright (C) 2010-2012 Javier Armendariz Silva, Naiara Garcia Royo
+// Copyright (C) 2010-2012 Universidad Publica de Navarra
+//
+// This file is part of OBSModules.
+//
+// OBSModules is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// OBSModules is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with OBSModules.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+#include<omnetpp.h>
+#include<stdio.h>
+#include<string.h>
+#include <vector>
+#include "OBS_DispatcherRule.h"
+
+class OBS_PacketBurstifier;
+
+//! Uses a rule file to assign an output gate for each message received.
+class OBS_PacketDispatcher : public cSimpleModule{
+   protected:
+      std::vector<OBS_DispatcherRule> ruleList; //!< List of dispatcher rules.
+      OBS_PacketBurstifier **burstifiers; //!< Pointers to the burstifiers modules (queues).
+      int numQueues; //!< Number of output gates (physical queues).
+      simtime_t *lastAccessTimes; //!< Tracks the last time each queue was sent a packet (for LRU).
+
+      //Statistics
+      cStdDev recvPackSize; //!< Received packets' length statistics.
+      int droppedPacket; //!< Number of dropped packets.
+      cOutVector recvPackSizeVec; //!< Length of the packets received (in bytes).
+      int p1Hits; //!< Priority 1 (busy match) hit count.
+      int p2Hits; //!< Priority 2 (idle reuse) hit count.
+      int p3Hits; //!< Priority 3 (fresh idle) hit count.
+      int p4Hits; //!< Priority 4 (LRU preemption) hit count.
+      int forceFlushCount; //!< Number of forced flush operations (queue label switch cost).
+      int dispatchMode; //!< 0=Dynamic, 1=NoPreemption, 2=RoundRobin, 3=Static
+      int rrCounter; //!< Round-robin counter for mode 2.
+
+      virtual void initialize();
+      virtual void finish();
+
+      virtual void handleMessage(cMessage *msg);
+   public:
+      OBS_PacketDispatcher();
+      virtual ~OBS_PacketDispatcher();
+};
