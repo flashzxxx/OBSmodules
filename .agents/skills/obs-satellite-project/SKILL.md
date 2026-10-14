@@ -22,6 +22,9 @@ description: OBSmodules 卫星星间全光交换仿真项目的专用上下文�
 - 研究结论、周次进度与各条「不得」口径**以 `research_status.md` 第十节为准**，本技能不复述。
 - 需要研究上下文时先读文档库；写报告/图/文献台账在文档库内提交。
 - 涉及实验设计或后续阶段时读 `../OBSmodules-docs/research_guide.md`。
+- 文档库另有一份面向文档工作区的配套 skill：
+  `../OBSmodules-docs/.agents/skills/obs-satellite-docs/SKILL.md`（把文档库作为工作目录打开时生效；
+  在代码工作区干活时不需要它，两者不重名、可同时存在）。
 
 ## 项目目标与阶段
 

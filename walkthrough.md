@@ -893,3 +893,13 @@ git fetch origin && git branch -f master origin/master
 `Examples/RingFdlOBS/plot_comprehensive.R` 是 RingFdlOBS **示例自带**的绘图脚本（示例 README 第 32/131 行
 引用 `Rscript plot_comprehensive.R`），非研究过程脚本、其输出图不入库，故保留在代码库并写入
 `AGENTS.md` 的允许清单。两侧 `AGENTS.md` 均已附上一条 `git ls-files | grep ...` 自查命令。
+
+**文档库的 agent 配置（2026-10-14 补齐）**：文档库此前只有 `AGENTS.md`（管"什么能提交"），没有 skill。现补
+`OBSmodules-docs/.agents/skills/obs-satellite-docs/SKILL.md`（管"怎么干"：目录地图、周报/作图/文献登记流程、
+研究红线、与代码仓库的配合），文档库 `AGENTS.md` 增「Agent 配置」小节写明分工；本技能同步加一行指向它。
+两个 skill **不重名**（`obs-satellite-project` / `obs-satellite-docs`），因此两个工作区各自打开时各自生效，
+也可以同时存在而不冲突。
+
+> 上表三个仓库的 SHA 是**分仓当时**的快照。此后：代码库为记录边界规则、文档库为记录边界与 skill、
+> 存档库为加冻结公告 README，各自又前进 3–4 个提交。要核对当前值一律用 `git ls-remote`：
+> 当时 `139d562` / `9b89b16` / `1d7ba60` → 现在 `b88871c` / `f3c71c6` / `4367f0d`。
