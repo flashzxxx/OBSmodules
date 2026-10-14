@@ -855,5 +855,25 @@ git fetch origin && git branch -f master origin/master
 **文档库杂质拦截**：docs 首次导入曾误收 122 个 deck 构建沙箱文件（`2026-08-direction-review/_working/`
 在旧仓库本就是整目录忽略），已按整目录忽略并修订提交；复核「旧仓库已跟踪集合 − 代码库 + docs 新增」的差集为 0。
 
-**未做**：GitHub 侧的改名/建库/推送（需用户操作）；两个新仓库的 `origin` 已预置 URL，待仓库创建后推送。
+**GitHub 终态（2026-10-14 完成）**：
+
+| 仓库 | 可见性 | 远端 | `master` |
+|---|---|---|---|
+| `flashzxxx/OBSmodules` | public、standalone（API `fork=false`） | https://github.com/flashzxxx/OBSmodules | `139d562` |
+| `flashzxxx/OBSmodules-docs` | **private** | https://github.com/flashzxxx/OBSmodules-docs | `9b89b16` |
+| `flashzxxx/OBSmodules-archive`（原 `OBSmodules`） | **private** | https://github.com/flashzxxx/OBSmodules-archive | `1d7ba60`（旧历史原样） |
+
+远端核对：代码库 GitHub tree API 报 **353 个 blob**，与本地一致，顶层只剩代码目录
+（`.agents`、`src`、`Examples`、`test`、`utils`、`Makefile`、`AGENTS.md`、`walkthrough.md` 等）；
+文档库与存档库匿名访问均返回 404（已私有）。旧仓库上未推送过的本地分支
+`archive/fdl-epoch-split-2026-09-20`（`698ff52`）与 `task/2.1-fdl-module`（`1d45cf4`）仍只在本地存档
+`D:\01work\project\OBSmodules-history-2026-10-14\`（bundle + gitdir）里。
+
+**环境坑（新增，供后续会话复用）**：**GitHub 不允许直接修改 fork 的可见性**——Danger Zone 的
+`Change visibility` 对 fork 灰显，提示 *"For security reasons, you cannot change the visibility of a fork."*
+可行顺序是先点 `Leave fork network`（前提：fork 为 public、体积 < 1 GB、无子 fork；本仓库 16.2 MB、0 fork，满足），
+脱离后 `Change visibility` 才可用。脱离**不可逆**，会丢弃 issues/PR/wiki/star/watcher 等元数据
+（本仓库这些均为 0），但**提交历史完整保留**；本案因此顺带断开了与 `mikelizal/OBSmodules` 的 fork 关系，
+新代码库是独立仓库（`fork=false`）。参考：[Detaching a fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/detaching-a-fork)。
+
 文档库侧记录见 `../OBSmodules-docs/MIGRATION-2026-10-14.md`。
