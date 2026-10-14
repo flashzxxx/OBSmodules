@@ -29,6 +29,22 @@
 - 文档库是 **private** 仓库；跨库引用一律写成 `../OBSmodules-docs/...`。
 - 写报告、分析、图、修订文献台账时，在文档库内提交，不要在代码仓库留下这些产物。
 
+### 内容边界（2026-10-14 用户确认）
+
+**本仓库只提交与代码相关的内容。**
+
+| 允许 | 例子 |
+|---|---|
+| 源码、构建与 NED 定义 | `src/**`、`Examples/**`、`test/**`、`utils/**`、`Makefile`、`doxy.cfg`、`package.ned`、`.cproject`/`.project` |
+| 能复现仿真的输入 | 实验配置 `*.ini`、路由 `*.irt`/`*.dat`、示例测试数据（如 `Examples/EdgeNodeTest/bursts.txt`） |
+| 结果目录占位符 | `**/results/.gitkeep` |
+| Agent 工作协议与代码任务的变更记录 | `AGENTS.md`、`.agents/**`、`walkthrough.md`、根 `README` |
+
+**禁止**：研究报告与周报、方案、架构图/时序图、论文骨架与图表、文献（PDF / `refs.bib` / 正文摘录）、
+原始仿真数据（`.sca`/`.csv`/`.vec`）、选刊名录、分析与绘图脚本，以及**任何一次运行的输出或报错捕获**。
+这些一律进 `../OBSmodules-docs`（边界规则见其 `AGENTS.md`）。`.gitignore` 已有保险规则，
+但提交前仍要用 `git status` 自查一遍。
+
 ## 项目结构
 
 ```text

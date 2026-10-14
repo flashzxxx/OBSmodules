@@ -877,3 +877,12 @@ git fetch origin && git branch -f master origin/master
 新代码库是独立仓库（`fork=false`）。参考：[Detaching a fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/detaching-a-fork)。
 
 文档库侧记录见 `../OBSmodules-docs/MIGRATION-2026-10-14.md`。
+
+**内容边界（2026-10-14 用户确认，已写入两侧 `AGENTS.md`）**：代码仓库只提交与代码相关的内容——允许
+`src/**`、`Examples/**`、`test/**`、`utils/**`、构建与 NED 文件、可复现仿真的输入（`*.ini`/`*.irt`/`*.dat`）、
+`**/results/.gitkeep`、`AGENTS.md`/`.agents/**`/`walkthrough.md`/根 `README`；禁止报告与周报、方案、架构图/时序图、
+论文骨架与图表、文献、原始仿真数据、选刊名录、分析绘图脚本，以及**任何一次运行的输出或报错捕获**。
+文档仓库做镜像规定（只收文档、图、数据、文献与研究工具脚本）。据此清掉两处杂项：代码库移除
+`Examples/BurstifierTest/config5_output.txt`（一行失败运行报错，全仓库无引用），文档库取消跟踪
+`.docs/.$dynamic_queue_allocation_flowchart.drawio.bkp`（draw.io 自动备份，原 `.drawio` 仍在），
+并把 `*.bkp`、`~$*` 加入其 `.gitignore`。
