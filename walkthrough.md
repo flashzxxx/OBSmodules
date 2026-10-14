@@ -886,3 +886,10 @@ git fetch origin && git branch -f master origin/master
 `Examples/BurstifierTest/config5_output.txt`（一行失败运行报错，全仓库无引用），文档库取消跟踪
 `.docs/.$dynamic_queue_allocation_flowchart.drawio.bkp`（draw.io 自动备份，原 `.drawio` 仍在），
 并把 `*.bkp`、`~$*` 加入其 `.gitignore`。
+
+**边界的两个灰区裁决（2026-10-14 用户）**：① `walkthrough.md` **留代码库**——它是代码任务的变更/验证记录，
+其中的实验数字只作验证记录，结论与研究口径以文档库为准；② 文档库 `tools/` 的 23 个分析/绘图脚本
+**留文档库**，作为「研究工具」例外，与它们产出的图/数据同处。另有一处不算违规但需点名：
+`Examples/RingFdlOBS/plot_comprehensive.R` 是 RingFdlOBS **示例自带**的绘图脚本（示例 README 第 32/131 行
+引用 `Rscript plot_comprehensive.R`），非研究过程脚本、其输出图不入库，故保留在代码库并写入
+`AGENTS.md` 的允许清单。两侧 `AGENTS.md` 均已附上一条 `git ls-files | grep ...` 自查命令。

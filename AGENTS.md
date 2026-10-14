@@ -38,12 +38,19 @@
 | 源码、构建与 NED 定义 | `src/**`、`Examples/**`、`test/**`、`utils/**`、`Makefile`、`doxy.cfg`、`package.ned`、`.cproject`/`.project` |
 | 能复现仿真的输入 | 实验配置 `*.ini`、路由 `*.irt`/`*.dat`、示例测试数据（如 `Examples/EdgeNodeTest/bursts.txt`） |
 | 结果目录占位符 | `**/results/.gitkeep` |
+| 示例自带的绘图脚本 | `Examples/RingFdlOBS/plot_comprehensive.R`——示例 README 第 32/131 行引用它（`Rscript plot_comprehensive.R`），属示例的一部分；它输出的图不入库 |
 | Agent 工作协议与代码任务的变更记录 | `AGENTS.md`、`.agents/**`、`walkthrough.md`、根 `README` |
 
 **禁止**：研究报告与周报、方案、架构图/时序图、论文骨架与图表、文献（PDF / `refs.bib` / 正文摘录）、
-原始仿真数据（`.sca`/`.csv`/`.vec`）、选刊名录、分析与绘图脚本，以及**任何一次运行的输出或报错捕获**。
-这些一律进 `../OBSmodules-docs`（边界规则见其 `AGENTS.md`）。`.gitignore` 已有保险规则，
+原始仿真数据（`.sca`/`.csv`/`.vec`）、选刊名录、**研究过程用的**分析与绘图脚本，以及**任何一次运行的
+输出或报错捕获**。这些一律进 `../OBSmodules-docs`（边界规则见其 `AGENTS.md`）。`.gitignore` 已有保险规则，
 但提交前仍要用 `git status` 自查一遍。
+
+**自查命令**（输出为空即合规；Git Bash 下执行）：
+
+```bash
+git ls-files | grep -Ei '\.(png|jpe?g|pdf|csv|bib|sca|vec)$|research_reports/|\.doc/|仿真原始数据'
+```
 
 ## 项目结构
 
@@ -145,6 +152,8 @@ OXC 增加一对回环端口 `in[N]`/`out[N]`，通过延迟为 τ 的 FDL 连�
 - Agent：调研代码、提出方案、实现获批范围内的改动、进行静态检查并产出 `walkthrough.md`。
 - 用户：审批方案、执行编译和仿真验证、作最终确认。
 - 每个任务完成后必须更新或产出 `walkthrough.md`（在本仓库），说明变更、设计理由、验证方法及未执行事项；研究结论与周报写到文档库。
+  （2026-10-14 用户裁决：`walkthrough.md` 留在本仓库；其中的实验数字只作**验证记录**，结论与研究口径一律以
+  `../OBSmodules-docs/research_status.md` 为准。）
 - 涉及实验设计或后续阶段时，按需读取 `../OBSmodules-docs/research_guide.md`。
 - **设计前提不得由 Agent 单方面定性为"配置问题"**（2026-09-24 立，缘于第 14 周边缘队列数事件）：
   反事实实验（改一个参数看结果怎么变）能查清**机制**，但**"哪个取值属于设计前提、哪个属于可调配置"
