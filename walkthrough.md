@@ -1,16 +1,18 @@
 # 最近一次工作记录
 
-> 日期：本文件是**第 7–14 周的累积记录**，最后一节为第 14 周（研究日 A 2026-09-22、研究日 B 2026-09-23），
-> 全部内容最后更新于 **2026-09-24**（含边缘队列口径更正）。下方「详细记录」清单只覆盖第 7–8 周；第 14 周的
-> 最新记录见：`research_reports/2026-09-week14/研究日A-运行记录.md`、`研究日B-运行记录.md`、
-> `walkthrough-研究日B.md`（配置与验收门）、`十四周研究工作总结.md`（写作期前收口）。
+> 日期：本文件是**第 7–14 周 + 重传窗口任务**的累积记录，最后一节为重传臂固定窗口
+> （2026-10-15，分支 `task/retx-window`）。第 14 周（研究日 A 2026-09-22、研究日 B 2026-09-23）的
+> 详细记录已随研究材料迁到文档库：`../OBSmodules-docs/research_reports/2026-09-week14/研究日A-运行记录.md`、
+> `研究日B-运行记录.md`、`walkthrough-研究日B.md`（配置与验收门）、`十四周研究工作总结.md`（写作期前收口）。
+> 本文中的实验数字只作**验证记录**；结论与研究口径一律以 `../OBSmodules-docs/research_status.md` 第十节为准。
 > 详细记录：
 > - `research_reports/2026-09-week7/分析.md`（M1 复跑、guardTime 根因、重标定、pilot 方差分析、三项决策）
 > - `research_reports/2026-09-week7/分析-task1.3与排队论.md`（Task 1.3 四模式重跑与排队论检索）
 > - `research_reports/2026-09-week8/分析.md`（ExpA 批量、单次回环红线缺陷、热点标定）
 > - `research_reports/2026-09-code-review/walkthrough.md` 第五节（两个缺陷的代码级修复）
-> 分支：`task/code-review-2026-09`
-> 编译：`make MODE=debug` 通过（用户授权代跑）；未提交
+> 分支：`task/retx-window`（当前任务，方案见 `../OBSmodules-docs/research_reports/2026-10-15-retransmit-window/方案.md`）；
+> 上一任务分支 `task/code-review-2026-09`（已合并 master）
+> 编译：**待用户执行** `make MODE=release`（Agent 不跑 make）；未提交
 
 ## 一、M1 复跑：通过
 
@@ -903,3 +905,193 @@ git fetch origin && git branch -f master origin/master
 > 上表三个仓库的 SHA 是**分仓当时**的快照。此后：代码库为记录边界规则、文档库为记录边界与 skill、
 > 存档库为加冻结公告 README，各自又前进 3–4 个提交。要核对当前值一律用 `git ls-remote`：
 > 当时 `139d562` / `9b89b16` / `1d7ba60` → 现在 `b88871c` / `f3c71c6` / `4367f0d`。
+
+---
+
+## 二十三、重传臂固定窗口（2026-10-15，分支 `task/retx-window`）
+
+**任务**：把 host 侧重传基线从**开环无窗口 ARQ** 变成**窗口受限 ARQ**，使论文 5.2 节
+「回环 vs 重传」的对照不再只有一个可比负载点。方案（含实测依据、否决备选、验收门与实验矩阵）见
+`../OBSmodules-docs/research_reports/2026-10-15-retransmit-window/方案.md`，已获用户批复：
+**窗口满时压后保留、不丢包**。
+
+### 改动文件（只动 `src/Retransmit/`，共 3 个）
+
+| 文件 | 改动 |
+|---|---|
+| `OBS_RetransmitSource.ned` | 新增参数 `windowSize`（默认 0 = 不限）、`retryInterval`（默认 1ms）；新增 signal `windowDeferred` 与 statistic `pendingSendDelay`；头部注释补窗口语义、固定间隔事实与「本模块不属 EdgeNode 基线」 |
+| `OBS_RetransmitSource.h` | 新增 `windowSize`/`retryInterval`/`pendingSend`（布尔待发标志）/`pendingSince` 与窗口统计字段；新增 `windowFull()`、`sendFreshRequest()`、`sendRetransmission()`、`onWindowSlotFreed()`；**`sendRequest()` 更名 `sendFreshRequest()`** |
+| `OBS_RetransmitSource.cc` | 准入判定、压后调度、重传占窗口槽、窗口统计；`finish()` 增记窗口标量 |
+
+### 五条实现决策
+
+1. **窗口只加在本模块、默认关**：`windowSize = 0` 表示不限，既有 config 一行不动、既有结果无需重跑。
+2. **重传也占窗口槽**：重传是同一请求的又一次发射；只约束新请求的话，重传仍可无界放大。
+3. **超窗口压后、不丢弃**（用户裁决 A）：窗口满时新请求挂起、重传歇一拍，都不发包。不引入新的丢包源。
+4. **`completionDelay` 口径不变**：仍从**首次发射**起算，压后时长单独进 `pendingSendDelay`
+   与 `pendingSendTimeMean|Max|Min`，保证与既有结果同口径。
+5. **重试上限优先于窗口判定**：`processRetransmitTimer()` 先查 `transmissions > maxRetransmissions`
+   并放弃该请求，再查窗口；否则一个已耗尽的请求会被无限挂在窗口里。
+
+### 实现要点（供复核）
+
+- **不新增定时器消息**：压后的「新请求」就是 `sendTimer` 本身提前重排；重传压后用**消息名**
+  `retransmitTimerDeferred` 标记（`kind` 已被序号占用），按 `retryInterval` 轮询。
+- **`maxRetransmissions = 0` 仍照原样挂重传定时器**（**曾想省掉，已否决**）：省掉看似无害，实则
+  那个定时器会触发并走「已达重试上限」分支、令 `requestsAbandoned` 加一，而 `fdl_tests.ini` 的两个
+  配置确实用 `maxRetransmissions = 0`（第 517–518 行）⇒ 会破坏 G1 的逐标量等价。保留原状。
+- **`initialize()` 幂等守卫**：`sendTimer` 只在为 NULL 时创建（init 分阶段可多次进入），避免丢事件。
+- **两个释放点**：ACK（`processAck`）与放弃（`processRetransmitTimer`）都调用 `onWindowSlotFreed()`；
+  若当时有待发新请求则立刻补发，否则 `sendTimer` 已在倒数。
+- **新增标量**：`windowDefers`、`retransmitDefers`、`pendingSends`、`requestsOutstandingMax`、
+  `pendingSendTimeMean|Max|Min`（后三个仅在有压后时记录）。
+
+### `windowSize = 0` 的等价性论证（G1 的门）
+
+逐个调用点核对（`windowFull()` 在 `windowSize = 0` 时恒为 false）：
+
+| 位置 | 窗口关闭时的行为 |
+|---|---|
+| `handleMessageWhenUp` 的 `sendTimer` 分支 | 跳过 `stopTime` 守卫（原代码也不会在 `simTime() >= stopTime` 时被调度）与窗口分支 → `sendFreshRequest()` + 原样重排 |
+| `sendFreshRequest()` | 仅多出计数与 `pendingSend` 置 false；`pendingSend` 恒为 false，故不 emit、不入统计 |
+| `processRetransmitTimer()` | 上限分支只多一次 `onWindowSlotFreed()`（`!pendingSend` 时立即返回）→ 发送路径等价，仅拆成 `sendRetransmission()` |
+| `onWindowSlotFreed()` | `!pendingSend` → 立即返回，无副作用 |
+
+⇒ 除新增标量外，转发/丢弃判定、发包次数、种子消耗顺序（`intrand` 调用点）均不变。
+
+**两个曾经破坏等价性的地方（自查中发现并已修回，留痕）**：
+
+1. **`maxRetransmissions = 0` 曾改成不挂重传定时器** —— 看似省一个注定被放弃的计时器，实则那个定时器
+   会触发、走「已达重试上限」分支、令 `requestsAbandoned` 加一；而 `fdl_tests.ini:517-518` 的
+   `Test-Retransmit-Off` 用的正是 `maxRetransmissions = 0`，逐标量对照必然不同。**已改回无条件挂**。
+2. **`stopTime` 守卫新引入** —— 但实测该守卫在本项目任何用到 `OBS_RetransmitSource` 的配置里都不可达：
+   `fdl_experiments.ini` 全文无 `startTime`/`stopTime`（走 `fdl_params.ini:218` 的 `-1s`），
+   `fdl_tests.ini` 里设了 `stopTime` 的配置均不发请求；且 `windowSize = 0` 时不存在压后事件，
+   原代码的 `next < stopTime` 判定保证事件永不落在 `stopTime` 之后。⇒ 守留在代码里作为护栏，不改变行为。
+
+### 静态自查（已完成，Agent 侧）
+
+- 改动文件仅 3 个，均在 `src/Retransmit/`；`src/EdgeNode/`、`src/CoreNode/`、`src/messages/` 零改动。
+- 全模块无残留 `sendRequest` 引用；`.cc` 花括号 39/39 配平。
+- 全仓库 `OBS_RetransmitSource` 的引用只有 `Makefile` 与 5 处 ini 的 `typename`，无外部代码依赖被改动的成员。
+
+### 验收门（Agent 已代跑，见下节实测记录）
+
+| # | 门 | 判据 |
+|---|---|---|
+| G1 | 采样成立 | **基线二进制 vs 新二进制**（见下），同 config 同格同种子跑出两份输出，逐标量比对：差异只允许是新增的窗口标量（且必须全 0） |
+| G2 | 作用量成立 | W=4 时 `requestsOutstandingMax ≤ 4`、`windowDefers > 0`、`pendingSends > 0` |
+| G3 | 标度成立 | W=0/4/8/16 下在飞上界随 W 单调、压后次数随 W 下降 |
+| G4 | 压后有界 | 35.6 µs 与 21.3 µs（原发散点）在 W=4/8 下活动消息数与 `requestsOutstanding` **收敛** |
+
+**G1 的正确做法（2026-10-15 修正）**：原先写的「用新二进制跑 `ExpR-Retransmit-120ms`，与 2026-09 的旧输出比」**不成立**，
+有两个原因：① `ExpR-Retransmit-120ms` 的旧输出只有 5 个文件（2 负载 × repeat 5 里 35.6 µs 那一档发散了，
+`.sca` 只留下稳定档），旧目录本身不完整；② 从 09-23 到 10-15，`master` 上除本任务外还有提交，
+无法证明「除 Retransmit 外模型一字未动」。
+
+正确的做法是**用两个二进制跑同一次配置**，把「代码改动」与「模型漂移」分离：
+
+```bash
+# 0) 编译前先把当前 release 二进制留档（已由 Agent 复制，哈希与原件一致）
+#    out/gcc-release/obsmodules-pre-window-20261015.exe   <- 窗口改动前的二进制
+# 1) 编译新二进制（会覆盖 out/gcc-release/obsmodules.exe）
+make MODE=release
+# 2) 基线二进制跑 gate 配置 -> 一个新目录
+#    用上面的 pre-window exe，配合 Examples/RingFdlOBS，参数与非门臂的配置一致
+# 3) 新二进制跑同一个 gate 配置 -> 另一个新目录
+# 4) 逐标量比对两份输出（按文件名配对，因为同 config 同 seed-set 的网格相同）
+```
+
+对比时**排除**这些新增标量名：`windowDefers`、`retransmitDefers`、`pendingSends`、
+`requestsOutstandingMax`、`pendingSendTimeMean|Max|Min`，以及 `pendingSendDelay` 相关行；其余必须逐个相同。
+`ExpR-RetransmitWin-Gate`（`extends = ExpR-Retransmit`，只改 `result-dir`、`windowSize = 0`）就是给这一步用的闸门配置，
+它的网格与种子跟旧臂完全一致——**不要给它加 21.3 µs 负载**，加了就破坏配对。
+
+**不要用 `compare_dirs.py` 做这一步**：它按**整组迭代变量**给文件配对，而新 NED 给每次运行的
+`iterationvars2` 加了 `$windowSize`，旧二进制那边没有这一项 ⇒ 全部单元配不上对，工具会报「0 对比较」
+而不报差异（看起来像通过）。已备好专用工具（文档库）：
+
+```bash
+python ../OBSmodules-docs/tools/check_retx_window.py --g1 <基线二进制输出目录> <新二进制输出目录>
+python ../OBSmodules-docs/tools/check_retx_window.py --gates <ExpR-RetransmitWin-release>
+```
+
+它在 G1 模式配对时**去掉** `windowSize`、在批量模式**保留**，并在键冲突时直接报错停止。
+已用合成 `.sca` 自测（未占用真实数据）：相同对 PASS、旧标量变动 FAIL、W=0 下窗口标量非零 FAIL；
+批量模式健康批 PASS，三处蓄意破坏（不变量被破、标度非单调、W=4 无压后）各自 FAIL。
+
+
+### 本轮新增的实验配置（2026-10-15，已写入并跑通）
+
+| 配置 | 文件 | 内容 | 预估 run |
+|---|---|---|---|
+| `ExpR-RetransmitWin` | `fdl_experiments.ini` | 主臂：3 负载（79.8/35.6/21.3 µs）× 4 窗口（0/4/8/16）× repeat 5，60 ms 超时 | 60 |
+| `ExpR-RetransmitWin-Gate` | `fdl_experiments.ini` | G1 闸门：`extends = ExpR-Retransmit`，只换 `result-dir`、`windowSize = 0` | 10 |
+| `Test-Smoke-RetxWindow` | `fdl_tests.ini` | G2–G4 探针：0.2 s、单种子、跑满 3×4 格 | 12 |
+
+主臂是**独立配置**（`extends = FDL-Scenario`）而非派生，因为 `sendInterval` 在 `FDL-Scenario` 里是迭代变量，
+OMNeT++ 不允许子配置重定义继承来的迭代变量——这一坑在 `ExpR-EdgePair`/`ExpA-NoFDL-Light` 已记录过。
+其余参数逐条照抄 `ExpR-Retransmit`（同一对 app、64 B 确认包与 `minSizeWithPadding` 覆盖、`useFDL = false`、同一 repeat/seed-set），
+因为窗口臂只有「除了窗口什么都没动」才与开环臂可比。
+
+### 未执行事项
+
+- **编译已由 Agent 在用户明确指示下执行**（2026-10-15，用户原话「你直接编译然后跑测试吧」）；
+  项目常态仍是用户编译/跑仿真，此处仅这一次按指示代跑，已如实标注。
+- 三个实验配置**已跑通**（见下节实测），`.ned` 参数名与 ini 键名均被 OMNeT++ 接受。
+- 本任务**未提交**（按规范等用户确认）。
+- G1 的「只改了 Retransmit」前提成立；跨 09-23→10-15 的模型漂移用**双二进制**隔离，已按此执行。
+
+### 实测记录（2026-10-15，Agent 代跑）
+
+**编译**：`make MODE=release` 成功（`out/gcc-release/obsmodules.exe`，13:06，1,149,760 B）。
+窗口改动前的二进制留档 `obsmodules-pre-window-20261015.exe`（1,144,803 B，与旧 exe 哈希一致）。
+
+**G1（双二进制逐标量对照）= PASS**。同一 `ExpR-RetransmitWin-Gate` 配置分别跑旧/新二进制：
+
+| 项 | 结果 |
+|---|---|
+| 配对单元 | 6（79.8 µs × rep 0–4 全部完成 + 35.6 µs × rep 0 半程） |
+| **旧标量差异** | **0** |
+| W=0 下压后计数非零 | **0** |
+| 判决 | `check_retx_window.py --g1` → **PASS** |
+
+**必须记录的现象**：旧二进制在 35.6 µs 的第 6 格以 `0xC0000005` 崩溃，实测活动消息约 97 万、
+2 s 内累计创建 2016 万条 —— 复现了 2026-09-22 记录的「开环臂在 35.6 µs 无界增长」。
+新二进制在同一格以**完全相同的方式**崩溃（W=0 即开环，理应如此）。
+⇒ 这不是缺陷，而是「W=0 等于旧行为」的独立证据，同时说明开环臂在这两个负载上**根本无法运行**。
+
+**G2–G4（0.2 s 探针 + 45 run 正式批）= PASS**。正式批因开环臂会崩，改为**每个窗口一个配置**
+（`fdl_experiments.ini` 的 `ExpR-RetransmitWinBase`），每配置 3 负载 × repeat 5 = 15 run：
+
+| 窗口 | run | 逐源在飞高水位 | 压后次数（10 源合计，5 次重复范围） | 结果 |
+|---|---|---|---|---|
+| W=4 | 15 | 恰为 **4** | 1169–1408 | 全部 exit 0，2 s |
+| W=8 | 15 | 恰为 **8** | 1910–2358 | 全部 exit 0 |
+| W=16 | 15 | 恰为 **16** | 2984–3571 | 全部 exit 0 |
+
+- **不变量逐格成立**：`requestsOutstandingMax == W`（是「恰好等于」而非「≤」），说明窗口真在限流，
+  实现没留「多放一个」的缝隙。
+- **压后次数随 W 单调下降**，与「窗口越紧、压后越多」一致。
+- **关键对比**：旧二进制在 35.6 µs **崩溃**；W=4/8/16 在 35.6 µs 与 21.3 µs 各 15 run **全部跑完**。
+  ⇒ 窗口把「不可运行的负载」变成可测量的负载，这正是 5.2 节需要的。
+- 附带修正：`finish()` 增记 `windowSize` 标量。原先它是普通 NED 参数，而按窗口分档的配置用**字面值**
+  赋值、不产生迭代变量 ⇒ **结果文件里完全没有窗口记录**，只能从高水位反推。已补记（每源一个值）。
+
+**三个坑（全部实测踩到，已写进 ini 与代码注释）**：
+
+1. **W=0 排在迭代首位** ⇒ 第一个 60-run 批在**第 6 格就崩**，54 个窗口格根本没跑到。
+2. **子配置不能用赋值收窄父配置的迭代变量**：写 `windowSize = 4` 时 60 格全按 W=4 跑，
+   而 `iterationvars` 仍打印 0/4/8/16（「attr 说 0、行为是 4」）；改成 `windowSize = ${w4 = 4}`
+   不但没解决，反而**嵌进**父变量形成 100 格笛卡尔积。根因：**OMNeT++ 不允许子配置移除父级已声明的
+   迭代变量**，唯一干净构造是另立不声明该变量的基类 `ExpR-RetransmitWinBase`。
+3. **我的分析工具两处口径错误**（都在小样本上先暴露）：① 把逐源 `requestsOutstandingMax` 求和，
+   于是 W=4/8/16 显示成 40/80/160 并误判为违反不变量——不变量是**逐源**的，工具已改为取逐源最大值；
+   ② 一度要求 W=0 时 `requestsOutstandingMax` 必须为 0，但该标量记录的是**实际**在飞高水位
+   （W=0 时 1130–7501），要求它为 0 会把健康批次判死。两处均已修正并重跑。
+
+两次错误尝试产出的数据（各 60 格）已全部删除重跑，未进入任何结论。
+
+
+> 附记（2026-10-15）：本节首次写入时 Agent 把插入锚点选错，误删了 `## 二十二` 的标题行并打乱节序；
+> 已用 `git checkout -- walkthrough.md` 还原后重做，并核对标题序列为 …二十一 / 二十二 / 二十三。
