@@ -40,6 +40,27 @@ import inet.applications.IUDPApp;
 // shorter than the RTT makes every request retransmit spuriously and the arm would then be
 // measuring its own impatience instead of the network's loss.
 //
+// windowSize bounds the requests that are simultaneously unacknowledged. It defaults to 0,
+// i.e. unlimited, which is the open-loop arm that was measured up to week 14: that arm has no
+// flow control at all, so the retransmissions provoked by loss add to the load that caused
+// them, and above a certain offered load the backlog grows without bound. Bounding it at W
+// makes the arm a window-limited ARQ and lets it be measured at loads where the open-loop
+// variant diverges, which is what section 5.2 needs in order to stop resting on a single
+// comparable load point.
+//
+// A retransmission consumes a window slot too, because it is another transmission of a
+// request that is already in flight - a limit that only counted fresh requests would still
+// let a request be retransmitted without bound. When the window is full, both a fresh request
+// and a retransmission are deferred and retried after retryInterval. Nothing is dropped for
+// lack of a slot: deferring throttles the source, dropping would add a loss mechanism and
+// change what the arm's delivery ratio means.
+//
+// The send timer is a fixed interval, not a random one: par("sendInterval") is evaluated once
+// at initialization, so the offered stream is strictly periodic and the window changes only
+// how much of it is deferred. completionDelay keeps its meaning (first transmission to
+// acknowledgement); the waiting time is reported separately as pendingSendDelay, so that the
+// delay comparison with the loopback arm stays on the same footing as before.
+//
 // It is NOT part of the protected EdgeNode baseline: nothing in src/EdgeNode/ is touched, and
 // the module is only instantiated by configs that ask for it.
 //
@@ -52,16 +73,20 @@ simple OBS_RetransmitSource like IUDPApp
         volatile int messageLength @unit(B);         // request size, in bytes
         double startTime @unit(s) = default(0s);     // start of the first request
         double stopTime @unit(s) = default(-1s);     // stop offering new requests, -1s means forever
-        volatile double sendInterval @unit(s);       // mean interval between fresh requests
+        volatile double sendInterval @unit(s);       // interval between fresh requests, evaluated once at initialization
         double retransmitTimeout @unit(s);           // ARQ timeout, measured from the last transmission
-        int maxRetransmissions = default(3);         // retry cap; 0 = send and forget
+        int maxRetransmissions = default(3);         // retry cap; 0 = send and forget, no timer is armed for the request at all
+        int windowSize = default(0);                 // max unacknowledged requests in flight; 0 = unlimited
+        double retryInterval @unit(s) = default(1ms); // how often to re-check for a free window slot while full
         @display("i=block/app");
         @signal[requestCompleted](type="double");
         // record=mean,min,max,count (not "stats"): the stats recorder writes a single
-        // <name>:stats statistic line with no fields in this OMNeT++ version, which no analysis
-        // script can read. These four recorders produce ordinary scalars, the same way
-        // OBS_CoreControlLogic records burstNodeDelay.
+        // <name>:stats statistic line with no fields in this OMNet++ version, which no analysis
+        // script can read. These recorders produce ordinary scalars, the same way
+        // OBS_CoreControlLogic records burstNodeDelay. pendingSendDelay is deliberately separate
+        // from completionDelay: one is network delay, the other is the sender waiting for a slot.
         @statistic[completionDelay](title="request completion delay (first transmission to acknowledgement)"; source="requestCompleted"; record=mean,min,max,count);
+        @statistic[pendingSendDelay](title="time a fresh request waited for a free window slot"; source="windowDeferred"; record=mean,min,max,count);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

@@ -36,6 +36,10 @@
 //! unacknowledged request and sends it again when retransmitTimeout expires, up to
 //! maxRetransmissions times. After that the request counts as lost.
 //!
+//! windowSize (0 = unlimited) bounds the unacknowledged requests in flight, retransmissions
+//! included, and defers rather than drops what would exceed it; see the NED header for why the
+//! open-loop arm needed that bound.
+//!
 //! Why a request/acknowledgement pair and not just UDP: in this network a burst lost in core
 //! contention is simply gone, and nothing tells the source. The alternative to optical
 //! buffering that the literature compares against is exactly this - recover in the time
@@ -63,10 +67,20 @@ class OBS_RetransmitSource : public ApplicationBase {
       simtime_t stopTime;
       simtime_t retransmitTimeout; //!< ARQ timeout. Must exceed the path round trip, otherwise every request is retransmitted spuriously.
       int maxRetransmissions;      //!< Retry cap. 0 turns the arm into send-and-forget with loss observation.
+      int windowSize;              //!< Max unacknowledged requests in flight. 0 = unlimited, the open-loop arm.
+      simtime_t retryInterval;     //!< Re-check interval while the window is full.
 
-      cMessage *sendTimer;         //!< Generates the fresh request stream.
+      cMessage *sendTimer;         //!< Generates the fresh request stream; also the deferred-send timer.
       std::map<int,RequestState> outstanding; //!< Requests awaiting an acknowledgement.
       std::vector<IPvXAddress> destAddresses; //!< Resolved destination addresses.
+
+      //! A fresh request is due but has no free window slot yet. Kept as a flag rather than as
+      //! "pendingSince != 0" so that a deferral starting at simulation time 0 is not mistaken
+      //! for the idle state.
+      bool pendingSend;
+      //! When that request became due; the wait reported is simTime() - pendingSince, so it is
+      //! the time spent waiting for a slot and nothing else.
+      simtime_t pendingSince;
 
       int nextSeq;
       // Statistics. All of them are gated on the measurement window, so a warmup period
@@ -76,12 +90,25 @@ class OBS_RetransmitSource : public ApplicationBase {
       long requestsAcked;       //!< Requests eventually acknowledged.
       long requestsAbandoned;   //!< Requests that hit the retry cap.
       long duplicateAcks;       //!< Acknowledgements for requests that were already completed.
+      long windowDefers;        //!< Fresh sends that had to wait for a free window slot.
+      long retransmitDefers;    //!< Retransmissions held back by a full window (counted per deferral step).
+      long pendingSends;        //!< Deferred fresh requests that were finally sent.
+      long requestsOutstandingMax; //!< High-water mark of requests in flight; must never exceed windowSize when it is set.
+      simtime_t pendingSendTimeSum; //!< Sum of the waiting times of the deferred fresh requests.
+      simtime_t pendingSendTimePeak; //!< Longest time a fresh request waited for a slot.
+      simtime_t pendingSendTimeFloor; //!< Shortest time a fresh request waited for a slot.
       simtime_t warmupPeriod;
 
       static simsignal_t requestCompletedSignal;
+      static simsignal_t windowDeferredSignal;
 
+      //! True when the window is in use and full. windowSize = 0 means unlimited, so the
+      //! open-loop arm never takes a deferral path and its behaviour is unchanged.
+      bool windowFull() const { return windowSize > 0 && (int)outstanding.size() >= windowSize; }
       virtual IPvXAddress chooseDestAddr();
-      virtual void sendRequest();
+      virtual void sendFreshRequest();
+      virtual void sendRetransmission(RequestState& state);
+      virtual void onWindowSlotFreed();
       virtual void processAck(cPacket *packet);
       virtual void processRetransmitTimer(cMessage *timer);
 

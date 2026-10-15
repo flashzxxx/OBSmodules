@@ -21,6 +21,7 @@
 #include "OBS_RetransmitSource.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "IPvXAddressResolver.h"
 #include "UDPControlInfo_m.h"
@@ -28,9 +29,13 @@
 Define_Module(OBS_RetransmitSource);
 
 simsignal_t OBS_RetransmitSource::requestCompletedSignal = registerSignal("requestCompleted");
+simsignal_t OBS_RetransmitSource::windowDeferredSignal = registerSignal("windowDeferred");
 
 OBS_RetransmitSource::OBS_RetransmitSource(){
    sendTimer = NULL;
+   // pendingSend is false until the send timer finds the window full; the window itself needs no
+   // message of its own, a deferred send is the send timer rescheduled earlier
+   pendingSend = false;
 }
 
 OBS_RetransmitSource::~OBS_RetransmitSource(){
@@ -63,6 +68,14 @@ void OBS_RetransmitSource::initialize(int stage){
       maxRetransmissions = par("maxRetransmissions");
       if(maxRetransmissions < 0) error("maxRetransmissions must not be negative");
 
+      // The window bounds the requests that are simultaneously unacknowledged. 0 disables it,
+      // which is the open-loop arm whose results already exist; every config that does not ask
+      // for a window therefore behaves exactly as it did before this parameter was added.
+      windowSize = par("windowSize");
+      if(windowSize < 0) error("windowSize must not be negative (0 = unlimited)");
+      retryInterval = par("retryInterval");
+      if(retryInterval <= 0) error("retryInterval must be positive");
+
       warmupPeriod = simulation.getWarmupPeriod();
 
       nextSeq = 0;
@@ -71,22 +84,60 @@ void OBS_RetransmitSource::initialize(int stage){
       requestsAcked = 0;
       requestsAbandoned = 0;
       duplicateAcks = 0;
+      // Deferral statistics. They are all zero while windowSize = 0.
+      windowDefers = 0;
+      retransmitDefers = 0;
+      pendingSends = 0;
+      requestsOutstandingMax = 0;
+      pendingSendTimeSum = SIMTIME_ZERO;
+      pendingSendTimePeak = SIMTIME_ZERO;
+      pendingSendTimeFloor = SIMTIME_ZERO;
+      pendingSince = SIMTIME_ZERO;
+      pendingSend = false;
 
       WATCH(requestsSent);
       WATCH(retransmissionsSent);
       WATCH(requestsAcked);
       WATCH(requestsAbandoned);
+      WATCH(windowDefers);
+      WATCH(retransmitDefers);
+      WATCH(pendingSends);
+      WATCH(requestsOutstandingMax);
+      WATCH(pendingSend);
 
-      sendTimer = new cMessage("sendTimer");
+      // Guard: initialize() can run more than once (the init stages), and the timer must not be
+      // replaced or the scheduled event would be lost.
+      if(sendTimer == NULL) sendTimer = new cMessage("sendTimer");
    }
 }
 
-// A self-message that is not sendTimer is the retransmission timer of one request, and its
-// kind carries that request's sequence number. Using the kind instead of a second map keeps
-// the pairing obvious and cannot collide with INET: these messages never leave the module.
+// The send timer is rescheduled earlier than its interval while it waits for a free window slot;
+// the retransmission timer of a request is re-armed with retryInterval for the same reason. Both
+// survive on the sender side only - no packet is emitted until a slot is free - so a deferred
+// event is the sender throttling itself, not a new retransmission and not a loss.
 void OBS_RetransmitSource::handleMessageWhenUp(cMessage *msg){
    if(msg == sendTimer){
-      sendRequest();
+      // The event that arrives here is a scheduled request, whether it is the periodic one or a
+      // repeat while the window was full; pendingSend is what turns it into a request.
+      if(stopTime >= SIMTIME_ZERO && simTime() >= stopTime){
+         // Stop offering, and emit nothing: the periodic stream is over even if the event that
+         // carried us here was a deferral.
+         return;
+      }
+
+      if(windowFull()){
+         // Defer: come back later, keep the request in hand. The window is what bounds the
+         // in-flight count, so a lost retransmission cannot grow into unbounded offered load.
+         if(!pendingSend){
+            pendingSend = true;
+            pendingSince = simTime();
+            windowDefers++;
+         }
+         scheduleAt(simTime() + retryInterval,sendTimer);
+         return;
+      }
+
+      sendFreshRequest();
       simtime_t next = simTime() + par("sendInterval").doubleValue();
       if(stopTime < SIMTIME_ZERO || next < stopTime){
          scheduleAt(next,sendTimer);
@@ -95,6 +146,12 @@ void OBS_RetransmitSource::handleMessageWhenUp(cMessage *msg){
    }
 
    if(msg->isSelfMessage()){
+      if(strcmp(msg->getName(),"retransmitTimerDeferred") == 0){
+         // A retransmission waiting for a free slot. Re-arm and poll again; its idle period
+         // consumes no retransmissions, so deferring cannot turn into extra attempts.
+         scheduleAt(simTime() + retryInterval,msg);
+         return;
+      }
       processRetransmitTimer(msg);
       return;
    }
@@ -114,9 +171,21 @@ IPvXAddress OBS_RetransmitSource::chooseDestAddr(){
    return destAddresses[k];
 }
 
-// One packet of the offered stream, plus its retransmission timer.
-void OBS_RetransmitSource::sendRequest(){
+// One packet of the offered stream, plus its retransmission timer. Called only when the window
+// has room for it.
+void OBS_RetransmitSource::sendFreshRequest(){
    if(destAddresses.empty()) return;
+
+   if(pendingSend){
+      // The request was due earlier and waited; report how long.
+      simtime_t waited = simTime() - pendingSince;
+      pendingSends++;
+      pendingSendTimeSum += waited;
+      if(pendingSendTimePeak == SIMTIME_ZERO || waited > pendingSendTimePeak) pendingSendTimePeak = waited;
+      if(pendingSendTimeFloor == SIMTIME_ZERO || waited < pendingSendTimeFloor) pendingSendTimeFloor = waited;
+      emit(windowDeferredSignal,SIMTIME_DBL(waited));
+   }
+   pendingSend = false;
 
    int seq = nextSeq++;
    OBS_RetransmitPacket *request = new OBS_RetransmitPacket("RetransmitRequest");
@@ -136,9 +205,45 @@ void OBS_RetransmitSource::sendRequest(){
    outstanding[seq] = state;
 
    if(state.firstSent >= warmupPeriod) requestsSent++;
+   if((long)outstanding.size() > requestsOutstandingMax) requestsOutstandingMax = outstanding.size();
 
    socket.sendTo(request,state.destAddr,state.destPort);
+   // The timer is armed unconditionally, even when maxRetransmissions is 0. Skipping it there
+   // looks like a harmless saving, but it is not: the timer would have fired and taken the
+   // "retry cap reached" branch, incrementing requestsAbandoned, which a config with
+   // maxRetransmissions = 0 can observe (fdl_tests.ini uses it). Keeping the arm preserves the
+   // exact behaviour of the open-loop arm, which is what the window parameter must not disturb.
    scheduleAt(simTime() + retransmitTimeout,timer);
+}
+
+// One repeat of a request that is already in flight. The completion delay origin stays at the
+// request's first transmission, so a retransmission does not restart it.
+void OBS_RetransmitSource::sendRetransmission(RequestState& state){
+   OBS_RetransmitPacket *request = new OBS_RetransmitPacket("RetransmitRequest");
+   request->setSeq(state.seq);
+   request->setByteLength(messageLength);
+   socket.sendTo(request,state.destAddr,state.destPort);
+
+   state.transmissions++;
+   if(simTime() >= warmupPeriod) retransmissionsSent++;
+   scheduleAt(simTime() + retransmitTimeout,state.timer);
+}
+
+// A window slot was just freed by an acknowledgement or an abandonment. If a fresh request is
+// waiting, send it now; otherwise the send timer is already counting down. Deferred
+// retransmissions need no action here: they poll the slot themselves.
+void OBS_RetransmitSource::onWindowSlotFreed(){
+   if(!pendingSend || windowFull()){
+      return;
+   }
+   if(sendTimer != NULL && sendTimer->isScheduled()){
+      cancelEvent(sendTimer);
+   }
+   sendFreshRequest();
+   simtime_t next = simTime() + par("sendInterval").doubleValue();
+   if(stopTime < SIMTIME_ZERO || next < stopTime){
+      scheduleAt(next,sendTimer);
+   }
 }
 
 // The retry cap counts retransmissions, so a request is given up on when its transmission
@@ -153,21 +258,29 @@ void OBS_RetransmitSource::processRetransmitTimer(cMessage *timer){
    }
 
    RequestState &state = it->second;
+   // The retry cap is checked first on purpose: a request that has exhausted its retries is
+   // abandoned here rather than parked in the window, so a full window cannot keep it alive
+   // forever. With maxRetransmissions = 0 this branch is what a request hits on its first timer.
    if(state.transmissions > maxRetransmissions){
       if(simTime() >= warmupPeriod) requestsAbandoned++;
       delete timer;
       outstanding.erase(it);
+      onWindowSlotFreed();
       return;
    }
 
-   OBS_RetransmitPacket *request = new OBS_RetransmitPacket("RetransmitRequest");
-   request->setSeq(seq);
-   request->setByteLength(messageLength);
-   socket.sendTo(request,state.destAddr,state.destPort);
+   if(windowFull()){
+      // A retransmission occupies a window slot - it is another transmission of a request that
+      // is already in flight. If the window is full, retry after retryInterval instead of
+      // putting more traffic on a network that is already behind. Marked by name so the poll is
+      // not mistaken for another attempt.
+      timer->setName("retransmitTimerDeferred");
+      retransmitDefers++;
+      scheduleAt(simTime() + retryInterval,timer);
+      return;
+   }
 
-   state.transmissions++;
-   if(simTime() >= warmupPeriod) retransmissionsSent++;
-   scheduleAt(simTime() + retransmitTimeout,timer);
+   sendRetransmission(state);
 }
 
 void OBS_RetransmitSource::processAck(cPacket *packet){
@@ -193,6 +306,9 @@ void OBS_RetransmitSource::processAck(cPacket *packet){
    cancelAndDelete(state.timer);
    outstanding.erase(it);
    delete ack;
+
+   // The acknowledgement freed a window slot.
+   onWindowSlotFreed();
 }
 
 void OBS_RetransmitSource::finish(){
@@ -203,6 +319,26 @@ void OBS_RetransmitSource::finish(){
    recordScalar("requestsAbandoned",requestsAbandoned);
    recordScalar("requestsOutstanding",(long)outstanding.size());
    recordScalar("duplicateAcks",duplicateAcks);
+
+   // Window evidence. With windowSize = 0 all of these stay 0 and nothing about the open-loop
+   // arm changes; with a window set, requestsOutstandingMax must never exceed windowSize, which
+   // is the invariant the acceptance gate checks.
+   //
+   // The parameter itself is recorded too. It is a plain NED parameter, so OMNeT++ records it
+   // only when a config happens to iterate over it - and the per-window configs deliberately set
+   // it as a literal, which left the results with no record of which window produced them. The
+   // only trace was the high-water mark, and a reader had to infer the window from it. This
+   // scalar removes that trap; it costs one value per source.
+   recordScalar("windowSize",windowSize);
+   recordScalar("windowDefers",windowDefers);
+   recordScalar("retransmitDefers",retransmitDefers);
+   recordScalar("pendingSends",pendingSends);
+   recordScalar("requestsOutstandingMax",requestsOutstandingMax);
+   if(pendingSends > 0){
+      recordScalar("pendingSendTimeMean",SIMTIME_DBL(pendingSendTimeSum) / (double)pendingSends);
+      recordScalar("pendingSendTimeMax",SIMTIME_DBL(pendingSendTimePeak));
+      recordScalar("pendingSendTimeMin",SIMTIME_DBL(pendingSendTimeFloor));
+   }
 
    // Delivery ratio is the primary metric of experiment R: what fraction of the offered
    // requests is eventually delivered, once retransmission has had its chance. Its complement
