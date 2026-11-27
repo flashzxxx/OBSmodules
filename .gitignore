@@ -53,6 +53,9 @@ Rplots.pdf
 # Agent session scratch space.
 /.dsh-uploads/
 /.dsh-vision-toolkit/
+/.dsh-vision-router/
+# Per-task scratch (global rule: temporary files live only in _scratch/<date>-<task>/)
+/_scratch/
 # Editor/skill backups.
 *.bak-*
 
